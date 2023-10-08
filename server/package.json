@@ -6,6 +6,7 @@
   "author": "Natchapol Thanoorutpong",
   "license": "MIT",
   "scripts": {
+    "start": "node index.js",
     "dev": "nodemon -r dotenv/config index.js"
   },
   "dependencies": {
