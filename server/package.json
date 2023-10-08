@@ -2,10 +2,18 @@
   "name": "server",
   "version": "0.0.0",
   "main": "index.js",
+  "type": "module",
   "author": "Natchapol Thanoorutpong",
   "license": "MIT",
+  "scripts": {
+    "dev": "nodemon -r dotenv/config index.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.1"
   }
 }
