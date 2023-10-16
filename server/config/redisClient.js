@@ -3,7 +3,11 @@ import redis from "redis";
 const redisOptions =
   process.env.APP_ENV === "production"
     ? {
-        url: process.env.REDIS_URL,
+        password: process.env.REDISPASSWORD,
+        socket: {
+          host: process.env.REDISHOST,
+          port: process.env.REDISPORT,
+        },
       }
     : {
         port: 6370,
