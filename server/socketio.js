@@ -3,8 +3,9 @@ import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
 
-export default function (io) {
-  redisClient.connect().catch(console.error);
+export default async function (io) {
+  await redisClient.connect().catch(console.error);
+  console.log("Redis connected.");
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
     socket.on("login", async (auth) => {

@@ -10,7 +10,7 @@ const redisOptions =
         },
       }
     : {
-        port: 6370,
+        port: 6379,
         host: "localhost",
       };
 const redisClient = redis.createClient(redisOptions);
