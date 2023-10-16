@@ -4,7 +4,6 @@ import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
 
 export default function (io) {
-  console.log("Redis connected.");
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
     socket.on("login", async (auth) => {

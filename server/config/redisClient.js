@@ -3,6 +3,7 @@ import redis from "redis";
 const redisOptions =
   process.env.APP_ENV === "production"
     ? {
+        username: "default",
         password: process.env.REDISPASSWORD,
         socket: {
           host: process.env.REDISHOST,
