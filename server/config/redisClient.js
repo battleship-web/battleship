@@ -14,5 +14,6 @@ const redisOptions =
         host: "localhost",
       };
 const redisClient = redis.createClient(redisOptions);
+await redisClient.connect().catch(console.error);
 
 export default redisClient;

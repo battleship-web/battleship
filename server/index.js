@@ -26,19 +26,15 @@ const socketIoOptions =
 
 const io = new Server(httpServer, socketIoOptions);
 
-async function run() {
-  await socketio(io);
+socketio(io);
 
-  connectDB();
-  mongoose.connection.once("open", () => {
-    httpServer.listen(port, () => {
-      console.log("🔗 Successfully Connected to MongoDB");
-      console.log(`✅ Application running on port: ${port}`);
-    });
+connectDB();
+mongoose.connection.once("open", () => {
+  httpServer.listen(port, () => {
+    console.log("🔗 Successfully Connected to MongoDB");
+    console.log(`✅ Application running on port: ${port}`);
   });
-  mongoose.connection.on("error", (err) => {
-    console.log(err);
-  });
-}
-
-run();
+});
+mongoose.connection.on("error", (err) => {
+  console.log(err);
+});
