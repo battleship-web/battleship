@@ -5,6 +5,4 @@ const URL =
     ? undefined
     : "http://localhost:4000";
 
-export const socket = io(URL, {
-  autoConnect: false,
-});
+export const socket = io(URL);

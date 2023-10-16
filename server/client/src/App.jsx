@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { socket } from "./socket";
 import AdminPage from "./admin/AdminPage";
 import TitlePage from "./menu/TitlePage";
+import LoginPage from "./menu/LoginPage";
 import InputNicknamePage from "./menu/InputNicknamePage";
 import WelcomePage from "./menu/WelcomePage";
-import ChooseOpponentPage from "./menu/ChooseOpponentPage";
+import LobbyPage from "./menu/LobbyPage";
 import PrepPage from "./game/prep/PrepPage";
 import BattlePage from "./game/battle/BattlePage";
 import NotFoundPage from "./notfound/NotFoundPage";
@@ -12,39 +13,64 @@ import NotFoundPage from "./notfound/NotFoundPage";
 function App() {
   const [gameStage, setGameStage] = useState("menu:title");
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [clientList, setClientList] = useState(null);
+  const [socketError, setSocketError] = useState(null);
+
   let page = null;
   useEffect(() => {
-    function onReceiveClientId(clientId) {
-      setUser((user) => {
-        return { ...user, clientId: clientId };
-      });
-    }
+    const onLoginResponse = (data) => {
+      if (data.success) {
+        setUser(data.message);
+        if (data.message.nickname) {
+          setGameStage("menu:welcome");
+        } else {
+          setGameStage("menu:nickname");
+        }
+        setIsLoading(false);
+      } else {
+        setSocketError(data.message);
+        setIsLoading(false);
+      }
+    };
 
-    socket.on("clientId", onReceiveClientId);
+    const cleanup = () => {
+      socket.off("loginResponse", onLoginResponse);
+      socket.disconnect();
+    };
+    socket.on("loginResponse", onLoginResponse);
+    socket.on("clientList", setClientList);
+
+    window.addEventListener("beforeunload", cleanup);
 
     return () => {
-      socket.off("clientId", onReceiveClientId);
+      window.removeEventListener("beforeunload", cleanup);
     };
   }, []);
   switch (gameStage) {
     case "menu:title":
       page = <TitlePage setGameStage={setGameStage} />;
       break;
-    case "menu:nickname":
-      socket.connect();
+    case "menu:login":
       page = (
-        <InputNicknamePage
-          setGameStage={setGameStage}
-          user={user}
-          setUser={setUser}
+        <LoginPage
+          socketError={socketError}
+          setSocketError={setSocketError}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
         />
       );
       break;
-    case "menu:welcome":
-      page = <WelcomePage user={user} />;
+    case "menu:nickname":
+      page = (
+        <InputNicknamePage setGameStage={setGameStage} setUser={setUser} />
+      );
       break;
-    case "menu:opponent":
-      page = <ChooseOpponentPage />;
+    case "menu:welcome":
+      page = <WelcomePage user={user} setGameStage={setGameStage} />;
+      break;
+    case "menu:lobby":
+      page = <LobbyPage clientList={clientList} username={user.username} />;
       break;
     case "game:prep":
       page = <PrepPage />;
