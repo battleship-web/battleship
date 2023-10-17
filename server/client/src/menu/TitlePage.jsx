@@ -3,7 +3,7 @@ export default function TitlePage({ setGameStage }) {
   return (
     <>
       <h1>Battleship</h1>
-      <button onClick={() => setGameStage("menu:nickname")}>Next</button>
+      <button onClick={() => setGameStage("menu:login")}>Next</button>
     </>
   );
 }

@@ -1,14 +1,17 @@
-import PropTypes from "prop-types";
-export default function WelcomePage({ user }) {
+function WelcomePage({ user, setGameStage }) {
+  const onhandleClick = () => {
+    setGameStage("menu:lobby");
+  };
   return (
-    <h1>
-      Welcome {user.nickname} {"("}
-      {user.clientId}
-      {")"}
-    </h1>
+    <div>
+      <h1>{`Welcome ${user.nickname} (${user.username})`}</h1>
+      <button
+        className="bg-slate-300 border-2 border-slate-600"
+        onClick={onhandleClick}
+      >
+        Next
+      </button>
+    </div>
   );
 }
-
-WelcomePage.propTypes = {
-  user: PropTypes.object,
-};
+export default WelcomePage;
