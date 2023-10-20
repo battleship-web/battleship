@@ -10,20 +10,23 @@ function AdminPage({gameList, gameID, score}) {
     socket.emit("gameListRequest");
   });
   let gameListDisplay = null;
-  if (gameList === null) {
-    gameListDisplay = <Loading />;
-  } else {
-    const listToDisplay = gameList.map((game) => {
-      return(
-        <li key={game.gameID}>
-          <h2 class="mr-8">{game.player1} vs {game.player2}</h2>
-          <h2 class="mr-40">{game.score}</h2>
-          <h2 class="object-right"><ResetButton /></h2>
-        </li>
-      );
-    });
-    gameListDisplay = <ul>{listToDisplay}</ul>
+  if (socket.on("gameList")) {
+    if (gameList === null) {
+      gameListDisplay = <Loading />;
+    } else {
+      const listToDisplay = gameList.map((game) => {
+        return(
+          <li key={game.gameID}>
+            <h2 class="mr-8">{game.player1} vs {game.player2}</h2>
+            <h2 class="mr-40">{game.score}</h2>
+            <h2 class="object-right"><ResetButton /></h2>
+          </li>
+        );
+      });
+      gameListDisplay = <ul>{listToDisplay}</ul>
+    }
   }
+  
 
   return(
     <>
