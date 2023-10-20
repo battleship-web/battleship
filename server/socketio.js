@@ -84,7 +84,19 @@ export default function (io) {
     });
     socket.on("disconnect", async () => {
       try {
-        await redisClient.del(`socketId:${socket.id}`);
+        const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+        const gameInfo = await redisClient.hGetAll(`game:${gameId}`);
+        const otherPlayerSocketId =
+          gameInfo.player1SocketId === socket.id
+            ? gameInfo.player2SocketId
+            : gameInfo.player1SocketId;
+
+        socket.to(otherPlayerSocketId).emit("opponentQuit");
+
+        const promise1 = redisClient.del(`game:${gameId}`);
+        const promise2 = redisClient.sRem("gameList", gameId);
+        const promise3 = redisClient.del(`socketId:${socket.id}`);
+        await Promise.all([promise1, promise2, promise3]);
         console.log(`Socket disconnected: ${socket.id}`);
       } catch (err) {
         console.log(err);
@@ -139,17 +151,36 @@ export default function (io) {
         const promise1 = redisClient.sAdd("gameList", gameId);
         const promise2 = redisClient.hSet(
           `game:${gameId}`,
-          "player1",
+          "player1SocketId",
           inviterSocketId
         );
         const promise3 = redisClient.hSet(
           `game:${gameId}`,
-          "player2",
+          "player2SocketId",
           socket.id
         );
         const promise4 = redisClient.hSet(`game:${gameId}`, "player1Score", 0);
         const promise5 = redisClient.hSet(`game:${gameId}`, "player2Score", 0);
-        await Promise.all([promise1, promise2, promise3, promise4, promise5]);
+        const promise6 = redisClient.hSet(
+          `socketId:${inviterSocketId}`,
+          "game",
+          gameId
+        );
+        const promise7 = redisClient.hSet(
+          `socketId:${socket.id}`,
+          "game",
+          gameId
+        );
+
+        await Promise.all([
+          promise1,
+          promise2,
+          promise3,
+          promise4,
+          promise5,
+          promise6,
+          promise7,
+        ]);
         socket.to(inviterSocketId).emit("inviteAccepted", socket.id);
       } catch (error) {
         console.log(error);
@@ -159,37 +190,47 @@ export default function (io) {
       socket.to(inviterSocketId).emit("inviteRefused", socket.id);
     });
     socket.on("gameListRequest", async () => {
-      const redisSearchPromise = redisClient.sMembers("gameList");
-      const gameIdList = await redisSearchPromise;
-      const gameListPromises = gameIdList.map((gameId) => {
-        return redisClient.hGetAll(`game:${gameId}`);
-      });
-      const gameList = await Promise.all(gameListPromises);
+      try {
+        const redisSearchPromise = redisClient.sMembers("gameList");
+        const gameIdList = await redisSearchPromise;
+        const gameListPromises = gameIdList.map((gameId) => {
+          return redisClient.hGetAll(`game:${gameId}`);
+        });
+        const gameList = await Promise.all(gameListPromises);
 
-      const player1InfoPromises = gameList.map((game) => {
-        return redisClient.hGet(`socketId:${game.player1}`, "username");
-      });
-      const player1Info = await Promise.all(player1InfoPromises);
+        const player1InfoPromises = gameList.map((game) => {
+          return redisClient.hGet(
+            `socketId:${game.player1SocketId}`,
+            "username"
+          );
+        });
+        const player1Info = await Promise.all(player1InfoPromises);
 
-      const player2InfoPromises = gameList.map((game) => {
-        return redisClient.hGet(`socketId:${game.player2}`, "username");
-      });
-      const player2Info = await Promise.all(player2InfoPromises);
+        const player2InfoPromises = gameList.map((game) => {
+          return redisClient.hGet(
+            `socketId:${game.player2SocketId}`,
+            "username"
+          );
+        });
+        const player2Info = await Promise.all(player2InfoPromises);
 
-      const formattedGameList = gameList.map((game, index) => {
-        return {
-          gameId: gameIdList[index],
-          player1: {
-            username: player1Info[index],
-            score: game.player1Score,
-          },
-          player2: {
-            username: player2Info[index],
-            score: game.player2Score,
-          },
-        };
-      });
-      socket.emit("gameList", formattedGameList);
+        const formattedGameList = gameList.map((game, index) => {
+          return {
+            gameId: gameIdList[index],
+            player1: {
+              username: player1Info[index],
+              score: game.player1Score,
+            },
+            player2: {
+              username: player2Info[index],
+              score: game.player2Score,
+            },
+          };
+        });
+        socket.emit("gameList", formattedGameList);
+      } catch (error) {
+        console.log(error);
+      }
     });
   });
 }
