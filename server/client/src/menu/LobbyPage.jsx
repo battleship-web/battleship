@@ -8,7 +8,7 @@ function LobbyPage({ clientList, username }) {
   }, []);
   let display = null;
   if (clientList === null) {
-    display = <h1 className="text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl ">Loading...</h1>;
+    display = <h1 className="text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl "><Loading /></h1>;
   } else {
     const clientExcludingMe = clientList.filter((client) => {
       return client.username !== username;
