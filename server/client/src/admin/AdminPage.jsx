@@ -28,7 +28,7 @@ function AdminPage({ gameList }) {
               {game.player1.username} vs {game.player2.username}
             </div>
             <div className="">
-              {game.player1.score}:{game.player2.score}
+              {game.player1.score} : {game.player2.score}
             </div>
 
             <ResetButton
