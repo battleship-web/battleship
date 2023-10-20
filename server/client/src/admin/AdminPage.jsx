@@ -1,79 +1,46 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import Loading from "../components/Loading";
+import RefreshButton from "./RefreshButton";
+import ResetButton from "./ResetButton";
 
-export default function AdminPage() {
-  const [nickname, setNickname] = useState("");
-  const NicknameSubmit = () => {
-    socket.emit("setNickname", nickname);
-    setUser((user) => {
-      return { ...user, nickname: nickname };
-    });
-  };
-  //This command aim to let user change his/her nickname.
-  //The default username in this case should be nickname set in InputNicknamePage, not a blank string.
-  
-  const profileImage = document.getElementById('profileImage');
-  const profileImageInput = document.getElementById('profileImageInput');
-  profileImageInput.addEventListener('change', (event) => {
-    const selectedFile = event.target.files[0];
-
-    if (selectedFile) {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        const base64Image = e.target.result;
-        profileImage.src = base64Image;
-      };
-
-      reader.readAsDataURL(selectedFile);
-    } else {
-      profileImage.src = '';
-    }
+//Display Game list and current score
+// Component function
+function AdminPage({gameList, gameID, score}) {
+  useEffect(() => {
+    socket.emit("gameListRequest");
   });
+  let gameListDisplay = null;
+  if (gameList === null) {
+    gameListDisplay = <Loading />;
+  } else {
+    const listToDisplay = gameList.map((game) => {
+      return(
+        <li key={game.gameID}>
+          <h2 class="mr-8">{game.player1} vs {game.player2}</h2>
+          <h2 class="mr-40">{game.score}</h2>
+          <h2 class="object-right"><ResetButton /></h2>
+        </li>
+      );
+    });
+    gameListDisplay = <ul>{listToDisplay}</ul>
+  }
 
   return(
-  <>
-  <div className="backToGame" class="flex w-1/5 h-full">
-    <div className="exitButton" class="flex w-20 h-20 align-top">
-      <button onClick={() => setGameState("menu:welcome")}>X</button>
-    </div>
-  </div>
-  <div class="flex w-4/5 h-2/5">
-    <div className="displayProfile" class="flex w-40">
-      <img class="object-center" id="profileImage" src="" alt="Selected Image"></img>
-      <br /><p align="center">{user.nickname}</p>
-    </div>
-    <div className="updateProfileImage" class="flex h-1/5">
-      <div class="object-center">
-        <p>Change Profile Image</p>
-        <input 
-          type="file" 
-          id="profileImageInput" 
-          accept="image/*" /></div>
+    <>
+    <div className="background" class="w-full h-full">
+      <div className="adminPage" class="w-full h-1/6 align-top">
+        <h1 align="center">Admin Page</h1>
       </div>
-    <div className="updateNickname" class="flex h-1/5">
-      <div>
-      <p>Change Nickname</p>
-    <input
-        type="text"
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-        placeholder="nickname"
-      />
+      <div class="px-28 h-4/6 bg-zinc-100 opacity-50">
+        {gameListDisplay}
+      </div>
+      <div className="footer" class="w-full h-1/6 align-bottom">
+        <div className="refreshButton" class="object-center">
+          <RefreshButton />
+        </div>
       </div>
     </div>
-    <div class="flex h-3/5 w-4/5">
-      <div className="connectedClient" class="flex w-2/5">
-        pass
-      </div>
-      <div className="winRate" class="flex w-2/5">
-        pass
-      </div>
-    </div>
-  </div>
   </>
-  //Wait for how to collect connected client list. (Target: write connected clients in form of list.)
-  //When a new client connected to the server, the connected client list is appended after, and shown here.
-  //Wait for collected win data from game section.
   );
 }
-
+export default AdminPage
