@@ -1,49 +1,82 @@
 import { useEffect } from "react";
+import { socket } from "../socket";
 import Loading from "../components/Loading";
 import RefreshButton from "./RefreshButton";
 import ResetButton from "./ResetButton";
 
 //Display Game list and current score
 // Component function
-function AdminPage({gameList, gameID, score}) {
+function AdminPage({ gameList }) {
   useEffect(() => {
     socket.emit("gameListRequest");
   });
   let gameListDisplay = null;
-  if (socket.on("gameList")) {
-    if (gameList === null) {
-      gameListDisplay = <Loading />;
+
+  if (gameList === null) {
+    gameListDisplay = <Loading />;
+  } else {
+    //Show "No Active Game" if there is no active game
+    if (gameList.length === 0) {
+      gameListDisplay = <h1>No Active Game</h1>;
     } else {
       const listToDisplay = gameList.map((game) => {
-        return(
-          <li key={game.gameID}>
-            <h2 class="mr-8">{game.player1} vs {game.player2}</h2>
-            <h2 class="mr-40">{game.score}</h2>
-            <h2 class="object-right"><ResetButton /></h2>
+        // Adjust the gameList structure a little bit
+        // Add two more buttons and add options for the emitting socket event
+        return (
+          <li key={game.gameId} className="flex justify-center gap-8">
+            <div className="">
+              {game.player1.username} vs {game.player2.username}
+            </div>
+            <div className="">
+              {game.player1.score} : {game.player2.score}
+            </div>
+
+            <ResetButton
+              text="Reset Score"
+              options={{
+                gameId: game.gameId,
+                toReset: "score",
+              }}
+            />
+            <ResetButton
+              text="Reset Game"
+              options={{
+                gameId: game.gameId,
+                toReset: "game",
+              }}
+            />
+            <ResetButton
+              text="Cancel Game"
+              options={{
+                gameId: game.gameId,
+                toReset: "cancel",
+              }}
+            />
           </li>
         );
       });
-      gameListDisplay = <ul>{listToDisplay}</ul>
+      gameListDisplay = <ul>{listToDisplay}</ul>;
     }
   }
-  
 
-  return(
+  return (
     <>
-    <div className="background" class="w-full h-full">
-      <div className="adminPage" class="w-full h-1/6 align-top">
-        <h1 align="center">Admin Page</h1>
-      </div>
-      <div class="px-28 h-4/6 bg-zinc-100 opacity-50">
-        {gameListDisplay}
-      </div>
-      <div className="footer" class="w-full h-1/6 align-bottom">
-        <div className="refreshButton" class="object-center">
-          <RefreshButton />
+      <div className="w-full h-full">
+        <div className="w-full h-1/6 align-top flex justify-center">
+          <h1 className="">Admin Page</h1>
+        </div>
+        <div className="flex justify-start">
+          <h1 className="ml-64">Match</h1>
+          <h1 className="ml-28">Score</h1>
+        </div>
+        <div className="bg-zinc-100 opacity-50">{gameListDisplay}</div>
+        <div className="w-full h-1/6 align-bottom">
+          <div classMame="object-center">
+            <RefreshButton />
+          </div>
         </div>
       </div>
-    </div>
-  </>
+    </>
   );
 }
-export default AdminPage
+export default AdminPage;
