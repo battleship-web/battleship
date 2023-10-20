@@ -4,6 +4,11 @@ export default {
   component: Light,
   title: "Light",
   tags: ["autodocs"],
+  argTypes: {
+    setVariant: {
+      action: "clicked",
+    },
+  },
 };
 
 export const Default = {};
