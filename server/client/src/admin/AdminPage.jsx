@@ -61,7 +61,7 @@ function AdminPage({ gameList }) {
 
   return (
     <>
-      <div className="w-full h-full bg-[url(https://www.google.com/url?sa=i&url=https%3A%2F%2Fwarriormaven.com%2Fsea%2Fhow-massive-wwii-battleships-still-shape-maritime-war&psig=AOvVaw2DnlmJnpLfSBlKR9CjABCh&ust=1697941550376000&source=images&cd=vfe&opi=89978449&ved=0CA8QjRxqFwoTCLDdlqmLhoIDFQAAAAAdAAAAABAD)]">
+      <div className="w-full h-full bg-[url('/iowa-class.jpg')]">
         <div className="w-full h-1/6 align-top flex justify-center">
           <h1>Admin Page</h1>
         </div>
