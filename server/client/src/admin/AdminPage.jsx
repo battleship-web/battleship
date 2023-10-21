@@ -30,7 +30,7 @@ function AdminPage({gameList, gameID, score}) {
 
   return(
     <>
-    <div className="background" class="w-full h-full">
+    <div className="background" class="w-full h-full bg-[url('/iowa-class.jpg')]">
       <div className="adminPage" class="w-full h-1/6 align-top">
         <h1 align="center">Admin Page</h1>
       </div>
