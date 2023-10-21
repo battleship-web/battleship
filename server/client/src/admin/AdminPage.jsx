@@ -28,7 +28,7 @@ function AdminPage({ gameList }) {
           </li>
         );
       });
-      clientListDisplay = {clientToDisplay};
+      clientListDisplay = <ol>{clientToDisplay}</ol>;
     }
   }
 
