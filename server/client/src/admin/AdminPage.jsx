@@ -24,10 +24,10 @@ function AdminPage({ gameList }) {
         // Add two more buttons and add options for the emitting socket event
         return (
           <li key={game.gameId} className="flex justify-center gap-8">
-            <div className="">
+            <div className="w-80 border-2 border-black">
               {game.player1.username} vs {game.player2.username}
             </div>
-            <div className="">
+            <div className="w-40 border-2 border-black text-center">
               {game.player1.score} : {game.player2.score}
             </div>
 
