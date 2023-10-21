@@ -71,7 +71,7 @@ function AdminPage({ gameList }) {
         </div>
         <div className="bg-zinc-100 opacity-50">{gameListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
-          <div classMame="object-center">
+          <div className="object-center">
             <RefreshButton />
           </div>
         </div>
