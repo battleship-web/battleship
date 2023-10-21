@@ -61,7 +61,7 @@ function AdminPage({ gameList }) {
 
   return (
     <>
-      <div className="w-full h-full bg-[url('/iowa-class.jpg')]">
+      <div className="w-full h-full bg-[url('./iowa-class.jpg')]">
         <div className="w-full h-1/6 align-top flex justify-center">
           <h1>Admin Page</h1>
         </div>
