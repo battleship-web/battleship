@@ -9,8 +9,28 @@ import ResetButton from "./ResetButton";
 function AdminPage({ gameList }) {
   useEffect(() => {
     socket.emit("gameListRequest");
+    socket.emit("allClientListRequest");
   });
   let gameListDisplay = null;
+  let clientListDisplay = null;
+  if (clientList === null) {
+    clientListDisplay = <Loading />;
+  } else {
+    if (clientList === 0) {
+      clientListDisplay = <h1>No Active Client</h1>;
+    } else {
+      const clientToDisplay = clientList.map((client) => {
+        return (
+          <li key={client.username} className="flex justify-center">
+            <div className="">
+              {client.nickname}
+            </div>
+          </li>
+        );
+      });
+      clientListDisplay = {clientToDisplay};
+    }
+  }
 
   if (gameList === null) {
     gameListDisplay = <Loading />;
@@ -69,7 +89,8 @@ function AdminPage({ gameList }) {
           <h1 className="ml-24">Match</h1>
           <h1 className="ml-40">Score</h1>
         </div>
-        <div className="bg-zinc-100 opacity-50">{gameListDisplay}</div>
+        <div className="bg-zinc-100 opacity-50 ">{gameListDisplay}</div>
+        <div className="bg-zinc-100 opacity-50">{clientListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
           <div className="text-center">
             <RefreshButton />
