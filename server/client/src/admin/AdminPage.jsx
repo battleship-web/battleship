@@ -24,10 +24,10 @@ function AdminPage({ gameList }) {
         // Add two more buttons and add options for the emitting socket event
         return (
           <li key={game.gameId} className="flex justify-center gap-8">
-            <div className="w-80 border-2 border-black">
+            <div className="">
               {game.player1.username} vs {game.player2.username}
             </div>
-            <div className="w-40 border-2 border-black text-center">
+            <div className="">
               {game.player1.score} : {game.player2.score}
             </div>
 
@@ -61,17 +61,17 @@ function AdminPage({ gameList }) {
 
   return (
     <>
-      <div className="w-full h-full bg-[url('/iowa-class.jpg')]">
+      <div className="w-full h-full">
         <div className="w-full h-1/6 align-top flex justify-center">
-          <h1>Admin Page</h1>
+          <h1 className="">Admin Page</h1>
         </div>
         <div className="flex justify-start">
-          <h1 className="ml-24">Match</h1>
-          <h1 className="ml-40">Score</h1>
+          <h1 className="ml-64">Match</h1>
+          <h1 className="ml-28">Score</h1>
         </div>
         <div className="bg-zinc-100 opacity-50">{gameListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
-          <div className="text-center">
+          <div classMame="object-center">
             <RefreshButton />
           </div>
         </div>
