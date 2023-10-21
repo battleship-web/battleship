@@ -22,7 +22,7 @@ function AdminPage({ gameList }) {
       const clientToDisplay = clientList.map((client) => {
         return (
           <li key={client.username} className="flex justify-center">
-            <div className="">
+            <div className="border-2 border-black ml-10">
               {client.nickname}
             </div>
           </li>
