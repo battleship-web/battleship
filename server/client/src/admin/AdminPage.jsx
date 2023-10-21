@@ -24,10 +24,10 @@ function AdminPage({ gameList }) {
         // Add two more buttons and add options for the emitting socket event
         return (
           <li key={game.gameId} className="flex justify-center gap-8">
-            <div className="">
+            <div className="w-80 border-2 border-black">
               {game.player1.username} vs {game.player2.username}
             </div>
-            <div className="">
+            <div className="w-40 border-2 border-black text-center">
               {game.player1.score} : {game.player2.score}
             </div>
 
@@ -61,17 +61,17 @@ function AdminPage({ gameList }) {
 
   return (
     <>
-      <div className="w-full h-full">
+      <div className="w-full h-full bg-[url(https://www.google.com/url?sa=i&url=https%3A%2F%2Fwarriormaven.com%2Fsea%2Fhow-massive-wwii-battleships-still-shape-maritime-war&psig=AOvVaw2DnlmJnpLfSBlKR9CjABCh&ust=1697941550376000&source=images&cd=vfe&opi=89978449&ved=0CA8QjRxqFwoTCLDdlqmLhoIDFQAAAAAdAAAAABAD)]">
         <div className="w-full h-1/6 align-top flex justify-center">
-          <h1 className="">Admin Page</h1>
+          <h1>Admin Page</h1>
         </div>
         <div className="flex justify-start">
-          <h1 className="ml-64">Match</h1>
-          <h1 className="ml-28">Score</h1>
+          <h1 className="ml-24">Match</h1>
+          <h1 className="ml-40">Score</h1>
         </div>
         <div className="bg-zinc-100 opacity-50">{gameListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
-          <div classMame="object-center">
+          <div className="text-center">
             <RefreshButton />
           </div>
         </div>
