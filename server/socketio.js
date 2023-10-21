@@ -85,18 +85,25 @@ export default function (io) {
     socket.on("disconnect", async () => {
       try {
         const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
-        const gameInfo = await redisClient.hGetAll(`game:${gameId}`);
-        const otherPlayerSocketId =
-          gameInfo.player1SocketId === socket.id
-            ? gameInfo.player2SocketId
-            : gameInfo.player1SocketId;
+        if (gameId) {
+          const gameInfo = await redisClient.hGetAll(`game:${gameId}`);
+          const otherPlayerSocketId =
+            gameInfo.player1SocketId === socket.id
+              ? gameInfo.player2SocketId
+              : gameInfo.player1SocketId;
 
-        socket.to(otherPlayerSocketId).emit("opponentQuit");
+          socket.to(otherPlayerSocketId).emit("opponentQuit");
 
-        const promise1 = redisClient.del(`game:${gameId}`);
-        const promise2 = redisClient.sRem("gameList", gameId);
-        const promise3 = redisClient.del(`socketId:${socket.id}`);
-        await Promise.all([promise1, promise2, promise3]);
+          const promise1 = redisClient.del(`game:${gameId}`);
+          const promise2 = redisClient.sRem("gameList", gameId);
+          const promise3 = redisClient.hDel(
+            `socketId:${otherPlayerSocketId}`,
+            "game"
+          );
+          await Promise.all([promise1, promise2, promise3]);
+        }
+
+        await redisClient.del(`socketId:${socket.id}`);
         console.log(`Socket disconnected: ${socket.id}`);
       } catch (err) {
         console.log(err);
@@ -123,7 +130,11 @@ export default function (io) {
           };
         });
         const filteredResult = resultsWithSocketId.filter((client) => {
-          return client.data.role !== "admin";
+          return (
+            client.data.role !== "admin" &&
+            typeof client.data.game === "undefined" &&
+            typeof client.data.nickname !== "undefined"
+          );
         });
         const clientList = filteredResult.map((client) => {
           return {
@@ -138,6 +149,38 @@ export default function (io) {
         console.log(error);
       }
     });
+
+    socket.on("allClientListRequest", async () => {
+      try {
+        const connectedSockets = Array.from(io.sockets.sockets.keys());
+        const redisSearchPromises = connectedSockets.map((socketId) => {
+          return redisClient.hGetAll(`socketId:${socketId}`);
+        });
+        const redisSearchResults = await Promise.all(redisSearchPromises);
+        const resultsWithSocketId = connectedSockets.map((socketId, index) => {
+          return {
+            socketId: socketId,
+            data: redisSearchResults[index],
+          };
+        });
+        const filteredResult = resultsWithSocketId.filter((client) => {
+          return client.data.role !== "admin";
+        });
+        const clientList = filteredResult.map((client) => {
+          return {
+            nickname: client.data.nickname,
+            username: client.data.username,
+            socketId: client.socketId,
+            gameId: client.data.game,
+          };
+        });
+
+        socket.emit("allClientList", clientList);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
     socket.on("invite", async (inviteeSocketId) => {
       if (!io.sockets.sockets.has(inviteeSocketId)) {
         socket.emit("inviteeLeft", inviteeSocketId);
@@ -199,18 +242,12 @@ export default function (io) {
         const gameList = await Promise.all(gameListPromises);
 
         const player1InfoPromises = gameList.map((game) => {
-          return redisClient.hGet(
-            `socketId:${game.player1SocketId}`,
-            "username"
-          );
+          return redisClient.hGetAll(`socketId:${game.player1SocketId}`);
         });
         const player1Info = await Promise.all(player1InfoPromises);
 
         const player2InfoPromises = gameList.map((game) => {
-          return redisClient.hGet(
-            `socketId:${game.player2SocketId}`,
-            "username"
-          );
+          return redisClient.hGetAll(`socketId:${game.player2SocketId}`);
         });
         const player2Info = await Promise.all(player2InfoPromises);
 
@@ -218,11 +255,13 @@ export default function (io) {
           return {
             gameId: gameIdList[index],
             player1: {
-              username: player1Info[index],
+              username: player1Info[index].username,
+              nickname: player1Info[index].nickname,
               score: game.player1Score,
             },
             player2: {
-              username: player2Info[index],
+              username: player2Info[index].username,
+              nickname: player2Info[index].nickname,
               score: game.player2Score,
             },
           };
