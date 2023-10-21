@@ -6,7 +6,7 @@ import ResetButton from "./ResetButton";
 
 //Display Game list and current score
 // Component function
-function AdminPage({ gameList }) {
+function AdminPage({ gameList, clientList }) {
   useEffect(() => {
     socket.emit("gameListRequest");
     socket.emit("allClientListRequest");
