@@ -15,17 +15,46 @@ function AdminPage({gameList, gameID, score}) {
       gameListDisplay = <Loading />;
     } else {
       const listToDisplay = gameList.map((game) => {
-        return(
-          <li key={game.gameID}>
-            <h2 class="mr-8">{game.player1} vs {game.player2}</h2>
-            <h2 class="mr-40">{game.score}</h2>
-            <h2 class="object-right"><ResetButton /></h2>
+        // Adjust the gameList structure a little bit
+        // Add two more buttons and add options for the emitting socket event
+        return (
+          <li key={game.gameId} className="flex justify-center gap-8">
+            <div className="w-80 border-2 border-black">
+              {game.player1.username} vs {game.player2.username}
+            </div>
+            <div className="w-40 border-2 border-black text-center">
+              {game.player1.score} : {game.player2.score}
+            </div>
+
+            <ResetButton
+              text="Reset Score"
+              options={{
+                gameId: game.gameId,
+                toReset: "score",
+              }}
+            />
+            <ResetButton
+              text="Reset Game"
+              options={{
+                gameId: game.gameId,
+                toReset: "game",
+              }}
+            />
+            <ResetButton
+              text="Cancel Game"
+              options={{
+                gameId: game.gameId,
+                toReset: "cancel",
+              }}
+            />
           </li>
         );
       });
-      gameListDisplay = <ul>{listToDisplay}</ul>
+      gameListDisplay = <ul>{listToDisplay}</ul>;
     }
   }
+
+  
   
 
   return(
