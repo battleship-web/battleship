@@ -1,18 +1,23 @@
 import { useEffect } from "react";
+import { socket } from "../socket";
 import Loading from "../components/Loading";
 import RefreshButton from "./RefreshButton";
 import ResetButton from "./ResetButton";
 
 //Display Game list and current score
 // Component function
-function AdminPage({gameList, gameID, score}) {
+function AdminPage({ gameList }) {
   useEffect(() => {
     socket.emit("gameListRequest");
   });
   let gameListDisplay = null;
-  if (socket.on("gameList")) {
-    if (gameList === null) {
-      gameListDisplay = <Loading />;
+
+  if (gameList === null) {
+    gameListDisplay = <Loading />;
+  } else {
+    //Show "No Active Game" if there is no active game
+    if (gameList.length === 0) {
+      gameListDisplay = <h1>No Active Game</h1>;
     } else {
       const listToDisplay = gameList.map((game) => {
         // Adjust the gameList structure a little bit
@@ -54,25 +59,24 @@ function AdminPage({gameList, gameID, score}) {
     }
   }
 
-  
-  
-
-  return(
+  return (
     <>
-    <div className="background" class="w-full h-full bg-[url('/iowa-class.jpg')]">
-      <div className="adminPage" class="w-full h-1/6 align-top">
-        <h1 align="center">Admin Page</h1>
-      </div>
-      <div class="px-28 h-4/6 bg-zinc-100 opacity-50">
-        {gameListDisplay}
-      </div>
-      <div className="footer" class="w-full h-1/6 align-bottom">
-        <div className="refreshButton" class="object-center">
-          <RefreshButton />
+      <div className="w-full h-full bg-[url('/iowa-class.jpg')]">
+        <div className="w-full h-1/6 align-top flex justify-center">
+          <h1 className="">Admin Page</h1>
+        </div>
+        <div className="flex justify-start">
+          <h1 className="ml-24">Match</h1>
+          <h1 className="ml-40">Score</h1>
+        </div>
+        <div className="bg-zinc-100 opacity-50">{gameListDisplay}</div>
+        <div className="w-full h-1/6 align-bottom">
+          <div className="text-center">
+            <RefreshButton />
+          </div>
         </div>
       </div>
-    </div>
-  </>
+    </>
   );
 }
-export default AdminPage
+export default AdminPage;
