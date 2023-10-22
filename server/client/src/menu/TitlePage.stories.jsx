@@ -6,4 +6,11 @@ export default {
   tags: ["autodocs"],
 };
 
-export const Default = {};
+function setGameStage(arg){
+  console.log(arg)
+}
+export const Default = {
+  args: {
+    setGameStage: setGameStage
+  }
+};

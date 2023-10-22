@@ -16,6 +16,13 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [clientList, setClientList] = useState(null);
   const [socketError, setSocketError] = useState(null);
+  const [inviteAccepted, setInviteAccepted] = useState(null);
+  const [inviteRefused, setInviteRefused] = useState(null);
+  const [inviteeLeft, setInviteeLeft] = useState(null);
+  const [inviting, setInviting] = useState(false);
+  const [incomingInvite, setIncomingInvite] = useState(null);
+
+
 
   let page = null;
   useEffect(() => {
@@ -70,7 +77,25 @@ function App() {
       page = <WelcomePage user={user} setGameStage={setGameStage} />;
       break;
     case "menu:lobby":
-      page = <LobbyPage clientList={clientList} username={user.username} />;
+      page = <LobbyPage 
+                clientList={clientList} 
+                username={user.username} 
+                setGameStage={setGameStage} 
+                inviteeLeft={inviteeLeft}  
+                inviteAccepted={inviteAccepted}  
+                inviteRefused={inviteRefused} 
+                setInviteeLeft={setInviteeLeft}
+                setInviteAccepted={setInviteAccepted}
+                setInviteRefused={setInviteRefused}
+                inviting={inviting}
+                incomingInvite={incomingInvite}
+                setInviting={setInviting}
+                setIncomingInvite={setIncomingInvite}
+                acceptInvite={acceptInvite}
+                refuseInvite={refuseInvite}
+                setAcceptInvite={setAcceptInvite}
+                setRefuseInvite={setRefuseInvite}
+                />;
       break;
     case "game:prep":
       page = <PrepPage />;
