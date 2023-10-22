@@ -1,3 +1,4 @@
+import { useReducer } from "react";
 import WelcomePage from "./WelcomePage";
 
 export default {
@@ -6,4 +7,9 @@ export default {
   tags: ["autodocs"],
 };
 
-export const Default = {};
+const user={nickname:"hey",username:"hey.co"}
+export const Default = {
+  args: {
+    user: user
+  },
+};
