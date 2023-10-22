@@ -16,19 +16,42 @@ function AdminPage({ gameList, clientList }) {
   if (clientList === null) {
     clientListDisplay = <Loading />;
   } else {
-    if (clientList === 0) {
+    if (clientList.length === 0) {
       clientListDisplay = <h1>No Active Client</h1>;
     } else {
       const clientToDisplay = clientList.map((client) => {
         return (
-          <li key={client.username} className="flex justify-center">
-            <div className="border-2 border-black ml-10">
-              {client.nickname}
-            </div>
-          </li>
+          <tr key={client.username}>
+            <td className="border-2 border-slate-500 text-center p-2">
+              {client.nickname ? client.nickname : "Unknown"}
+            </td>
+            <td className="border-2 border-slate-500 text-center p-2">
+              {client.username}
+            </td>
+            <td className="border-2 border-slate-500 text-center p-2">
+              {client.gameId ? client.gameId : "-"}
+            </td>
+          </tr>
         );
       });
-      clientListDisplay = <ol>{clientToDisplay}</ol>;
+      clientListDisplay = (
+        <table>
+          <thead>
+            <tr>
+              <th className="border-2 border-slate-500 text-center p-2">
+                Nickname
+              </th>
+              <th className="border-2 border-slate-500 text-center p-2">
+                Username
+              </th>
+              <th className="border-2 border-slate-500 text-center p-2">
+                Game ID
+              </th>
+            </tr>
+          </thead>
+          <tbody>{clientToDisplay}</tbody>
+        </table>
+      );
     }
   }
 
@@ -43,54 +66,67 @@ function AdminPage({ gameList, clientList }) {
         // Adjust the gameList structure a little bit
         // Add two more buttons and add options for the emitting socket event
         return (
-          <li key={game.gameId} className="flex justify-center gap-8">
-            <div className="w-80 border-2 border-black">
-              {game.player1.username} vs {game.player2.username}
-            </div>
-            <div className="w-40 border-2 border-black text-center">
+          <tr key={game.gameId}>
+            <td className="border-2 border-slate-500 text-center p-2">
+              {`${game.player1.nickname} (${game.player1.username}) vs `}
+              {`${game.player2.nickname} (${game.player2.username})`}
+            </td>
+            <td className="border-2 border-slate-500 text-center p-2">
               {game.player1.score} : {game.player2.score}
-            </div>
-
-            <ResetButton
-              text="Reset Score"
-              options={{
-                gameId: game.gameId,
-                toReset: "score",
-              }}
-            />
-            <ResetButton
-              text="Reset Game"
-              options={{
-                gameId: game.gameId,
-                toReset: "game",
-              }}
-            />
-            <ResetButton
-              text="Cancel Game"
-              options={{
-                gameId: game.gameId,
-                toReset: "cancel",
-              }}
-            />
-          </li>
+            </td>
+            <td className="border border-slate-500 p-2">
+              <ResetButton
+                text="Reset Score"
+                options={{
+                  gameId: game.gameId,
+                  toReset: "score",
+                }}
+              />
+              <ResetButton
+                text="Reset Game"
+                options={{
+                  gameId: game.gameId,
+                  toReset: "game",
+                }}
+              />
+              <ResetButton
+                text="Cancel Game"
+                options={{
+                  gameId: game.gameId,
+                  toReset: "cancel",
+                }}
+              />
+            </td>
+          </tr>
         );
       });
-      gameListDisplay = <ul>{listToDisplay}</ul>;
+      gameListDisplay = (
+        <table className="border-collapse border-2 border-slate-500">
+          <thead>
+            <tr>
+              <th className="border-2 border-slate-500 p-2">
+                Competing Players
+              </th>
+              <th className="border-2 border-slate-500 p-2">Scores</th>
+              <th className="border-2 border-slate-500 p-2">Buttons</th>
+            </tr>
+          </thead>
+          <tbody>{listToDisplay}</tbody>
+        </table>
+      );
     }
   }
 
   return (
     <>
-      <div className="w-full h-full bg-[url('/iowa-class.jpg')]">
-        <div className="w-full h-1/6 align-top flex justify-center">
-          <h1 className="">Admin Page</h1>
+      <div className="w-screen h-screen flex flex-col items-center gap-4 bg-[url('/src/admin/iowa-class.jpg')]">
+        <div className="w-full align-top flex justify-center">
+          <h1 className="bg-zinc-100 p-2">Admin Page</h1>
         </div>
-        <div className="flex justify-start">
-          <h1 className="ml-24">Match</h1>
-          <h1 className="ml-40">Score</h1>
-        </div>
-        <div className="bg-zinc-100 opacity-50 ">{gameListDisplay}</div>
-        <div className="bg-zinc-100 opacity-50">{clientListDisplay}</div>
+        <h1 className="bg-zinc-100 p-2">Game</h1>
+        <div className="bg-zinc-100">{gameListDisplay}</div>
+        <h1 className="bg-zinc-100 p-2">Player</h1>
+        <div className="bg-zinc-100">{clientListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
           <div className="text-center">
             <RefreshButton />
