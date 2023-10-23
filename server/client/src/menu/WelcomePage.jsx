@@ -10,19 +10,19 @@ function WelcomePage({ user, setGameStage }) {
         </div>
         <div className="text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-10 py-2 shadow-2xl sm:rounded-3xl border-2 border-slate-400">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-1xl ">
-            ⛴ In the beginning, before humance race was born, before dinosaur
-            has extinct, there are only violence. Every single of livingthing
-            tried to adapt, survive, and most importance is killing each other.
-            Therefore, in every single era, there are war. war to survive, war
-            to conqure food, war for mating. Every reason can cause a war.
-            Nowadays people have law and rule to minimise conflix between each
-            other. However the thrist of war isn&apos;t ga anywhere, it still
-            inside of every single human. Since one man name Dr.Necern have
-            found gunium particle. The technology of warship is forever changed,
-            and the war begun every where. Just to conqure even one more grain
-            of sand. And now there are several individuals try to conqure your
-            island. But it not that easy because this island have a war ship
-            too!!!. Use it general!! Protect this island!!! Conqure the
+            ⛴ In the beginning, before the human race was born, before dinosaurs
+            went extinct, there was only violence. Every single living thing
+            tried to adapt, survive, and most importantly, kill each other.
+            Therefore, in every single era, there are wars. war to survive, war
+            to conquer food, war for mating. Every reason can cause a war.
+            Nowadays people have law and rule to minimise conflicts between each
+            other. However the thirst for war isn&apos;t going anywhere, it is
+            still inside of every single human. Since one man named Dr.Necern
+            has found gunium particles. The technology of warships is forever
+            changed, and wars occur everywhere. Just to conquer even one more
+            grain of sand. And now several individuals are trying to conquer
+            your island. But it is not that easy because this island has a
+            warship too!!!. Use it, general!! Protect this island!!! Conquer the
             world!!!! ⛴
           </h1>
         </div>
