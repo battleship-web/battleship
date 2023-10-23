@@ -1,11 +1,12 @@
 
-export default function win() {
+export default function losePage() {
   return (
-    <main className="grid min-h-full place-items-center bg-[url(https://t3.ftcdn.net/jpg/04/43/69/32/360_F_443693248_FFOUon01HIYUVLVPFIyhrzDlbmWN8XKq.jpg)] px-6 py-24 sm:py-32 lg:px-8">
+    <main className="grid min-h-full place-items-center bg-[url(https://images.theconversation.com/files/162016/original/image-20170322-31176-2q8pz6.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=754&fit=clip)] px-6 py-24 sm:py-32 lg:px-8">
 
+    
         <paramiter : centered></paramiter : centered>
         <div className="mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">
-            <div className="relative isolate overflow-hidden bg-green-500 px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-4 lg:px-56 lg:pt-0">
+            <div className="relative isolate overflow-hidden bg-red-900 px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-4 lg:px-56 lg:pt-0">
                 <paramiter : centered></paramiter : centered>
                 <svg
                     viewBox="0 0 1024 1024"
@@ -25,12 +26,12 @@ export default function win() {
                 <paramiter : centered></paramiter : centered>
           <span className="inline-flex items-center text-5xl place-items-center layout:center text- center rounded-md bg-gray-50 mx-50 px-20 py-10 text-300 font-medium  text-gray-600 ring-1 ring-inset ring-gray-500/10">
           <paramiter : centered></paramiter : centered>
-            YOU WIN !
+            YOU LOSE
           </span>
           
             <div className="  place-items-center  lg:text-middle"></div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-3xl">Congratulations </h1>
-          <p className="mt-6 text-base leading-7 text-white">You are supercool among all of the player.</p>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-3xl">better luck next time XP </h1>
+          <p className="mt-6 text-base leading-7 text-white">You almost win the game!, keep it up.</p>
                         
                    
                     <br></br>
@@ -52,6 +53,9 @@ export default function win() {
                 </div>
             </div>
         </div>
+    
     </main>
-);
+  );
 }
+
+

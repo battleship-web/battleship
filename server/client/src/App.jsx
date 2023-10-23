@@ -113,6 +113,15 @@ function App() {
     case "game:prep":
       page = <PrepPage />;
       break;
+    case "game:gamerule":
+      page = <gamerulePage setGameStage={setGameStage} />;
+      break;
+    case "game:lose":
+      page = <losePage setGameStage={setGameStage} />;
+      break;
+    case "game:win":
+      page = <winPage setGameStage={setGameStage} />;
+      break;
     case "game:battle":
       page = <BattlePage />;
       break;

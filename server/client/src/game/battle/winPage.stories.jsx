@@ -1,8 +1,8 @@
-import win from "./win";
+import winPage from "./winPage";
 
 export default {
-  component: win,
-  title: "win",
+  component: winPage,
+  title: "winPage",
   tags: ["autodocs"],
 };
 
