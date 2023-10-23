@@ -36,6 +36,7 @@ const clientList1 = [
     socketId: "mock-socket-id-5",
   },
 ];
+
 const gameList1 = [
   {
     gameId: "mock-id-1",
@@ -68,6 +69,7 @@ const gameList1 = [
     },
   },
 ];
+
 
 const gameList2 = [
   {
@@ -120,6 +122,7 @@ const gameList2 = [
 export const Default = {
   args: {
     clientList: [],
+
     gameList: [],
   },
 };

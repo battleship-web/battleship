@@ -6,12 +6,15 @@ import ResetButton from "./ResetButton";
 
 //Display Game list and current score
 // Component function
+
 function AdminPage({ gameList, clientList }) {
+  
   useEffect(() => {
     socket.emit("gameListRequest");
     socket.emit("allClientListRequest");
   });
   let gameListDisplay = null;
+
   let clientListDisplay = null;
   if (clientList === null) {
     clientListDisplay = <Loading />;
@@ -54,6 +57,7 @@ function AdminPage({ gameList, clientList }) {
       );
     }
   }
+
 
   if (gameList === null) {
     gameListDisplay = <Loading />;
@@ -114,6 +118,7 @@ function AdminPage({ gameList, clientList }) {
           <tbody>{listToDisplay}</tbody>
         </table>
       );
+
     }
   }
 
@@ -129,6 +134,7 @@ function AdminPage({ gameList, clientList }) {
         <div className="bg-zinc-100">{clientListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
           <div className="text-center">
+
             <RefreshButton />
           </div>
         </div>
