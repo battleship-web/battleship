@@ -291,12 +291,18 @@ export default function (io) {
           }
 
           // choosing of whose turn
+          let turn = null;
+
           if (Math.random() < 0.5) {
-            message.turn = player1SocketId;
+            turn = player1SocketId;
           } else {
-            message.turn = player2SocketId;
+            turn = player2SocketId;
           }
 
+          // updating whose turn in redis game entry
+          await redisClient.hSet(`game:${gameId}`, "turn", turn);
+
+          message.turn = turn;
           io.to(player1SocketId).to(player2SocketId).emit("startSignal", message);
         }
 
