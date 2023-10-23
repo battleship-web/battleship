@@ -15,7 +15,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [clientList, setClientList] = useState(null);
-  const [socketError, setSocketError] = useState(null);
 
   let page = null;
   useEffect(() => {
@@ -74,6 +73,15 @@ function App() {
       break;
     case "game:prep":
       page = <PrepPage />;
+      break;
+    case "game:gamerule":
+      page = <gamerulePage setGameStage={setGameStage}/>;
+      break;
+    case "game:lose":
+      page = <losePage setGameStage={setGameStage}/>;
+      break;
+    case "game:win":
+      page = <winPage setGameStage={setGameStage}/>;
       break;
     case "game:battle":
       page = <BattlePage />;
