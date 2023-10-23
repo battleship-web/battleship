@@ -16,6 +16,11 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [clientList, setClientList] = useState(null);
   const [socketError, setSocketError] = useState(null);
+  const [inviteAccepted, setInviteAccepted] = useState(null);
+  const [inviteRefused, setInviteRefused] = useState(null);
+  const [inviteeLeft, setInviteeLeft] = useState(null);
+  const [inviting, setInviting] = useState(false);
+  const [incomingInvite, setIncomingInvite] = useState(null);
 
   let page = null;
   useEffect(() => {
@@ -36,10 +41,19 @@ function App() {
 
     const cleanup = () => {
       socket.off("loginResponse", onLoginResponse);
+      socket.off("clientList", setClientList);
+      socket.off("incomingInvite", setIncomingInvite);
+      socket.off("inviteeLeft", setInviteeLeft);
+      socket.off("inviteAccepted", setInviteAccepted);
+      socket.off("inviteRefused", setInviteRefused);
       socket.disconnect();
     };
     socket.on("loginResponse", onLoginResponse);
     socket.on("clientList", setClientList);
+    socket.on("incomingInvite", setIncomingInvite);
+    socket.on("inviteeLeft", setInviteeLeft);
+    socket.on("inviteAccepted", setInviteAccepted);
+    socket.on("inviteRefused", setInviteRefused);
 
     window.addEventListener("beforeunload", cleanup);
 
@@ -70,7 +84,23 @@ function App() {
       page = <WelcomePage user={user} setGameStage={setGameStage} />;
       break;
     case "menu:lobby":
-      page = <LobbyPage clientList={clientList} username={user.username} />;
+      page = (
+        <LobbyPage
+          clientList={clientList}
+          username={user.username}
+          setGameStage={setGameStage}
+          inviteeLeft={inviteeLeft}
+          inviteAccepted={inviteAccepted}
+          inviteRefused={inviteRefused}
+          setInviteeLeft={setInviteeLeft}
+          setInviteAccepted={setInviteAccepted}
+          setInviteRefused={setInviteRefused}
+          inviting={inviting}
+          incomingInvite={incomingInvite}
+          setInviting={setInviting}
+          setIncomingInvite={setIncomingInvite}
+        />
+      );
       break;
     case "game:prep":
       page = <PrepPage />;
