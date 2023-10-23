@@ -31,7 +31,7 @@ function LobbyPage({
   };
 
   const handleBattle = () => {
-    setGameStage("game:battle");
+    setGameStage("game:gamerulePage");
     setInviting(false);
     setInviteeLeft(null);
     setInviteAccepted(null);
@@ -45,7 +45,7 @@ function LobbyPage({
 
   function acceptInvitation(opponentSocketId) {
     socket.emit("acceptInvite", opponentSocketId);
-    setGameStage("game:battle");
+    setGameStage("game:gamerulePage");
     setIncomingInvite(null);
   }
 

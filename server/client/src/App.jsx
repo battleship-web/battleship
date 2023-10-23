@@ -108,6 +108,9 @@ function App() {
     case "game:battle":
       page = <BattlePage />;
       break;
+    case "game:gamerule":
+      page = <gamerulePage user={user} setGameStage={setGameStage}/>;
+      break;
     case "admin":
       page = <AdminPage />;
       break;
