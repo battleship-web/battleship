@@ -1,6 +1,7 @@
 export default function gamerule_page() {
   return (
-    <div className="bg-blue-300">
+    <main className="grid min-h-full place-items-center bg-[url(https://t3.ftcdn.net/jpg/04/43/69/32/360_F_443693248_FFOUon01HIYUVLVPFIyhrzDlbmWN8XKq.jpg)] px-6 py-24 sm:py-32 lg:px-8">
+    
         <div className="mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">
             <div className="relative isolate overflow-hidden bg-gray-900 px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-20 lg:px-24 lg:pt-0">
                 <svg
@@ -23,7 +24,7 @@ export default function gamerule_page() {
                         "Instruction"
                     </h2>
                     <p className="mt-6 text-lg leading-8 text-gray-300">
-                        insert game rule there although i dont know how to play it at all. fuck off
+                        insert game rule there, the score and the point should be link in other page,also the nickname
                         <br />
                         rule1
                         <br />
@@ -51,7 +52,7 @@ export default function gamerule_page() {
                 </div>
             </div>
         </div>
-    </div>
+ </main>
 );
 }
 
