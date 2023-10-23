@@ -15,19 +15,23 @@ function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [clientList, setClientList] = useState(null);
+  const [allClientList, setAllClientList] = useState(null);
   const [socketError, setSocketError] = useState(null);
   const [inviteAccepted, setInviteAccepted] = useState(null);
   const [inviteRefused, setInviteRefused] = useState(null);
   const [inviteeLeft, setInviteeLeft] = useState(null);
   const [inviting, setInviting] = useState(false);
   const [incomingInvite, setIncomingInvite] = useState(null);
+  const [gameList, setGameList] = useState(null);
 
   let page = null;
   useEffect(() => {
     const onLoginResponse = (data) => {
       if (data.success) {
         setUser(data.message);
-        if (data.message.nickname) {
+        if (data.message.role === "admin") {
+          setGameStage("admin");
+        } else if (data.message.nickname) {
           setGameStage("menu:welcome");
         } else {
           setGameStage("menu:nickname");
@@ -42,18 +46,22 @@ function App() {
     const cleanup = () => {
       socket.off("loginResponse", onLoginResponse);
       socket.off("clientList", setClientList);
+      socket.off("allClientList", setAllClientList);
       socket.off("incomingInvite", setIncomingInvite);
       socket.off("inviteeLeft", setInviteeLeft);
       socket.off("inviteAccepted", setInviteAccepted);
       socket.off("inviteRefused", setInviteRefused);
+      socket.off("gameList", setGameList);
       socket.disconnect();
     };
     socket.on("loginResponse", onLoginResponse);
     socket.on("clientList", setClientList);
+    socket.on("allClientList", setAllClientList);
     socket.on("incomingInvite", setIncomingInvite);
     socket.on("inviteeLeft", setInviteeLeft);
     socket.on("inviteAccepted", setInviteAccepted);
     socket.on("inviteRefused", setInviteRefused);
+    socket.on("gameList", setGameList);
 
     window.addEventListener("beforeunload", cleanup);
 
@@ -109,7 +117,7 @@ function App() {
       page = <BattlePage />;
       break;
     case "admin":
-      page = <AdminPage />;
+      page = <AdminPage clientList={allClientList} gameList={gameList} />;
       break;
     default:
       page = <NotFoundPage />;

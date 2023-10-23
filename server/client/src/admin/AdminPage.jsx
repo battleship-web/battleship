@@ -8,11 +8,10 @@ import ResetButton from "./ResetButton";
 // Component function
 
 function AdminPage({ gameList, clientList }) {
-  
   useEffect(() => {
     socket.emit("gameListRequest");
     socket.emit("allClientListRequest");
-  });
+  }, []);
   let gameListDisplay = null;
 
   let clientListDisplay = null;
@@ -57,7 +56,6 @@ function AdminPage({ gameList, clientList }) {
       );
     }
   }
-
 
   if (gameList === null) {
     gameListDisplay = <Loading />;
@@ -118,23 +116,21 @@ function AdminPage({ gameList, clientList }) {
           <tbody>{listToDisplay}</tbody>
         </table>
       );
-
     }
   }
 
   return (
     <>
-      <div className="w-screen h-screen flex flex-col items-center gap-4 bg-[url('/src/admin/iowa-class.jpg')]">
+      <div className="w-screen h-screen flex flex-col items-center gap-4 bg-[url('/src/admin/iowa-class.jpg')] bg-cover">
         <div className="w-full align-top flex justify-center">
-          <h1 className="bg-zinc-100 p-2">Admin Page</h1>
+          <h1 className="bg-zinc-100 p-2 rounded-md">Admin Page</h1>
         </div>
-        <h1 className="bg-zinc-100 p-2">Game</h1>
+        <h1 className="bg-zinc-100 p-2 rounded-md">Game</h1>
         <div className="bg-zinc-100">{gameListDisplay}</div>
-        <h1 className="bg-zinc-100 p-2">Player</h1>
+        <h1 className="bg-zinc-100 p-2 rounded-md">Player</h1>
         <div className="bg-zinc-100">{clientListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
           <div className="text-center">
-
             <RefreshButton />
           </div>
         </div>
