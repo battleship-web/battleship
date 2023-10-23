@@ -4,31 +4,30 @@ import Inviting from "../components/Inviting";
 import InviteeLeft from "../components/InviteeLeft";
 import InviteAccepted from "../components/InviteAccepted";
 import InviteRefused from "../components/InviteRefused";
-import IncommingInvite from "../components/IncommingInvite";
+import IncomingInvite from "../components/IncomingInvite";
 import { socket } from "../socket";
-
+import { PropTypes } from "prop-types";
 
 function LobbyPage({
-  clientList, 
+  clientList,
   username,
   setGameStage,
-  inviteeLeft, 
+  inviteeLeft,
   inviteAccepted,
-  inviteRefused, 
-  setInviteAccepted, 
-  setInviteRefused, 
-  setInviteeLeft, 
-  inviting, 
-  incomingInvite, 
-  setInviting, 
+  inviteRefused,
+  setInviteAccepted,
+  setInviteRefused,
+  setInviteeLeft,
+  incomingInvite,
   setIncomingInvite,
+  inviting,
+  setInviting,
 }) {
-
   const handleBack = () => {
-      setInviting(false);
-      setInviteeLeft(null);
-      setInviteAccepted(null);
-      setInviteRefused(null);
+    setInviting(false);
+    setInviteeLeft(null);
+    setInviteAccepted(null);
+    setInviteRefused(null);
   };
 
   const handleBattle = () => {
@@ -39,22 +38,21 @@ function LobbyPage({
     setInviteRefused(null);
   };
 
-  function handleInvite() {
+  function handleInvite(opponentSocketId) {
     setInviting(true);
-    socket.emit("invite", client.socketId);
+    socket.emit("invite", opponentSocketId);
   }
 
-  function acceptInvitation() {
-    socket.emit("accept", user.socketId);
+  function acceptInvitation(opponentSocketId) {
+    socket.emit("accept", opponentSocketId);
     setGameStage("game:battle");
     setIncomingInvite(null);
   }
 
-  function refuseInvitation() {
-    socket.emit("refuse", user.socketId);
+  function refuseInvitation(opponentSocketId) {
+    socket.emit("refuse", opponentSocketId);
     setIncomingInvite(null);
   }
-
 
   useEffect(() => {
     socket.emit("clientListRequest");
@@ -63,48 +61,97 @@ function LobbyPage({
   let display = null;
 
   if (incomingInvite !== null) {
-    display = <h1><IncommingInvite acceptInvitation={acceptInvitation} refuseInvitation={refuseInvitation}/></h1>; 
-  } else{
+    display = (
+      <h1>
+        <IncomingInvite
+          acceptInvitation={() => {
+            acceptInvitation(incomingInvite);
+          }}
+          refuseInvitation={() => {
+            refuseInvitation(incomingInvite);
+          }}
+        />
+      </h1>
+    );
+  } else {
     if (inviting) {
-      if (inviteeLeft !== null){
-        display = <h1><InviteeLeft handleBack={handleBack} /></h1>;
+      if (inviteeLeft !== null) {
+        display = (
+          <h1>
+            <InviteeLeft handleBack={handleBack} />
+          </h1>
+        );
       } else if (inviteRefused !== null) {
         if (inviteeLeft !== null) {
-          display = <h1><InviteeLeft handleBack={handleBack} /></h1>;
-        } else{
-          display = <h1><InviteRefused handleBack={handleBack}/></h1>;
-        };
-      } else if(inviteAccepted !== null) {
+          display = (
+            <h1>
+              <InviteeLeft handleBack={handleBack} />
+            </h1>
+          );
+        } else {
+          display = (
+            <h1>
+              <InviteRefused handleBack={handleBack} />
+            </h1>
+          );
+        }
+      } else if (inviteAccepted !== null) {
         if (inviteeLeft !== null) {
-          display = <h1><InviteeLeft handleBack={handleBack} /></h1>;
-        } else{
-          display = <h1><InviteAccepted handleBattle={handleBattle} /></h1>;
-        };
+          display = (
+            <h1>
+              <InviteeLeft handleBack={handleBack} />
+            </h1>
+          );
+        } else {
+          display = (
+            <h1>
+              <InviteAccepted handleBattle={handleBattle} />
+            </h1>
+          );
+        }
       } else {
-        display = <h1><Inviting /></h1>;
-      };
+        display = (
+          <h1>
+            <Inviting />
+          </h1>
+        );
+      }
     } else {
       if (clientList === null) {
-          display = <h1><Loading  /></h1>;
+        display = (
+          <h1>
+            <Loading />
+          </h1>
+        );
       } else {
         const clientExcludingMe = clientList.filter((client) => {
           return client.username !== username;
         });
 
         if (clientExcludingMe.length === 0) {
-          display = <h1 className="text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl animate-pulse ">No other online player...</h1>;
+          display = (
+            <h1 className="text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl animate-pulse ">
+              No other online player...
+            </h1>
+          );
         } else {
           const listToDisplay = clientExcludingMe.map((client) => {
             return (
-              <li className="flex justify-center text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-10 py-2 shadow-2xl sm:rounded-3xl border-2 border-slate-400" key={client.username}>
+              <li
+                className="flex justify-center text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-10 py-2 shadow-2xl sm:rounded-3xl border-2 border-slate-400"
+                key={client.username}
+              >
                 <h2 className="my-3 mr-5 text-yellow-300">General</h2>
                 <h1 className="my-3 mr-5 ">{client.nickname}</h1>
                 <h2 className="my-3">({client.username})</h2>
-                  <button className="mx-6 bg-gradient-to-r from-sky-500 to-blue-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl border-2 border-slate-400"
-                    onClick={handleInvite}
-                  >
-                    Fight
-                  </button>
+                <button
+                  className="mx-6 bg-gradient-to-r from-sky-500 to-blue-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl border-2 border-slate-400"
+                  onClick={() => {
+                    handleInvite(client.socketId);
+                  }}
+                >
+                  Fight
+                </button>
               </li>
             );
           });
@@ -118,12 +165,14 @@ function LobbyPage({
     <main className="grid min-h-full place-items-center bg-[url(https://images.theconversation.com/files/162016/original/image-20170322-31176-2q8pz6.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=754&fit=clip)] px-6 py-24 sm:py-32 lg:px-8">
       <div className="text-center">
         <div className="text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-20 py-10 shadow-2xl sm:rounded-3xl border-2 border-slate-400">
-        {display}
+          {display}
         </div>
         <div>
           <button
             className="mx-4 bg-gradient-to-r from-sky-500 to-blue-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-white shadow-sm sm:text-2xl border-2 border-slate-400"
-            onClick={handleInvite}
+            onClick={() => {
+              socket.emit("clientListRequest");
+            }}
           >
             Refresh
           </button>
@@ -133,3 +182,19 @@ function LobbyPage({
   );
 }
 export default LobbyPage;
+
+LobbyPage.propTypes = {
+  clientList: PropTypes.array.isRequired,
+  username: PropTypes.string.isRequired,
+  setGameStage: PropTypes.func.isRequired,
+  inviteeLeft: PropTypes.string.isRequired,
+  inviteAccepted: PropTypes.string.isRequired,
+  inviteRefused: PropTypes.string.isRequired,
+  setInviteAccepted: PropTypes.func.isRequired,
+  setInviteRefused: PropTypes.func.isRequired,
+  setInviteeLeft: PropTypes.func.isRequired,
+  inviting: PropTypes.bool.isRequired,
+  incomingInvite: PropTypes.string.isRequired,
+  setInviting: PropTypes.func.isRequired,
+  setIncomingInvite: PropTypes.func.isRequired,
+};

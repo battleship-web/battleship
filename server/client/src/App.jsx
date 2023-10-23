@@ -22,8 +22,6 @@ function App() {
   const [inviting, setInviting] = useState(false);
   const [incomingInvite, setIncomingInvite] = useState(null);
 
-
-
   let page = null;
   useEffect(() => {
     const onLoginResponse = (data) => {
@@ -77,25 +75,23 @@ function App() {
       page = <WelcomePage user={user} setGameStage={setGameStage} />;
       break;
     case "menu:lobby":
-      page = <LobbyPage 
-                clientList={clientList} 
-                username={user.username} 
-                setGameStage={setGameStage} 
-                inviteeLeft={inviteeLeft}  
-                inviteAccepted={inviteAccepted}  
-                inviteRefused={inviteRefused} 
-                setInviteeLeft={setInviteeLeft}
-                setInviteAccepted={setInviteAccepted}
-                setInviteRefused={setInviteRefused}
-                inviting={inviting}
-                incomingInvite={incomingInvite}
-                setInviting={setInviting}
-                setIncomingInvite={setIncomingInvite}
-                acceptInvite={acceptInvite}
-                refuseInvite={refuseInvite}
-                setAcceptInvite={setAcceptInvite}
-                setRefuseInvite={setRefuseInvite}
-                />;
+      page = (
+        <LobbyPage
+          clientList={clientList}
+          username={user.username}
+          setGameStage={setGameStage}
+          inviteeLeft={inviteeLeft}
+          inviteAccepted={inviteAccepted}
+          inviteRefused={inviteRefused}
+          setInviteeLeft={setInviteeLeft}
+          setInviteAccepted={setInviteAccepted}
+          setInviteRefused={setInviteRefused}
+          inviting={inviting}
+          incomingInvite={incomingInvite}
+          setInviting={setInviting}
+          setIncomingInvite={setIncomingInvite}
+        />
+      );
       break;
     case "game:prep":
       page = <PrepPage />;
