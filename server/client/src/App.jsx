@@ -41,10 +41,19 @@ function App() {
 
     const cleanup = () => {
       socket.off("loginResponse", onLoginResponse);
+      socket.off("clientList", setClientList);
+      socket.off("incomingInvite", setIncomingInvite);
+      socket.off("inviteeLeft", setInviteeLeft);
+      socket.off("inviteAccepted", setInviteAccepted);
+      socket.off("inviteRefused", setInviteRefused);
       socket.disconnect();
     };
     socket.on("loginResponse", onLoginResponse);
     socket.on("clientList", setClientList);
+    socket.on("incomingInvite", setIncomingInvite);
+    socket.on("inviteeLeft", setInviteeLeft);
+    socket.on("inviteAccepted", setInviteAccepted);
+    socket.on("inviteRefused", setInviteRefused);
 
     window.addEventListener("beforeunload", cleanup);
 

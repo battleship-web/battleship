@@ -44,13 +44,13 @@ function LobbyPage({
   }
 
   function acceptInvitation(opponentSocketId) {
-    socket.emit("accept", opponentSocketId);
+    socket.emit("acceptInvite", opponentSocketId);
     setGameStage("game:battle");
     setIncomingInvite(null);
   }
 
   function refuseInvitation(opponentSocketId) {
-    socket.emit("refuse", opponentSocketId);
+    socket.emit("refuseInvite", opponentSocketId);
     setIncomingInvite(null);
   }
 
@@ -162,7 +162,7 @@ function LobbyPage({
   }
 
   return (
-    <main className="grid min-h-full place-items-center bg-[url(https://images.theconversation.com/files/162016/original/image-20170322-31176-2q8pz6.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=754&fit=clip)] px-6 py-24 sm:py-32 lg:px-8">
+    <main className="grid h-screen w-screen place-items-center bg-[url(https://images.theconversation.com/files/162016/original/image-20170322-31176-2q8pz6.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=754&fit=clip)] px-6 py-24 sm:py-32 lg:px-8 bg-cover">
       <div className="text-center">
         <div className="text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-20 py-10 shadow-2xl sm:rounded-3xl border-2 border-slate-400">
           {display}
@@ -184,17 +184,17 @@ function LobbyPage({
 export default LobbyPage;
 
 LobbyPage.propTypes = {
-  clientList: PropTypes.array.isRequired,
-  username: PropTypes.string.isRequired,
-  setGameStage: PropTypes.func.isRequired,
-  inviteeLeft: PropTypes.string.isRequired,
-  inviteAccepted: PropTypes.string.isRequired,
-  inviteRefused: PropTypes.string.isRequired,
-  setInviteAccepted: PropTypes.func.isRequired,
-  setInviteRefused: PropTypes.func.isRequired,
-  setInviteeLeft: PropTypes.func.isRequired,
-  inviting: PropTypes.bool.isRequired,
-  incomingInvite: PropTypes.string.isRequired,
-  setInviting: PropTypes.func.isRequired,
-  setIncomingInvite: PropTypes.func.isRequired,
+  clientList: PropTypes.array,
+  username: PropTypes.string,
+  setGameStage: PropTypes.func,
+  inviteeLeft: PropTypes.string,
+  inviteAccepted: PropTypes.string,
+  inviteRefused: PropTypes.string,
+  setInviteAccepted: PropTypes.func,
+  setInviteRefused: PropTypes.func,
+  setInviteeLeft: PropTypes.func,
+  inviting: PropTypes.bool,
+  incomingInvite: PropTypes.string,
+  setInviting: PropTypes.func,
+  setIncomingInvite: PropTypes.func,
 };
