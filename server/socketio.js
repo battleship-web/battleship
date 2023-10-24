@@ -273,9 +273,9 @@ export default function (io) {
         if ((await redisClient.hExists(`game:${gameId}`, "player1Board")) && (await redisClient.hExists(`game:${gameId}`, "player2Board"))) {
           // prep to send start signal
           const player1SocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
-          const player1Score = await redisClient.hGet(`game:${gameId}`, "player1Score");
+          const player1Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player1Score"));
           const player2SocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
-          const player2Score = await redisClient.hGet(`game:${gameId}`, "player2Score");
+          const player2Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player2Score"));
 
           // message to send each player
           let message = {
@@ -352,9 +352,9 @@ export default function (io) {
 
       // update redis
       const player1SocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
-      const player1Score = await redisClient.hGet(`game:${gameId}`, "player1Score");
+      const player1Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player1Score"));
       const player2SocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
-      const player2Score = await redisClient.hGet(`game:${gameId}`, "player2Score");
+      const player2Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player2Score"));
 
       // update board
       // store string of the board
