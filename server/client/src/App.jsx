@@ -8,13 +8,17 @@ import WelcomePage from "./menu/WelcomePage";
 import LobbyPage from "./menu/LobbyPage";
 import PrepPage from "./game/prep/PrepPage";
 import BattlePage from "./game/battle/BattlePage";
+import GamerulePage from "./game/battle/GamerulePage";
+import ScorepointPage from "./game/battle/ScorepointPage";
 import NotFoundPage from "./notfound/NotFoundPage";
+
 
 function App() {
   const [gameStage, setGameStage] = useState("menu:title");
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [clientList, setClientList] = useState(null);
+  const [instruction, setInstruction] = useState(false);
 
   let page = null;
   useEffect(() => {
@@ -75,7 +79,7 @@ function App() {
       page = <PrepPage />;
       break;
     case "game:gamerule":
-      page = <gamerulePage setGameStage={setGameStage}/>;
+      page = <GamerulePage setGameStage={setGameStage}/>;
       break;
     case "game:lose":
       page = <losePage setGameStage={setGameStage}/>;
@@ -85,6 +89,9 @@ function App() {
       break;
     case "game:battle":
       page = <BattlePage />;
+      break;
+    case "game:scorepoint":
+      page = <ScorepointPage instruction={instruction} setInstruction={setInstruction} user={user} setGameStage={setGameStage}/>;
       break;
     case "admin":
       page = <AdminPage />;

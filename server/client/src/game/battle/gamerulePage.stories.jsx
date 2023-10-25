@@ -1,12 +1,17 @@
-import gamerulePage from "./gamerulePage";
+import GamerulePage from "./GamerulePage";
 
 export default {
-  component: gamerulePage,
-  title: "gamerulePage",
+  component: GamerulePage,
+  title: "GamerulePage",
   tags: ["autodocs"],
 };
 
-export const Default = {};
+const user ={nickname:"Noey", username:"Yolo"}
+export const Default = {
+  args: {
+    user: user
+  },
+};
 
 
 

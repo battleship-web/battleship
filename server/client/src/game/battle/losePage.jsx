@@ -3,10 +3,10 @@ export default function losePage({ setGameStage }) {
   return (
     <main className="grid min-h-full place-items-center bg-[url(https://images.theconversation.com/files/162016/original/image-20170322-31176-2q8pz6.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=754&fit=clip)] px-6 py-24 sm:py-32 lg:px-8">
             <div className="text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] py-10 px-10 border-2 border-slate-400 shadow-2xl sm:rounded-3xl">
-              <span className="mt-2 text-12xl font-mono font-bold tracking-tight bg-gradient-to-r from-red-600 via-green-500 to-indigo-500 inline-block text-transparent bg-clip-text sm:text-6xl ">YOU NOOB SHIT !</span>
+              <span className="mt-2 text-12xl font-mono font-bold tracking-tight bg-gradient-to-r from-red-600 via-red-500 to-red-400 animate-pulse inline-block text-transparent bg-clip-text sm:text-7xl ">DEFEATED!</span>
             <div className="  place-items-center  lg:text-middle"></div>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight bg-gradient-to-r from-red-200 via-green-200 to-indigo-200 inline-block text-transparent bg-clip-text sm:text-3xl">Congratulations </h1>
-            <p className="mt-6 text-base leading-7 text-white">You are supercool among all of the player.</p>
+            <h1 className="mt-6 text-3xl font-bold tracking-tight bg-gradient-to-r from-red-200 via-green-200 to-indigo-200 inline-block text-transparent bg-clip-text sm:text-3xl">Better luck next time</h1>
+            <p className="mt-4 text-base leading- font-bold text-white">You amost got it,maybe try again?</p>
             <div className="mt-7 flex items-center justify-center gap-x-6"> 
               <a
                 href="#"
