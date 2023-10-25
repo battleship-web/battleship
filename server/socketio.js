@@ -444,6 +444,42 @@ export default function (io) {
 
       }
     })
+    socket.on("initiateReset", async (resetRequest) => {
+      if ((await redisClient.hGet(`socketId:${socket.id}`, "role")) === "admin") {
+        // check if game exists 
+        if (await redisClient.sIsMember("gameList", resetRequest.gameId)) {
+          // craft message
+          const player1SocketId = await redisClient.hGet(`game:${resetRequest.gameId}`, "player1SocketId");
+          const player2SocketId = await redisClient.hGet(`game:${resetRequest.gameId}`, "player2SocketId");
+
+          const message = {
+            toReset: resetRequest.toReset
+          }
+
+          // update in redis
+          if (resetRequest.toReset === "score") {
+            await redisClient.hSet(`game:${resetRequest.gameId}`, "player1Score", 0);
+            await redisClient.hSet(`game:${resetRequest.gameId}`, "player2Score", 0);
+
+          } else if (resetRequest.toReset === "game") {
+            // new board will be made in placement stage anyways
+            await redisClient.hSet(`game:${resetRequest.gameId}`, "player1Board", "");
+            await redisClient.hSet(`game:${resetRequest.gameId}`, "player2Board", "");
+
+          } else if (resetRequest.toReset === "cancel") {
+            // handle when game end
+            // remove game info entry
+            await redisClient.del(`game:${resetRequest.gameId}`);
+
+            // remove gameId from game list
+            await redisClient.sRem("gameList", resetRequest.gameId);
+          }
+
+          io.to(player1SocketId).to(player2SocketId).emit("reset", message);
+        }
+      }
+    })
+
     socket.on("gameListRequest", async () => {
       try {
         const redisSearchPromise = redisClient.sMembers("gameList");
