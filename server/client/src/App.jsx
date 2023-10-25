@@ -18,7 +18,15 @@ function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [clientList, setClientList] = useState(null);
+  const [allClientList, setAllClientList] = useState(null);
   const [socketError, setSocketError] = useState(null);
+  const [inviteAccepted, setInviteAccepted] = useState(null);
+  const [inviteRefused, setInviteRefused] = useState(null);
+  const [inviteeLeft, setInviteeLeft] = useState(null);
+  const [inviting, setInviting] = useState(false);
+  const [incomingInvite, setIncomingInvite] = useState(null);
+  const [gameList, setGameList] = useState(null);
+  const [instruction, setInstruction] = useState(false);
 
   let page = null;
   useEffect(() => {

@@ -1,8 +1,7 @@
 import Score from "../../components/Score";
 import Instruction from "../../components/Instruction";
 
-function ScorepointPage({instruction, setInstruction, user, setGameStage, score, opponent}) {
-  let anaBoard  = <h1>waiting for anaBoard and case</h1>;
+function ScorepointPage({instruction, setInstruction, user, setGameStage, score, opponent, board, onClick, size, opponentboard}) {
   const handleClickInstruction = () => {
     setInstruction(true);
   };
@@ -13,7 +12,7 @@ function ScorepointPage({instruction, setInstruction, user, setGameStage, score,
   if (instruction) {
     scorePageDisplay = <h1><Instruction handleClickOut={handleClickOut}/></h1>
   } else {
-    scorePageDisplay = <h1><Score handleClickInstruction={handleClickInstruction} user={user} setGameStage={setGameStage} anaBoard={anaBoard}/></h1>
+    scorePageDisplay = <h1><Score handleClickInstruction={handleClickInstruction} user={user} setGameStage={setGameStage} board={board} onClick={onClick} size={size} opponentboard={opponentboard}/></h1>
   };
 
 
