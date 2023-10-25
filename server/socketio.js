@@ -395,6 +395,55 @@ export default function (io) {
       io.to(player1SocketId).to(player2SocketId).emit("fireResult", message);
 
     })
+    socket.on("replay", async (wantsReplay) => {
+      const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+      const isPlayer1 = await redisClient.hGet(`game:${gameId}`, "player1SocketId") === socket.id;
+
+      // store player wants replay status in redis
+      if (isPlayer1) {
+        await redisClient.hSet(`game:${gameId}`, "player1WantsReplay", wantsReplay);
+      } else {
+        await redisClient.hSet(`game:${gameId}`, "player2WantsReplay", wantsReplay);
+      }
+
+      // check if replay statuses in
+      if ((await redisClient.hExists(`game:${gameId}`, "player1WantsReplay")) && (redisClient.hExists(`game:${gameId}`, "player2WantsReplay"))) {
+        // handle when both replay statuses in
+        // get replay statuses converted to boolean
+        const player1WantsReplay = (await redisClient.hGet(`game:${gameId}`, "player1WantsReplay")) === "true";
+        const player2WantsReplay = (await redisClient.hGet(`game:${gameId}`, "player2WantsReplay")) === "true";
+
+        // get replayConsensus
+        const bothWantsReplay = player1WantsReplay && player2WantsReplay;
+
+        // sending message
+        const player1SocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
+        const player2SocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
+
+        if (player1WantsReplay) {
+          io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
+        }
+        if (player2WantsReplay) {
+          io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
+        }
+
+        // delete players wants replay off redis
+        await redisClient.hDel(`game:${gameId}`, "player1WantsReplay");
+        await redisClient.hDel(`game:${gameId}`, "player2WantsReplay");
+
+        // end game
+        if (!bothWantsReplay) {
+          // handle when both dont want replay
+          // remove game info entry
+          await redisClient.del(`game:${gameId}`);
+
+          // remove gameId from game list
+          await redisClient.sRem("gameList", gameId);
+
+        }
+
+      }
+    })
     socket.on("gameListRequest", async () => {
       try {
         const redisSearchPromise = redisClient.sMembers("gameList");
