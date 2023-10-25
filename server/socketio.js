@@ -489,6 +489,30 @@ export default function (io) {
         console.log(error);
       }
     })
+    socket.on("quit", async () => {
+      try {
+        const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+        const isPlayer1 = await redisClient.hGet(`game:${gameId}`, "player1SocketId") === socket.id;
+        let otherPlayerSocketId;
+
+        if (isPlayer1) {
+          otherPlayerSocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
+        } else {
+          otherPlayerSocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
+        }
+
+        // remove game info entry
+        await redisClient.del(`game:${gameId}`);
+
+        // remove gameId from game list
+        await redisClient.sRem("gameList", gameId);
+
+        io.to(otherPlayerSocketId).emit("opponentQuit");
+
+      } catch (error) {
+        console.log(error);
+      }
+    })
 
     socket.on("gameListRequest", async () => {
       try {
