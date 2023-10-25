@@ -416,16 +416,9 @@ export default function (io) {
         // get replayConsensus
         const bothWantsReplay = player1WantsReplay && player2WantsReplay;
 
-        // sending message
+        // get id for sending message
         const player1SocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
         const player2SocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
-
-        if (player1WantsReplay) {
-          io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
-        }
-        if (player2WantsReplay) {
-          io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
-        }
 
         // delete players wants replay off redis
         await redisClient.hDel(`game:${gameId}`, "player1WantsReplay");
@@ -439,7 +432,13 @@ export default function (io) {
 
           // remove gameId from game list
           await redisClient.sRem("gameList", gameId);
+        }
 
+        if (player1WantsReplay) {
+          io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
+        }
+        if (player2WantsReplay) {
+          io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
         }
 
       }
