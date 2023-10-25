@@ -91,7 +91,7 @@ function App() {
       page = <BattlePage />;
       break;
     case "game:scorepoint":
-      page = <ScorepointPage instruction={instruction} setInstruction={setInstruction} user={user} setGameStage={setGameStage}/>;
+      page = <ScorepointPage instruction={instruction} setInstruction={setInstruction} user={user} setGameStage={setGameStage} />;
       break;
     case "admin":
       page = <AdminPage />;
