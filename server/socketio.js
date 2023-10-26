@@ -232,6 +232,288 @@ export default function (io) {
     socket.on("refuseInvite", (inviterSocketId) => {
       socket.to(inviterSocketId).emit("inviteRefused", socket.id);
     });
+    socket.on("placement", async (ships) => {
+      try {
+        // get gameid
+        const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+        const isPlayer1 = await redisClient.hGet(`game:${gameId}`, "player1SocketId") === socket.id;
+
+        // make board
+        const board = []; // or columns
+        for (let x = 0; x < 8; x++) {
+          let column = [];
+          for (let y = 0; y < 8; y++) {
+            column.push("B");
+          }
+          board.push(column);
+        }
+
+        // processing: take ship pos and place into board
+        for (const ship of ships) {
+          if (ship.rotated) { // vertical
+            for (let i = 0; i < 4; i++) { // 4 square long ships
+              board[ship.x][ship.y + i] = "S";
+            }
+          } else { // horizontal
+            for (let i = 0; i < 4; i++) { // 4 square long ships
+              board[ship.x + i][ship.y] = "S";
+            }
+          }
+        }
+
+        // store string of the board
+        const boardStr = board.map((column) => column.reduce((x, y) => x + y, "")).reduce((x, y) => x + y, ""); // concatenation
+        if (isPlayer1) {
+          await redisClient.hSet(`game:${gameId}`, "player1Board", boardStr);
+        } else {
+          await redisClient.hSet(`game:${gameId}`, "player2Board", boardStr);
+        }
+
+        // check if last, else wait for next
+        if ((await redisClient.hExists(`game:${gameId}`, "player1Board")) && (await redisClient.hExists(`game:${gameId}`, "player2Board"))) {
+          // prep to send start signal
+          const player1SocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
+          const player1Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player1Score"));
+          const player2SocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
+          const player2Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player2Score"));
+
+          // message to send each player
+          let message = {
+            turn: null,
+            scoreboard: [{
+              socketId: player1SocketId,
+              score: player1Score
+            }, {
+              socketId: player2SocketId,
+              score: player2Score
+            }
+            ]
+          }
+
+          // choosing of whose turn
+          let turn = null;
+
+          if (Math.random() < 0.5) {
+            turn = player1SocketId;
+          } else {
+            turn = player2SocketId;
+          }
+
+          // updating whose turn in redis game entry
+          await redisClient.hSet(`game:${gameId}`, "turn", turn);
+
+          message.turn = turn;
+          io.to(player1SocketId).to(player2SocketId).emit("startSignal", message);
+        }
+
+      } catch (error) {
+        console.log(error);
+      }
+    })
+    socket.on("fire", async (position) => {
+      try {
+        // get gameid
+        const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+        const isPlayer1 = await redisClient.hGet(`game:${gameId}`, "player1SocketId") === socket.id;
+
+        // get opponent board
+        let boardStr;
+        if (isPlayer1) {
+          boardStr = await redisClient.hGet(`game:${gameId}`, "player2Board");
+        } else {
+          boardStr = await redisClient.hGet(`game:${gameId}`, "player1Board");
+        }
+
+        // convert board string to 2d array
+        let board = [];
+        let start = 0;
+        let end = 8;
+        for (let i = 0; i < 8; i++) {
+          board.push(boardStr.slice(start, end));
+          start += 8;
+          end += 8;
+        }
+        board = board.map(columnStr => columnStr.split(""));
+
+        // check if ship
+        let isHit = false;
+
+        if (Object.keys(position).length() !== 0) { // check if empty object
+          if (board[position.x][position.y] === "S") {
+            // hit
+            board[position.x][position.y] = "H";
+            isHit = true;
+
+          } else if (board[position.x][position.y] === "B") {
+            // miss
+            board[position.x][position.y] = "M";
+          }
+          // for rest board remain unchanged
+        }
+
+        // update redis
+        const player1SocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
+        const player1Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player1Score"));
+        const player2SocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
+        const player2Score = parseInt(await redisClient.hGet(`game:${gameId}`, "player2Score"));
+
+        // update board
+        // store string of the board
+        boardStr = board.map((column) => column.reduce((x, y) => x + y, "")).reduce((x, y) => x + y, ""); // concatenation
+        if (isPlayer1) {
+          await redisClient.hSet(`game:${gameId}`, "player2Board", boardStr);
+        } else {
+          await redisClient.hSet(`game:${gameId}`, "player1Board", boardStr);
+        }
+
+        // craft message
+        let message = {
+          x: position.x,
+          y: position.y,
+          hit: isHit,
+          winner: null
+        }
+
+        // check if won
+        let numOfHits = 0;
+
+        for (let i = 0; i < boardStr.length; i++) {
+          if (boardStr[i] === "H") {
+            numOfHits++;
+          }
+        }
+        if (numOfHits >= 16) {
+          // handle win
+          message.winner = socket.id;
+
+          if (isPlayer1) {
+            await redisClient.hSet(`game:${gameId}`, "player1Score", player1Score + 1);
+          } else {
+            await redisClient.hSet(`game:${gameId}`, "player2Score", player2Score + 1);
+          }
+        }
+
+        io.to(player1SocketId).to(player2SocketId).emit("fireResult", message);
+      } catch (error) {
+        console.log(error);
+      }
+    })
+    socket.on("replay", async (wantsReplay) => {
+      try {
+        const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+        const isPlayer1 = await redisClient.hGet(`game:${gameId}`, "player1SocketId") === socket.id;
+
+        // store player wants replay status in redis
+        if (isPlayer1) {
+          await redisClient.hSet(`game:${gameId}`, "player1WantsReplay", wantsReplay);
+        } else {
+          await redisClient.hSet(`game:${gameId}`, "player2WantsReplay", wantsReplay);
+        }
+
+        // check if replay statuses in
+        if ((await redisClient.hExists(`game:${gameId}`, "player1WantsReplay")) && (redisClient.hExists(`game:${gameId}`, "player2WantsReplay"))) {
+          // handle when both replay statuses in
+          // get replay statuses converted to boolean
+          const player1WantsReplay = (await redisClient.hGet(`game:${gameId}`, "player1WantsReplay")) === "true";
+          const player2WantsReplay = (await redisClient.hGet(`game:${gameId}`, "player2WantsReplay")) === "true";
+
+          // get replayConsensus
+          const bothWantsReplay = player1WantsReplay && player2WantsReplay;
+
+          // get id for sending message
+          const player1SocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
+          const player2SocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
+
+          // delete players wants replay off redis
+          await redisClient.hDel(`game:${gameId}`, "player1WantsReplay");
+          await redisClient.hDel(`game:${gameId}`, "player2WantsReplay");
+
+          // end game
+          if (!bothWantsReplay) {
+            // handle when both dont want replay
+            // remove game info entry
+            await redisClient.del(`game:${gameId}`);
+
+            // remove gameId from game list
+            await redisClient.sRem("gameList", gameId);
+          }
+
+          if (player1WantsReplay) {
+            io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
+          }
+          if (player2WantsReplay) {
+            io.to(player1SocketId).emit("replayConsensus", bothWantsReplay);
+          }
+
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })
+    socket.on("initiateReset", async (resetRequest) => {
+      try {
+        if ((await redisClient.hGet(`socketId:${socket.id}`, "role")) === "admin") {
+          // check if game exists 
+          if (await redisClient.sIsMember("gameList", resetRequest.gameId)) {
+            // craft message
+            const player1SocketId = await redisClient.hGet(`game:${resetRequest.gameId}`, "player1SocketId");
+            const player2SocketId = await redisClient.hGet(`game:${resetRequest.gameId}`, "player2SocketId");
+
+            const message = {
+              toReset: resetRequest.toReset
+            }
+
+            // update in redis
+            if (resetRequest.toReset === "score") {
+              await redisClient.hSet(`game:${resetRequest.gameId}`, "player1Score", 0);
+              await redisClient.hSet(`game:${resetRequest.gameId}`, "player2Score", 0);
+
+            } else if (resetRequest.toReset === "game") {
+              // new board will be made in placement stage anyways
+              await redisClient.hSet(`game:${resetRequest.gameId}`, "player1Board", "");
+              await redisClient.hSet(`game:${resetRequest.gameId}`, "player2Board", "");
+
+            } else if (resetRequest.toReset === "cancel") {
+              // handle when game end
+              // remove game info entry
+              await redisClient.del(`game:${resetRequest.gameId}`);
+
+              // remove gameId from game list
+              await redisClient.sRem("gameList", resetRequest.gameId);
+            }
+
+            io.to(player1SocketId).to(player2SocketId).emit("reset", message);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })
+    socket.on("quit", async () => {
+      try {
+        const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+        const isPlayer1 = await redisClient.hGet(`game:${gameId}`, "player1SocketId") === socket.id;
+        let otherPlayerSocketId;
+
+        if (isPlayer1) {
+          otherPlayerSocketId = await redisClient.hGet(`game:${gameId}`, "player2SocketId");
+        } else {
+          otherPlayerSocketId = await redisClient.hGet(`game:${gameId}`, "player1SocketId");
+        }
+
+        // remove game info entry
+        await redisClient.del(`game:${gameId}`);
+
+        // remove gameId from game list
+        await redisClient.sRem("gameList", gameId);
+
+        io.to(otherPlayerSocketId).emit("opponentQuit");
+
+      } catch (error) {
+        console.log(error);
+      }
+    })
+
     socket.on("gameListRequest", async () => {
       try {
         const redisSearchPromise = redisClient.sMembers("gameList");
