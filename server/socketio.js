@@ -186,7 +186,19 @@ export default function (io) {
         socket.emit("inviteeLeft", inviteeSocketId);
         return;
       }
-      socket.to(inviteeSocketId).emit("incomingInvite", socket.id);
+      const inviterNickname = await redisClient.hGet(
+        `socketId:${socket.id}`,
+        "nickname"
+      );
+      const inviterUsername = await redisClient.hGet(
+        `socketId:${socket.id}`,
+        "username"
+      );
+      socket.to(inviteeSocketId).emit("incomingInvite", {
+        socketId: socket.id,
+        nickname: inviterNickname,
+        username: inviterUsername,
+      });
     });
     socket.on("acceptInvite", async (inviterSocketId) => {
       try {

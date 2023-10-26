@@ -1,10 +1,9 @@
-import losePage from "./losePage";
+import LosePage from "./losePage";
 
 export default {
-  component: losePage,
-  title: "losePage",
+  component: LosePage,
+  title: "LosePage",
   tags: ["autodocs"],
 };
 
 export const Default = {};
-

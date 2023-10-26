@@ -1,15 +1,9 @@
-import winPage from "./winPage";
+import WinPage from "./winPage";
 
 export default {
-  component: winPage,
+  component: WinPage,
   title: "winPage",
   tags: ["autodocs"],
 };
 
 export const Default = {};
-
-export const Green = {
-  args: {
-    variant: "green",
-  },
-};

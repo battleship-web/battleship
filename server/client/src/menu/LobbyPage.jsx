@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Loading from "../components/Loading";
 import Inviting from "../components/Inviting";
 import InviteeLeft from "../components/InviteeLeft";
@@ -22,29 +22,48 @@ function LobbyPage({
   setIncomingInvite,
   inviting,
   setInviting,
+  setOpponentInfo,
 }) {
+  const [inviteeInfo, setInviteeInfo] = useState(null);
+
   const handleBack = () => {
     setInviting(false);
     setInviteeLeft(null);
     setInviteAccepted(null);
     setInviteRefused(null);
+    setInviteeInfo(null);
   };
 
   const handleBattle = () => {
-    setGameStage("game:battle");
+    setGameStage("game:gamerule");
     setInviting(false);
     setInviteeLeft(null);
     setInviteAccepted(null);
     setInviteRefused(null);
+    setOpponentInfo(inviteeInfo);
   };
 
-  function handleInvite(opponentSocketId) {
+  function handleInvite(opponentSocketId, opponentNickname, opponentUsername) {
     setInviting(true);
+    setInviteeInfo({
+      socketId: opponentSocketId,
+      nickname: opponentNickname,
+      username: opponentUsername,
+    });
     socket.emit("invite", opponentSocketId);
   }
 
-  function acceptInvitation(opponentSocketId) {
+  function acceptInvitation(
+    opponentSocketId,
+    opponentNickname,
+    opponentUsername
+  ) {
     socket.emit("acceptInvite", opponentSocketId);
+    setOpponentInfo({
+      socketId: opponentSocketId,
+      nickname: opponentNickname,
+      username: opponentUsername,
+    });
     setGameStage("game:battle");
     setIncomingInvite(null);
   }
@@ -58,6 +77,13 @@ function LobbyPage({
     socket.emit("clientListRequest");
   }, []);
 
+  useEffect(() => {
+    if (inviting && incomingInvite) {
+      socket.emit("refuseInvite", incomingInvite.socketId);
+      setIncomingInvite(null);
+    }
+  }, [inviting, incomingInvite, setIncomingInvite]);
+
   let display = null;
 
   if (incomingInvite !== null) {
@@ -65,11 +91,17 @@ function LobbyPage({
       <h1>
         <IncomingInvite
           acceptInvitation={() => {
-            acceptInvitation(incomingInvite);
+            acceptInvitation(
+              incomingInvite.socketId,
+              incomingInvite.nickname,
+              incomingInvite.username
+            );
           }}
           refuseInvitation={() => {
-            refuseInvitation(incomingInvite);
+            refuseInvitation(incomingInvite.socketId);
           }}
+          opponentNickname={incomingInvite.nickname}
+          opponentUsername={incomingInvite.username}
         />
       </h1>
     );
@@ -147,7 +179,11 @@ function LobbyPage({
                 <button
                   className="mx-6 bg-gradient-to-r from-sky-500 to-blue-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl border-2 border-slate-400"
                   onClick={() => {
-                    handleInvite(client.socketId);
+                    handleInvite(
+                      client.socketId,
+                      client.nickname,
+                      client.username
+                    );
                   }}
                 >
                   Fight

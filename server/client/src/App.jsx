@@ -7,10 +7,11 @@ import InputNicknamePage from "./menu/InputNicknamePage";
 import WelcomePage from "./menu/WelcomePage";
 import LobbyPage from "./menu/LobbyPage";
 import PrepPage from "./game/prep/PrepPage";
-import BattlePage from "./game/battle/BattlePage";
 import GamerulePage from "./game/battle/GamerulePage";
 import ScorepointPage from "./game/battle/ScorepointPage";
 import NotFoundPage from "./notfound/NotFoundPage";
+import LosePage from "./game/battle/losePage";
+import WinPage from "./game/battle/winPage";
 
 function App() {
   const [gameStage, setGameStage] = useState("menu:title");
@@ -26,6 +27,10 @@ function App() {
   const [incomingInvite, setIncomingInvite] = useState(null);
   const [gameList, setGameList] = useState(null);
   const [instruction, setInstruction] = useState(false);
+  const [turn, setTurn] = useState(null);
+  const [scores, setScores] = useState(null);
+  const [opponentInfo, setOpponentInfo] = useState(null);
+  const [playerBoard, setPlayerBoard] = useState(null);
 
   let page = null;
   useEffect(() => {
@@ -46,6 +51,11 @@ function App() {
       }
     };
 
+    const handleStartSignal = (message) => {
+      setTurn(message.turn);
+      setScores(message.scoreboard);
+    };
+
     const cleanup = () => {
       socket.off("loginResponse", onLoginResponse);
       socket.off("clientList", setClientList);
@@ -54,6 +64,7 @@ function App() {
       socket.off("inviteeLeft", setInviteeLeft);
       socket.off("inviteAccepted", setInviteAccepted);
       socket.off("inviteRefused", setInviteRefused);
+      socket.off("startSignal", handleStartSignal);
       socket.off("gameList", setGameList);
       socket.disconnect();
     };
@@ -64,6 +75,7 @@ function App() {
     socket.on("inviteeLeft", setInviteeLeft);
     socket.on("inviteAccepted", setInviteAccepted);
     socket.on("inviteRefused", setInviteRefused);
+    socket.on("startSignal", handleStartSignal);
     socket.on("gameList", setGameList);
 
     window.addEventListener("beforeunload", cleanup);
@@ -110,31 +122,33 @@ function App() {
           incomingInvite={incomingInvite}
           setInviting={setInviting}
           setIncomingInvite={setIncomingInvite}
+          setOpponentInfo={setOpponentInfo}
         />
       );
       break;
     case "game:prep":
-      page = <PrepPage />;
+      page = <PrepPage setPlayerBoard={setPlayerBoard} />;
       break;
     case "game:gamerule":
       page = <GamerulePage setGameStage={setGameStage} />;
       break;
     case "game:lose":
-      page = <losePage setGameStage={setGameStage} />;
+      page = <LosePage setGameStage={setGameStage} />;
       break;
     case "game:win":
-      page = <winPage setGameStage={setGameStage} />;
+      page = <WinPage setGameStage={setGameStage} />;
       break;
     case "game:battle":
-      page = <BattlePage />;
-      break;
-    case "game:scorepoint":
       page = (
         <ScorepointPage
           instruction={instruction}
           setInstruction={setInstruction}
           user={user}
           setGameStage={setGameStage}
+          turn={turn}
+          scores={scores}
+          opponentInfo={opponentInfo}
+          board={playerBoard}
         />
       );
       break;
