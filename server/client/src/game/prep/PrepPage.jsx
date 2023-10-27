@@ -112,6 +112,10 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
           <button
             className="flex-1 rounded border-black-100 bg-green-500 hover:bg-green-900"
             onClick={() => {
+              if (placementCount !== 4) {
+                alert("Must place all ships before confirming.");
+                return;
+              }
               socket.emit("placement", infoTosend);
               setPlayerBoard(boardState);
               setGameStage("game:battle");

@@ -152,6 +152,19 @@ function App() {
       setGameStage("game:opponentQuit");
     };
 
+    const handleReset = (message) => {
+      if (message.toReset === "score") {
+        setPlayerScore(0);
+        setOpponentScore(0);
+      } else if (message.toReset === "game") {
+        handleNewGame();
+        setGameStage("game:prep");
+      } else if (message.toReset === "cancel") {
+        handleQuitGame();
+        setGameStage("menu:lobby");
+      }
+    };
+
     const cleanup = () => {
       if (opponentInfo) {
         socket.emit("quit");
@@ -176,6 +189,7 @@ function App() {
     socket.on("fireResult", handleFireResult);
     socket.on("replayConsensus", handleReplayConsensus);
     socket.on("opponentQuit", handleOpponentQuit);
+    socket.on("reset", handleReset);
     socket.on("gameList", setGameList);
 
     window.addEventListener("pagehide", cleanup);
