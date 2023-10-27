@@ -77,13 +77,6 @@ function LobbyPage({
     socket.emit("clientListRequest");
   }, []);
 
-  useEffect(() => {
-    if (inviting && incomingInvite) {
-      socket.emit("refuseInvite", incomingInvite.socketId);
-      setIncomingInvite(null);
-    }
-  }, [inviting, incomingInvite, setIncomingInvite]);
-
   let display = null;
 
   if (incomingInvite !== null) {

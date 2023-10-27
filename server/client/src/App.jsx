@@ -51,27 +51,26 @@ function App() {
       }
     };
 
+    const handleIncomingInvite = (message) => {
+      if (inviting || incomingInvite) {
+        socket.emit("refuseInvite", message.socketId);
+      } else {
+        setIncomingInvite(message);
+      }
+    };
     const handleStartSignal = (message) => {
       setTurn(message.turn);
       setScores(message.scoreboard);
     };
 
     const cleanup = () => {
-      socket.off("loginResponse", onLoginResponse);
-      socket.off("clientList", setClientList);
-      socket.off("allClientList", setAllClientList);
-      socket.off("incomingInvite", setIncomingInvite);
-      socket.off("inviteeLeft", setInviteeLeft);
-      socket.off("inviteAccepted", setInviteAccepted);
-      socket.off("inviteRefused", setInviteRefused);
-      socket.off("startSignal", handleStartSignal);
-      socket.off("gameList", setGameList);
+      socket.off();
       socket.disconnect();
     };
     socket.on("loginResponse", onLoginResponse);
     socket.on("clientList", setClientList);
     socket.on("allClientList", setAllClientList);
-    socket.on("incomingInvite", setIncomingInvite);
+    socket.on("incomingInvite", handleIncomingInvite);
     socket.on("inviteeLeft", setInviteeLeft);
     socket.on("inviteAccepted", setInviteAccepted);
     socket.on("inviteRefused", setInviteRefused);
@@ -81,9 +80,11 @@ function App() {
     window.addEventListener("beforeunload", cleanup);
 
     return () => {
+      socket.off();
       window.removeEventListener("beforeunload", cleanup);
     };
-  }, []);
+  }, [inviting, incomingInvite]);
+
   switch (gameStage) {
     case "menu:title":
       page = <TitlePage setGameStage={setGameStage} />;
