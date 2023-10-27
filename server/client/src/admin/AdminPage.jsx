@@ -121,7 +121,7 @@ function AdminPage({ gameList, clientList }) {
 
   return (
     <>
-      <div className="w-screen h-screen flex flex-col items-center gap-4 bg-[url('/src/admin/iowa-class.jpg')] bg-cover">
+      <div className="w-screen min-h-screen flex flex-col items-center gap-4 bg-blue-400 p-4">
         <div className="w-full align-top flex justify-center">
           <h1 className="bg-zinc-100 p-2 rounded-md">Admin Page</h1>
         </div>

@@ -34,6 +34,7 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
             className="border-2 border-slate-500"
             type="text"
             id="username"
+            autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -46,6 +47,7 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
             className="border-2 border-slate-500"
             type="password"
             id="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />

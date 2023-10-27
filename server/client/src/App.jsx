@@ -12,28 +12,79 @@ import ScorepointPage from "./game/battle/ScorepointPage";
 import NotFoundPage from "./notfound/NotFoundPage";
 import LosePage from "./game/battle/LosePage";
 import WinPage from "./game/battle/WinPage";
+import Loading from "./components/Loading";
+import ReplayPage from "./game/battle/ReplayPage";
+import OpponentQuitPage from "./game/battle/OpponentQuitPage";
 
 function App() {
+  const [disconnectedByBacking, setDisconnectedByBacking] = useState(false);
   const [gameStage, setGameStage] = useState("menu:title");
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [clientList, setClientList] = useState(null);
   const [allClientList, setAllClientList] = useState(null);
   const [socketError, setSocketError] = useState(null);
+  const [gameList, setGameList] = useState(null);
+
+  // lobby states
   const [inviteAccepted, setInviteAccepted] = useState(null);
   const [inviteRefused, setInviteRefused] = useState(null);
   const [inviteeLeft, setInviteeLeft] = useState(null);
   const [inviting, setInviting] = useState(false);
   const [incomingInvite, setIncomingInvite] = useState(null);
-  const [gameList, setGameList] = useState(null);
+
+  // game specific states
   const [instruction, setInstruction] = useState(false);
   const [turn, setTurn] = useState(null);
-  const [scores, setScores] = useState(null);
+  const [playerScore, setPlayerScore] = useState(null);
+  const [opponentScore, setOpponentScore] = useState(null);
   const [opponentInfo, setOpponentInfo] = useState(null);
   const [playerBoard, setPlayerBoard] = useState(null);
+  const [playerBoardFireResults, setPlayerBoardFireResults] = useState([]);
+  const [opponentBoardFireResults, setOpponentBoardFireResults] = useState([]);
+  const [winner, setWinner] = useState(null);
 
   let page = null;
+
+  function handleQuitGame() {
+    setInstruction(false);
+    setTurn(null);
+    setPlayerScore(null);
+    setOpponentScore(null);
+    setOpponentInfo(null);
+    setPlayerBoard(null);
+    setPlayerBoardFireResults([]);
+    setOpponentBoardFireResults([]);
+    setWinner(null);
+  }
+
+  function handleNewGame() {
+    setInstruction(false);
+    setTurn(null);
+    setPlayerBoard(null);
+    setPlayerBoardFireResults([]);
+    setOpponentBoardFireResults([]);
+    setWinner(null);
+  }
+
   useEffect(() => {
+    function resetAllState() {
+      setGameStage("menu:title");
+      setUser(null);
+      setIsLoading(false);
+      setClientList(null);
+      setAllClientList(null);
+      setSocketError(null);
+      setGameList(null);
+      setInviteAccepted(null);
+      setInviteRefused(null);
+      setInviteeLeft(null);
+      setInviting(null);
+      setIncomingInvite(null);
+      setDisconnectedByBacking(true);
+      handleQuitGame();
+    }
+
     const onLoginResponse = (data) => {
       if (data.success) {
         setUser(data.message);
@@ -60,13 +111,60 @@ function App() {
     };
     const handleStartSignal = (message) => {
       setTurn(message.turn);
-      setScores(message.scoreboard);
+      if (message.scoreboard[0].socketId === socket.id) {
+        setPlayerScore(message.scoreboard[0].score);
+        setOpponentScore(message.scoreboard[1].score);
+      } else {
+        setPlayerScore(message.scoreboard[1].score);
+        setOpponentScore(message.scoreboard[0].score);
+      }
+    };
+
+    const handleFireResult = (result) => {
+      if (turn === socket.id) {
+        setOpponentBoardFireResults([
+          ...opponentBoardFireResults,
+          { rowIndex: result.y, columnIndex: result.x, hit: result.hit },
+        ]);
+        setTurn(opponentInfo.socketId);
+      } else {
+        setPlayerBoardFireResults([
+          ...playerBoardFireResults,
+          { rowIndex: result.y, columnIndex: result.x, hit: result.hit },
+        ]);
+        setTurn(socket.id);
+      }
+      setWinner(result.winner);
+    };
+
+    const handleReplayConsensus = (consensus) => {
+      if (consensus) {
+        handleNewGame();
+        setGameStage("game:beforeReplay");
+      } else {
+        handleQuitGame();
+        setGameStage("game:beforeLobby");
+      }
+    };
+
+    const handleOpponentQuit = () => {
+      handleQuitGame();
+      setGameStage("game:opponentQuit");
     };
 
     const cleanup = () => {
+      if (opponentInfo) {
+        socket.emit("quit");
+      }
+      resetAllState();
       socket.off();
       socket.disconnect();
     };
+
+    if (disconnectedByBacking) {
+      socket.connect();
+    }
+
     socket.on("loginResponse", onLoginResponse);
     socket.on("clientList", setClientList);
     socket.on("allClientList", setAllClientList);
@@ -75,15 +173,26 @@ function App() {
     socket.on("inviteAccepted", setInviteAccepted);
     socket.on("inviteRefused", setInviteRefused);
     socket.on("startSignal", handleStartSignal);
+    socket.on("fireResult", handleFireResult);
+    socket.on("replayConsensus", handleReplayConsensus);
+    socket.on("opponentQuit", handleOpponentQuit);
     socket.on("gameList", setGameList);
 
-    window.addEventListener("beforeunload", cleanup);
+    window.addEventListener("pagehide", cleanup);
 
     return () => {
       socket.off();
-      window.removeEventListener("beforeunload", cleanup);
+      window.removeEventListener("pagehide", cleanup);
     };
-  }, [inviting, incomingInvite]);
+  }, [
+    inviting,
+    incomingInvite,
+    turn,
+    opponentBoardFireResults,
+    playerBoardFireResults,
+    opponentInfo,
+    disconnectedByBacking,
+  ]);
 
   switch (gameStage) {
     case "menu:title":
@@ -128,16 +237,26 @@ function App() {
       );
       break;
     case "game:prep":
-      page = <PrepPage setPlayerBoard={setPlayerBoard} />;
+      page = (
+        <PrepPage
+          setGameStage={setGameStage}
+          setPlayerBoard={setPlayerBoard}
+          handleQuitGame={handleQuitGame}
+        />
+      );
       break;
     case "game:gamerule":
       page = <GamerulePage setGameStage={setGameStage} />;
       break;
     case "game:lose":
-      page = <LosePage setGameStage={setGameStage} />;
+      page = (
+        <LosePage setGameStage={setGameStage} handleQuitGame={handleQuitGame} />
+      );
       break;
     case "game:win":
-      page = <WinPage setGameStage={setGameStage} />;
+      page = (
+        <WinPage setGameStage={setGameStage} handleQuitGame={handleQuitGame} />
+      );
       break;
     case "game:battle":
       page = (
@@ -147,9 +266,48 @@ function App() {
           user={user}
           setGameStage={setGameStage}
           turn={turn}
-          scores={scores}
+          playerScore={playerScore}
+          opponentScore={opponentScore}
           opponentInfo={opponentInfo}
-          board={playerBoard}
+          playerBoard={playerBoard}
+          setPlayerBoard={setPlayerBoard}
+          playerBoardFireResults={playerBoardFireResults}
+          opponentBoardFireResults={opponentBoardFireResults}
+          winner={winner}
+          setWinner={setWinner}
+          handleQuitGame={handleQuitGame}
+        />
+      );
+      break;
+    case "game:waitForReplay":
+      page = <Loading text="Did the opponent escape?" />;
+      break;
+    case "game:beforeReplay":
+      page = (
+        <ReplayPage
+          text="Your opponent also wants a rematch!"
+          handleOkay={() => {
+            setGameStage("game:prep");
+          }}
+        />
+      );
+      break;
+    case "game:beforeLobby":
+      page = (
+        <ReplayPage
+          text="Your opponent escaped!"
+          handleOkay={() => {
+            setGameStage("menu:lobby");
+          }}
+        />
+      );
+      break;
+    case "game:opponentQuit":
+      page = (
+        <OpponentQuitPage
+          handleOkay={() => {
+            setGameStage("menu:lobby");
+          }}
         />
       );
       break;

@@ -24,7 +24,7 @@ const Board = ({ board, onClick, size }) => {
                 <Square
                   state={state}
                   size={size}
-                  onClick={(state) => onClick(rowIndex, colIndex, state)}
+                  onClick={() => onClick(rowIndex, colIndex, state)}
                 />
               </td>
             ))}

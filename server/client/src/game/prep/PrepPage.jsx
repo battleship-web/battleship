@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./Grid.css";
 import Board from "../../squarenboard/Board";
+import shipPic from "../../assets/ship.png";
+import rotatePic from "../../assets/rotate.png";
+import { socket } from "../../socket";
 
-const Grid = ({ setGameStage }) => {
+const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
   const [boardState, setBoardState] = useState(
     new Array(8).fill(0).map(() => new Array(8).fill("blank"))
   );
+  const [infoTosend, setInfoToSend] = useState([]);
   const [placementCount, setPlacementCount] = useState(0);
   const maxPlacements = 4;
-  const gridSize = 8;
   const [selectionMode, setSelectionMode] = useState("row");
   const numShips = 4 - placementCount;
   const handleClick = (rowIndex, columnIndex) => {
@@ -31,7 +34,6 @@ const Grid = ({ setGameStage }) => {
           alert("Battleships should not overlap.");
           return;
         }
-
         newGrid[rowIndex][columnIndex + i] = `ship${4 - i}`;
       }
     } else {
@@ -48,6 +50,13 @@ const Grid = ({ setGameStage }) => {
         newGrid[rowIndex + i][columnIndex] = `ship${i + 1}r`;
       }
     }
+
+    const toAppend = {
+      x: columnIndex,
+      y: rowIndex,
+      rotated: !(selectionMode === "row"),
+    };
+    setInfoToSend([...infoTosend, toAppend]);
     setBoardState(newGrid);
     setPlacementCount(placementCount + 1);
   };
@@ -65,7 +74,7 @@ const Grid = ({ setGameStage }) => {
           className="rounded bg-red-500 rotate-button"
           onClick={toggleSelectionMode}
         >
-          <img class="object-right w-14 h-14" url="rotate.png" />
+          <img className="object-right w-14 h-14" src={rotatePic} />
         </button>
         <div className="rounded container bg-red-500 w-2000 h-100">
           {selectionMode}
@@ -78,6 +87,7 @@ const Grid = ({ setGameStage }) => {
             setBoardState(
               new Array(8).fill(0).map(() => new Array(8).fill("blank"))
             );
+            setInfoToSend([]);
             setPlacementCount(0);
           }}
         >
@@ -86,9 +96,15 @@ const Grid = ({ setGameStage }) => {
         <div className="container w-60 h-60 bg-blue-500">
           {Array(numShips)
             .fill(0)
-            .map(() => (
-              <button className="mx-5 flex rounded bg-blue-500 border-blue-700 hover:bg-blue-600 active-bg-blue-700 focus-outline-none focus-ring focus-ring-blue-300">
-                <img className="color-button w-full h-full object-contain" />
+            .map((_, index) => (
+              <button
+                key={index}
+                className="mx-5 flex rounded bg-blue-500 border-blue-700 hover:bg-blue-600 active-bg-blue-700 focus-outline-none focus-ring focus-ring-blue-300"
+              >
+                <img
+                  className="color-button w-full h-full object-contain"
+                  src={shipPic}
+                />
               </button>
             ))}
         </div>
@@ -96,6 +112,8 @@ const Grid = ({ setGameStage }) => {
           <button
             className="flex-1 rounded border-black-100 bg-green-500 hover:bg-green-900"
             onClick={() => {
+              socket.emit("placement", infoTosend);
+              setPlayerBoard(boardState);
               setGameStage("game:battle");
             }}
           >
@@ -105,6 +123,8 @@ const Grid = ({ setGameStage }) => {
           <button
             className="flex-1rounded border-black-100 bg-red-500 hover:bg-red-900"
             onClick={() => {
+              socket.emit("quit");
+              handleQuitGame();
               setGameStage("menu:lobby");
             }}
           >

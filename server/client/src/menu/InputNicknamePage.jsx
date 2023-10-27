@@ -23,6 +23,7 @@ export default function InputNicknamePage({ setGameStage, setUser }) {
             <input
               type="text"
               value={nickname}
+              name="nickname"
               onChange={(e) => setNickname(e.target.value)}
               placeholder="nickname"
               className="mt-5  rounded-md px-2.5 py-1 font-bold text-slate-800 shadow-sm sm:text-1xl border-2 border-slate-500"

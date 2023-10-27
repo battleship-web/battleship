@@ -7,3 +7,15 @@ export default {
 };
 
 export const Default = {};
+
+export const Error = {
+  args: {
+    socketError: "Generic error here",
+  },
+};
+
+export const Loading = {
+  args: {
+    isLoading: true,
+  },
+};

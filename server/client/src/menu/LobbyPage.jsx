@@ -64,7 +64,7 @@ function LobbyPage({
       nickname: opponentNickname,
       username: opponentUsername,
     });
-    setGameStage("game:battle");
+    setGameStage("game:gamerule");
     setIncomingInvite(null);
   }
 
@@ -156,7 +156,7 @@ function LobbyPage({
         if (clientExcludingMe.length === 0) {
           display = (
             <h1 className="text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl animate-pulse ">
-              No other online player...
+              No other online player who are free...
             </h1>
           );
         } else {
@@ -223,7 +223,7 @@ LobbyPage.propTypes = {
   setInviteRefused: PropTypes.func,
   setInviteeLeft: PropTypes.func,
   inviting: PropTypes.bool,
-  incomingInvite: PropTypes.string,
+  incomingInvite: PropTypes.object,
   setInviting: PropTypes.func,
   setIncomingInvite: PropTypes.func,
 };
