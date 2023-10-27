@@ -1,4 +1,4 @@
-import WinPage from "./winPage";
+import WinPage from "./WinPage";
 
 export default {
   component: WinPage,

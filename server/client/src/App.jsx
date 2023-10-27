@@ -10,8 +10,8 @@ import PrepPage from "./game/prep/PrepPage";
 import GamerulePage from "./game/battle/GamerulePage";
 import ScorepointPage from "./game/battle/ScorepointPage";
 import NotFoundPage from "./notfound/NotFoundPage";
-import LosePage from "./game/battle/losePage";
-import WinPage from "./game/battle/winPage";
+import LosePage from "./game/battle/LosePage";
+import WinPage from "./game/battle/WinPage";
 
 function App() {
   const [gameStage, setGameStage] = useState("menu:title");

@@ -1,4 +1,4 @@
-import LosePage from "./losePage";
+import LosePage from "./LosePage";
 
 export default {
   component: LosePage,
