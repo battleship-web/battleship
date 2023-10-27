@@ -107,10 +107,14 @@ export const InviteAcceptedButInviteeLeft = {
 
 export const IncomingInvite = {
   args: {
-    inviting: "sadasd",
+    // inviting: "sadasd",
     clientList: clientList,
     username: "leo1234",
-    incomingInvite: "sadasd",
+    incomingInvite: {
+      socketId: "socketId1",
+      nickname: "SadBoy",
+      username: "sadboy123",
+    },
     inviteeLeft: "sadasd",
     inviteAccepted: "sadasd",
     inviteRefused: "sadasd",
