@@ -10,6 +10,9 @@ const redisOptions = {
 };
 
 const redisClient = redis.createClient(redisOptions);
-await redisClient.connect().catch(console.error);
+await redisClient
+  .connect()
+  .then(console.log("Redis connected."))
+  .catch(console.error);
 
 export default redisClient;

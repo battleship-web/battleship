@@ -6,6 +6,37 @@ export default {
   tags: ["autodocs"],
 };
 
+const clientList1 = [
+  {
+    nickname: "Alice",
+    username: "alice123",
+    socketId: "mock-socket-id-1",
+    gameId: "mock-id-1",
+  },
+  {
+    nickname: "Bob",
+    username: "bob456",
+    socketId: "mock-socket-id-2",
+    gameId: "mock-id-1",
+  },
+  {
+    nickname: "Eve",
+    username: "eve13432",
+    socketId: "mock-socket-id-3",
+    gameId: "mock-id-2",
+  },
+  {
+    nickname: "Trudy",
+    username: "trudy555",
+    socketId: "mock-socket-id-4",
+    gameId: "mock-id-2",
+  },
+  {
+    username: "guest:mock-guest-id-1",
+    socketId: "mock-socket-id-5",
+  },
+];
+
 const gameList1 = [
   {
     gameId: "mock-id-1",
@@ -39,6 +70,10 @@ const gameList1 = [
   },
 ];
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/origin/main
 const gameList2 = [
   {
     gameId: "mock-id-1",
@@ -89,6 +124,8 @@ const gameList2 = [
 
 export const Default = {
   args: {
+    clientList: [],
+
     gameList: [],
   },
 };
@@ -96,6 +133,13 @@ export const Default = {
 export const PopulatedSample1 = {
   args: {
     gameList: gameList1,
+    clientList: clientList1,
+  },
+};
+
+export const PopulatedSample2 = {
+  args: {
+    gameList: gameList2,
   },
 };
 
