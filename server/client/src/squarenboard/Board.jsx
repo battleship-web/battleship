@@ -1,5 +1,6 @@
-import PropTypes from "prop-types";
-import Square from "./Square";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Square from './Square';
 
 const Board = ({ board, onClick, size }) => {
   return (
@@ -15,21 +16,18 @@ const Board = ({ board, onClick, size }) => {
     //   )}
     // </div>
 
-    <table className="border-collapse">
+    <table className = "border-collapse">
       <tbody>
-        {board.map((row, rowIndex) => (
-          <tr key={rowIndex}>
-            {row.map((state, colIndex) => (
-              <td key={colIndex} className="p-0">
-                <Square
-                  state={state}
-                  size={size}
-                  onClick={() => onClick(rowIndex, colIndex, state)}
-                />
-              </td>
-            ))}
-          </tr>
-        ))}
+        {board.map((row) =>
+        <tr key = {row}> {row.map((state,col) => 
+        <td className = "p-0" key ={col}> 
+          <Square
+            state={state}
+            size={size}
+            onClick={() => {
+              if (CheckShipPlacement(row,col)) {onClick}}}
+        />
+        </td>)}</tr>)}
       </tbody>
     </table>
   );
@@ -41,3 +39,4 @@ Board.propTypes = {
 };
 
 export default Board;
+

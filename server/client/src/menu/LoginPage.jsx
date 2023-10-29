@@ -25,13 +25,16 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
     <Loading />
   ) : (
     <div className="text-center">
-      <div className="text-center  bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-10 py-4 shadow-2xl sm:rounded-3xl border-2 border-slate-400">
+      <div className="text-center bg-opacity-50 px-20 py-10"
+        style={{
+          backgroundImage: "url('/scroll.png')",
+          backgroundSize: "100% 100%",}}>
         <div className="flex flex-col items-start">
-          <label className="text-gray-300 font-bold" htmlFor="username">
+          <label className="text-orange-950 font-bold" htmlFor="username">
             username:
           </label>
           <input
-            className="border-2 border-slate-500"
+            className="border-2 border-blue-950"
             type="text"
             id="username"
             autoComplete="username"
@@ -40,11 +43,11 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
           />
         </div>
         <div className="flex flex-col items-start">
-          <label className="text-gray-300 font-bold" htmlFor="password">
+          <label className="text-orange-950 font-bold" htmlFor="password">
             password:
           </label>
           <input
-            className="border-2 border-slate-500"
+            className="border-2 border-blue-950"
             type="password"
             id="password"
             autoComplete="current-password"
@@ -52,16 +55,16 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <span className="text-slate-200">{socketError}</span>
+        <span className="text-blue-950">{socketError}</span>
       </div>
       <button
-        className="bg-gradient-to-r from-blue-600 to-sky-500 rounded mt-2 mb-2 p-1 px-12 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl"
+        className="bg-gradient-to-r from-orange-700 to-orange-600 rounded mt-2 mb-2 p-1 px-12 py-2 text-sm font-bold border-2 border-orange-950 text-orange-950 shadow-sm sm:text-1xl"
         onClick={handleLogin}
       >
         Submit
       </button>
       <button
-        className="mx-2 bg-gradient-to-r from-sky-500 to-blue-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl"
+        className="mx-2 bg-gradient-to-r from-orange-600 to-orange-700 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold border-2 border-orange-950 text-orange-950 shadow-sm sm:text-1xl"
         onClick={handleGuest}
       >
         Play as a guest
@@ -69,7 +72,10 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
     </div>
   );
   return (
-    <main className="grid h-screen w-screen place-items-center bg-[url(https://wallpapercave.com/wp/wp2874399.jpg)] px-6 py-24 sm:py-32 lg:px-8 bg-cover">
+    <main className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover "
+    style={{
+      backgroundImage: "url('/bluebkg.jpg')",
+      backgroundSize: "100% 100%",}}>
       {display}
     </main>
   );

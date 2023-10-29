@@ -127,7 +127,10 @@ function ScorepointPage({
   }
 
   return (
-    <main className="grid w-screen min-h-screen place-items-center bg-[url(https://images.theconversation.com/files/162016/original/image-20170322-31176-2q8pz6.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=754&fit=clip)] px-6 py-24 sm:py-32 lg:px-8 bg-cover">
+    <main className="grid w-screen min-h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
+        style={{
+          backgroundImage: "url('/bluebkg.jpg')",
+          backgroundSize: "100% 100%",}}>
       {scorePageDisplay}
     </main>
   );

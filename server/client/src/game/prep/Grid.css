@@ -38,7 +38,7 @@ img {
 }
 
 .page-background {
-  background-image: url("/src/assets/sea.jpeg");
+  background-image: url("bluebkg.jpg");
   background-size: cover;
   height: 100vh;
   display: flex;
