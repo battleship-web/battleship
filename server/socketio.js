@@ -339,7 +339,7 @@ export default function (io) {
           }
 
           // updating whose turn in redis game entry
-          await redisClient.hSet(`game:${gameId}`, "turn", turn);
+          // await redisClient.hSet(`game:${gameId}`, "turn", turn);
 
           message.turn = turn;
           io.to(player1SocketId)
@@ -541,6 +541,10 @@ export default function (io) {
               delGamePlayer1Promise,
               delGamePlayer2Promise,
             ]);
+          } else {
+            // delete old board data from redis
+            await redisClient.hDel(`game:${gameId}`, "player1Board");
+            await redisClient.hDel(`game:${gameId}`, "player2Board");
           }
 
           if (player1WantsReplay) {
@@ -588,16 +592,14 @@ export default function (io) {
                 0
               );
             } else if (resetRequest.toReset === "game") {
-              // new board will be made in placement stage anyways
-              await redisClient.hSet(
+              // old board must be deleted since the placement event listener checks for old board to send startSignal
+              await redisClient.hDel(
                 `game:${resetRequest.gameId}`,
-                "player1Board",
-                ""
+                "player1Board"
               );
-              await redisClient.hSet(
+              await redisClient.hDel(
                 `game:${resetRequest.gameId}`,
-                "player2Board",
-                ""
+                "player2Board"
               );
             } else if (resetRequest.toReset === "cancel") {
               // handle when game end

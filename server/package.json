@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node index.js",
+    "devStart": "node -r dotenv/config index.js",
     "build": "cd ./client && yarn install && VITE_APP_ENV=production yarn run build && cd ..",
     "dev": "nodemon -r dotenv/config index.js"
   },
