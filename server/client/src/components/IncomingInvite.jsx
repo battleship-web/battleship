@@ -1,27 +1,23 @@
 import { PropTypes } from "prop-types";
 
-function IncomingInvite({
-  acceptInvitation,
-  refuseInvitation,
-  opponentNickname,
-  opponentUsername,
-}) {
+
+function IncomingInvite({ acceptInvitation, refuseInvitation }) {
   return (
-    <div className="absolute w-300 h-60 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-5 bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 shadow-2xl sm:rounded-3xl border-2 border-slate-400 flex justify-center items-center ">
-      <div className="mb-12 text-12xl font-mono font-bold tracking-tight text-orange-500 sm:text-4xl animate-pulse ">
-        !!!Enemy Approaching!!!
-        <h2 className="text-base">
-          {`${opponentNickname} (${opponentUsername}) is challenging you!`}
-        </h2>
-      </div>
+    <div className="absolute bg-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-opacity-50 flex justify-center items-center "
+        style={{
+          backgroundImage: "url('/src/assets/scroll.png')",
+          backgroundSize: "100% 100%",}}>
+      <h1 className="mb-8 text-12xl font-mono font-bold tracking-tight text-orange-950 p-1 px-20 py-20 sm:text-4xl animate-pulse ">
+        Enemy Approaching! 
+      </h1>
       <button
-        className="mr-20 absolute bg-gradient-to-r from-green-500 to-green-600 rounded mt-20  p-1 px-3 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl border-2 border-slate-400"
+        className="mr-20 absolute bg-gradient-to-r from-green-500 to-green-600 rounded mt-20  p-1 px-3 py-2 text-sm font-bold text-lime-900 shadow-sm sm:text-1xl border-2 border-lime-900"
         onClick={acceptInvitation}
       >
         Accept
       </button>
       <button
-        className="ml-20 absolute bg-gradient-to-r from-red-500 to-red-600 rounded mt-20  p-1 px-3 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl border-2 border-slate-400"
+        className="ml-20 absolute bg-gradient-to-r from-red-500 to-red-600 rounded mt-20  p-1 px-3 py-2 text-sm font-bold text-red-900 shadow-sm sm:text-1xl border-2 border-red-900"
         onClick={refuseInvitation}
       >
         Refuse
@@ -30,6 +26,7 @@ function IncomingInvite({
   );
 }
 export default IncomingInvite;
+
 
 IncomingInvite.propTypes = {
   acceptInvitation: PropTypes.func.isRequired,

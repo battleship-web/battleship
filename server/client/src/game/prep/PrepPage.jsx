@@ -71,18 +71,18 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
       <div className="container w-10"></div>
       <div className="rotate-container">
         <button
-          className="rounded bg-red-500 rotate-button"
+          className="rounded bg-gradient-to-r from-orange-700 to-orange-800 border-2 border-orange-950"
           onClick={toggleSelectionMode}
         >
           <img className="object-right w-14 h-14" src={rotatePic} />
         </button>
-        <div className="rounded container bg-red-500 w-2000 h-100">
+        <div className=" text-center text-black font-bold rounded container bg-gradient-to-r from-orange-700 to-orange-800 border-2 border-orange-950 w-2000 h-100">
           {selectionMode}
         </div>
       </div>
       <div className="color-buttons-container">
         <button
-          className="rounded h-10 border-black-100 bg-red-500 hover:bg-red-900"
+          className="h-10 bg-gradient-to-r from-red-500 to-red-600 rounded text-sm font-bold text-red-900 shadow-sm sm:text-1xl border-2 border-red-900 hover:bg-red-800"
           onClick={() => {
             setBoardState(
               new Array(8).fill(0).map(() => new Array(8).fill("blank"))
@@ -93,7 +93,7 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
         >
           Clear Board
         </button>
-        <div className="container w-60 h-60 bg-blue-500">
+        <div className="container w-60 h-60 bg-sky-700">
           {Array(numShips)
             .fill(0)
             .map((_, index) => (
@@ -110,7 +110,7 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
         </div>
         <div className="container flex h-10">
           <button
-            className="flex-1 rounded border-black-100 bg-green-500 hover:bg-green-900"
+            className="flex-1 rounded border-2 bg-gradient-to-r border-lime-900 from-green-500 to-green-600 hover:bg-green-800 text-sm font-bold text-lime-900 shadow-sm sm:text-1xl"
             onClick={() => {
               if (placementCount !== 4) {
                 alert("Must place all ships before confirming.");
@@ -125,7 +125,7 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
           </button>
 
           <button
-            className="flex-1rounded border-black-100 bg-red-500 hover:bg-red-900"
+            className="flex-1 bg-gradient-to-r from-red-500 to-red-600 rounded text-sm font-bold text-red-900 shadow-sm sm:text-1xl border-2 border-red-900 hover:bg-red-800"
             onClick={() => {
               socket.emit("quit");
               handleQuitGame();

@@ -13,7 +13,9 @@ function AdminPage({ gameList, clientList }) {
     socket.emit("allClientListRequest");
   }, []);
   let gameListDisplay = null;
-
+  let numberOfClients = clientList
+    ? `(${clientList.length} connected clients)`
+    : "loading...";
   let clientListDisplay = null;
   if (clientList === null) {
     clientListDisplay = <Loading />;
@@ -24,13 +26,13 @@ function AdminPage({ gameList, clientList }) {
       const clientToDisplay = clientList.map((client) => {
         return (
           <tr key={client.username}>
-            <td className="border-2 border-slate-500 text-center p-2">
+            <td className="border-2 border-orange-950 text-center p-2">
               {client.nickname ? client.nickname : "Unknown"}
             </td>
-            <td className="border-2 border-slate-500 text-center p-2">
+            <td className="border-2 border-orange-950 text-center p-2">
               {client.username}
             </td>
-            <td className="border-2 border-slate-500 text-center p-2">
+            <td className="border-2 border-orange-950 text-center p-2">
               {client.gameId ? client.gameId : "-"}
             </td>
           </tr>
@@ -40,13 +42,13 @@ function AdminPage({ gameList, clientList }) {
         <table>
           <thead>
             <tr>
-              <th className="border-2 border-slate-500 text-center p-2">
+              <th className="border-2 border-orange-950 text-center p-2">
                 Nickname
               </th>
-              <th className="border-2 border-slate-500 text-center p-2">
+              <th className="border-2 border-orange-950 text-center p-2">
                 Username
               </th>
-              <th className="border-2 border-slate-500 text-center p-2">
+              <th className="border-2 border-orange-950 text-center p-2">
                 Game ID
               </th>
             </tr>
@@ -69,14 +71,14 @@ function AdminPage({ gameList, clientList }) {
         // Add two more buttons and add options for the emitting socket event
         return (
           <tr key={game.gameId}>
-            <td className="border-2 border-slate-500 text-center p-2">
+            <td className="border-2 border-orange-950 text-center p-2">
               {`${game.player1.nickname} (${game.player1.username}) vs `}
               {`${game.player2.nickname} (${game.player2.username})`}
             </td>
-            <td className="border-2 border-slate-500 text-center p-2">
+            <td className="border-2 border-orange-950 text-center p-2">
               {game.player1.score} : {game.player2.score}
             </td>
-            <td className="border border-slate-500 p-2">
+            <td className="border border-orange-950 p-2">
               <ResetButton
                 text="Reset Score"
                 options={{
@@ -103,14 +105,14 @@ function AdminPage({ gameList, clientList }) {
         );
       });
       gameListDisplay = (
-        <table className="border-collapse border-2 border-slate-500">
+        <table className="border-collapse border-2 border-orange-950">
           <thead>
             <tr>
-              <th className="border-2 border-slate-500 p-2">
+              <th className="border-2 border-orange-950 p-2">
                 Competing Players
               </th>
-              <th className="border-2 border-slate-500 p-2">Scores</th>
-              <th className="border-2 border-slate-500 p-2">Buttons</th>
+              <th className="border-2 border-orange-950 p-2">Scores</th>
+              <th className="border-2 border-orange-950 p-2">Buttons</th>
             </tr>
           </thead>
           <tbody>{listToDisplay}</tbody>
@@ -121,14 +123,26 @@ function AdminPage({ gameList, clientList }) {
 
   return (
     <>
-      <div className="w-screen min-h-screen flex flex-col items-center gap-4 bg-blue-400 p-4">
+      <div
+        className="w-screen min-h-screen flex flex-col items-center gap-4 p-4"
+        style={{
+          backgroundImage: "url('/src/assets/bluebkg.jpg')",
+          backgroundSize: "100% 100%",
+        }}
+      >
         <div className="w-full align-top flex justify-center">
-          <h1 className="bg-zinc-100 p-2 rounded-md">Admin Page</h1>
+          <h1 className="bg-sky-400  border-4 border-orange-950 font-bold p-2 rounded-md">
+            ADMIN PAGE
+          </h1>
         </div>
-        <h1 className="bg-zinc-100 p-2 rounded-md">Game</h1>
-        <div className="bg-zinc-100">{gameListDisplay}</div>
-        <h1 className="bg-zinc-100 p-2 rounded-md">Player</h1>
-        <div className="bg-zinc-100">{clientListDisplay}</div>
+        <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">
+          Games
+        </h1>
+        <div className="bg-sky-200">{gameListDisplay}</div>
+        <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">
+          Players {numberOfClients}
+        </h1>
+        <div className="bg-sky-200">{clientListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
           <div className="text-center">
             <RefreshButton />

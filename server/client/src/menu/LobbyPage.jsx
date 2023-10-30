@@ -155,7 +155,7 @@ function LobbyPage({
 
         if (clientExcludingMe.length === 0) {
           display = (
-            <h1 className="text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl animate-pulse ">
+            <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl animate-pulse ">
               No other online player who are free...
             </h1>
           );
@@ -163,14 +163,17 @@ function LobbyPage({
           const listToDisplay = clientExcludingMe.map((client) => {
             return (
               <li
-                className="flex justify-center text-12xl font-mono font-bold tracking-tight text-gray-100 sm:text-3xl text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-10 py-2 shadow-2xl sm:rounded-3xl border-2 border-slate-400"
+                className="flex justify-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3"
+                style={{
+                  backgroundImage: "url('/src/assets/scroll.png')",
+                  backgroundSize: "100% 100%",}}
                 key={client.username}
               >
-                <h2 className="my-3 mr-5 text-yellow-300">General</h2>
+                <h2 className="my-3 mr-5 text-blue-950">General</h2>
                 <h1 className="my-3 mr-5 ">{client.nickname}</h1>
                 <h2 className="my-3">({client.username})</h2>
                 <button
-                  className="mx-6 bg-gradient-to-r from-sky-500 to-blue-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl border-2 border-slate-400"
+                  className="mx-6 bg-gradient-to-r from-orange-600 to-orange-700 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-1xl border-2 border-orange-950"
                   onClick={() => {
                     handleInvite(
                       client.socketId,
@@ -179,7 +182,7 @@ function LobbyPage({
                     );
                   }}
                 >
-                  Fight
+                  Fight!
                 </button>
               </li>
             );
@@ -191,14 +194,20 @@ function LobbyPage({
   }
 
   return (
-    <main className="grid h-screen w-screen place-items-center bg-[url(https://images.theconversation.com/files/162016/original/image-20170322-31176-2q8pz6.jpg?ixlib=rb-1.1.0&q=45&auto=format&w=754&fit=clip)] px-6 py-24 sm:py-32 lg:px-8 bg-cover">
+    <main className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
+    style={{
+      backgroundImage: "url('/src/assets/bluebkg.jpg')",
+      backgroundSize: "100% 100%",}}>
       <div className="text-center">
-        <div className="text-center bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] bg-opacity-50 px-20 py-10 shadow-2xl sm:rounded-3xl border-2 border-slate-400">
+      <div className="text-center bg-cover bg-opacity-50 px-10 py-10 items-center "
+        style={{
+          backgroundImage: "url('/src/assets/wood.png')",
+          backgroundSize: "100% 100%",}}>
           {display}
         </div>
         <div>
           <button
-            className="mx-4 bg-gradient-to-r from-sky-500 to-blue-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-white shadow-sm sm:text-2xl border-2 border-slate-400"
+            className="mx-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-2xl border-2 border-orange-950"
             onClick={() => {
               socket.emit("clientListRequest");
             }}

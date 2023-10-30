@@ -58,35 +58,38 @@ function Score({
 
   return (
     <main className="text-center">
-      <div className="text-center items-center mb-6 relative isolate overflow-hidden bg-[url(https://thumbs.dreamstime.com/b/iron-background-threadbare-rusty-steel-covering-rivet-44688853.jpg)] px-10 py-4 shadow-2xl sm:rounded-3xl">
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-yellow-500 sm:text-5xl">
+     <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40"
+        style={{
+          backgroundImage: "url('/src/assets/scroll.png')",
+          backgroundSize: "100% 100%",}}>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-orange-950 sm:text-5xl pt-5">
           BATTLESHIP{" "}
         </h1>
         {turn === socket.id ? (
           <Timer startSeconds={20} onZero={handleZero} fired={fired} />
         ) : (
-          <h1 className="mt-2 text-base leading-7 text-white font-bold bg-blue-600 rounded-md sm:text-2xl">
+          <h1 className="mt-2 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
             Opponent&apos;s Turn
           </h1>
         )}
         <div className="mt-8 text-center items-center">
           <div className="flex-row">
-            <div className="inline-flex mr-10 items-center rounded-md bg-red-50 px-2 py-1 text-1x1 font-bold text-red-700">
+            <div className="inline-flex mr-10 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
               General {opponentInfo.nickname}
             </div>
-            <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-1x1 font-bold text-red-700">
+            <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
               POINT {opponentScore}
             </span>
-            <span className="inline-flex ml-10 mr-20 items-center rounded-md bg-red-50 px-2 py-1 text-1x1 font-bold text-red-700">
+            <span className="inline-flex ml-10 mr-20 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
               No. of Hits: {numHitOnPlayerBoard}
             </span>
-            <span className="inline-flex ml-20 mr-10 items-center rounded-md bg-green-50 px-2 py-1 text-1x1 font-bold text-green-700">
+            <span className="inline-flex ml-20 mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
               General {user.nickname}
             </span>
-            <span className="inline-flex mr-10 items-center rounded-md bg-green-50 px-2 py-1 text-1x1 font-bold text-green-700">
+            <span className="inline-flex mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
               POINT {playerScore}
             </span>
-            <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-1x1 font-bold text-green-700">
+            <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
               No. of Hits: {numHitOnOpponentBoard}
             </span>
           </div>
@@ -100,7 +103,7 @@ function Score({
                 size="big"
               />
             </h1>
-            <h1 className="mt-20 text-orange-500 sm:text-8xl font-bold">vs</h1>
+            <h1 className="mt-20 text-orange-950 sm:text-8xl font-bold">vs</h1>
             <h1 className="ml-2">
               <Board board={playerBoard} onClick={() => {}} size="big" />
             </h1>
@@ -109,13 +112,13 @@ function Score({
       </div>
 
       <button
-        className="mt-6 rounded-md bg-gradient-to-r from-blue-600 to-sky-500 px-2 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 border-2 border-gray-400 mr-5"
+        className="mt-6 rounded-md bg-gradient-to-r from-orange-800 to-orange-700 px-2 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-1xl hover:bg-orange-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-950 border-2 border-orange-950 mr-5"
         onClick={handleClickInstruction}
       >
-        Instruction
+        Instructions
       </button>
       <button
-        className="mt-6 rounded-md bg-gradient-to-r from-red-600 to-red-400 px-2 py-2 text-sm font-bold text-white shadow-sm sm:text-1xl hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 border-2 border-gray-400"
+        className="mt-6 rounded-md bg-gradient-to-r from-red-500 to-red-600 px-2 py-2 text-sm font-bold text-red-900 shadow-sm sm:text-1xl hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-900 border-2 border-red-900"
         onClick={() => {
           socket.emit("quit");
           handleQuitGame();
