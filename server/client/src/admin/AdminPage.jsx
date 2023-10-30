@@ -13,7 +13,9 @@ function AdminPage({ gameList, clientList }) {
     socket.emit("allClientListRequest");
   }, []);
   let gameListDisplay = null;
-
+  let numberOfClients = clientList
+    ? `(${clientList.length} connected clients)`
+    : "loading...";
   let clientListDisplay = null;
   if (clientList === null) {
     clientListDisplay = <Loading />;
@@ -121,16 +123,25 @@ function AdminPage({ gameList, clientList }) {
 
   return (
     <>
-      <div className="w-screen min-h-screen flex flex-col items-center gap-4 p-4"
+      <div
+        className="w-screen min-h-screen flex flex-col items-center gap-4 p-4"
         style={{
           backgroundImage: "url('/src/assets/bluebkg.jpg')",
-          backgroundSize: "100% 100%",}}>
+          backgroundSize: "100% 100%",
+        }}
+      >
         <div className="w-full align-top flex justify-center">
-          <h1 className="bg-sky-400  border-4 border-orange-950 font-bold p-2 rounded-md">ADMIN PAGE</h1>
+          <h1 className="bg-sky-400  border-4 border-orange-950 font-bold p-2 rounded-md">
+            ADMIN PAGE
+          </h1>
         </div>
-        <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">Games</h1>
+        <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">
+          Games
+        </h1>
         <div className="bg-sky-200">{gameListDisplay}</div>
-        <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">Players</h1>
+        <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">
+          Players {numberOfClients}
+        </h1>
         <div className="bg-sky-200">{clientListDisplay}</div>
         <div className="w-full h-1/6 align-bottom">
           <div className="text-center">
