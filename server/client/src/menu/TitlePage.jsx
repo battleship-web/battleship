@@ -5,12 +5,12 @@ export default function TitlePage({ setGameStage }) {
     <>
       <main className="grid h-screen w-screen place-items-center  px-6 py-24 sm:py-32 lg:px-8 bg-cover"
         style={{
-          backgroundImage: "url('/bluebkg.jpg')",
+          backgroundImage: "url('/src/assets/bluebkg.jpg')",
           backgroundSize: "100% 100%",}}>
         <div className="text-center">
         <div className="text-center bg-cover bg-opacity-50 px-40 py-40 items-center "
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/scroll.png')",
           backgroundSize: "100% 100%",}}>
             <h1 className="mt-4 text-12xl font-mono font-bold tracking-tight bg-gradient-to-r from-orange-950 via-orange-700 to-orange-950 inline-block text-transparent bg-clip-text sm:text-6xl ">
               Battleship

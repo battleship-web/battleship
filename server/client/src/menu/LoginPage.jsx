@@ -27,7 +27,7 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
     <div className="text-center">
       <div className="text-center bg-opacity-50 px-20 py-10"
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/scroll.png')",
           backgroundSize: "100% 100%",}}>
         <div className="flex flex-col items-start">
           <label className="text-orange-950 font-bold" htmlFor="username">
@@ -74,7 +74,7 @@ function LoginPage({ socketError, setSocketError, isLoading, setIsLoading }) {
   return (
     <main className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover "
     style={{
-      backgroundImage: "url('/bluebkg.jpg')",
+      backgroundImage: "url('/src/assets/bluebkg.jpg')",
       backgroundSize: "100% 100%",}}>
       {display}
     </main>

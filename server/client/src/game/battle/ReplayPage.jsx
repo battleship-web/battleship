@@ -2,11 +2,11 @@ function ReplayPage({ text, handleOkay }) {
   return (
     <main className="grid w-screen min-h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
         style={{
-          backgroundImage: "url('/bluebkg.jpg')",
+          backgroundImage: "url('/src/assets/bluebkg.jpg')",
           backgroundSize: "100% 100%",}}>
       <div className="text-center py-10 px-10"
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/scroll.png')",
           backgroundSize: "100% 100%",}}>
         <h1 className="font-bold text-orange-950 text-lg">{text}</h1>
         <button

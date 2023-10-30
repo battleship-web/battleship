@@ -129,7 +129,7 @@ function ScorepointPage({
   return (
     <main className="grid w-screen min-h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
         style={{
-          backgroundImage: "url('/bluebkg.jpg')",
+          backgroundImage: "url('/src/assets/bluebkg.jpg')",
           backgroundSize: "100% 100%",}}>
       {scorePageDisplay}
     </main>

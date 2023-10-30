@@ -3,13 +3,13 @@ function Instruction(handleClickOut) {
         <main className="text-center">
         <div className="text-center bg-opacity-50 px-10 py-3 "
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/wood.png')",
           backgroundSize: "100% 100%",}}>
-            <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">Instruction</h1>
+            <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">Instructions</h1>
           </div>
           <div className="text-center bg-opacity-50 px-10 py-10 "
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/scroll.png')",
           backgroundSize: "100% 100%",}}>
             <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
               ⛴ 1) ⛴

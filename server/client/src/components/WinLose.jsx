@@ -13,11 +13,11 @@ export default function WinLose({ setGameStage, handleQuitGame, win }) {
   return (
     <main className="grid min-h-full place-items-center px-6 py-24 sm:py-32 lg:px-8"
     style={{
-          backgroundImage: "url('/bluebkg.jpg')",
+          backgroundImage: "url('/src/assets/bluebkg.jpg')",
           backgroundSize: "100% 100%",}}>
       <div className="text-center py-20 px-10 "
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/scroll.png')",
           backgroundSize: "100% 100%",}}>
         <span
           className={`mt-2 text-12xl font-mono font-bold tracking-tight bg-gradient-to-r ${greenRed} animate-pulse inline-block text-transparent bg-clip-text sm:text-7xl `}

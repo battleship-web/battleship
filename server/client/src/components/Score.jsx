@@ -60,9 +60,9 @@ function Score({
     <main className="text-center">
      <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40"
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/scroll.png')",
           backgroundSize: "100% 100%",}}>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-orange-950 sm:text-5xl">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-orange-950 sm:text-5xl pt-5">
           BATTLESHIP{" "}
         </h1>
         {turn === socket.id ? (
@@ -115,7 +115,7 @@ function Score({
         className="mt-6 rounded-md bg-gradient-to-r from-orange-800 to-orange-700 px-2 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-1xl hover:bg-orange-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-950 border-2 border-orange-950 mr-5"
         onClick={handleClickInstruction}
       >
-        Instruction
+        Instructions
       </button>
       <button
         className="mt-6 rounded-md bg-gradient-to-r from-red-500 to-red-600 px-2 py-2 text-sm font-bold text-red-900 shadow-sm sm:text-1xl hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-900 border-2 border-red-900"

@@ -15,7 +15,7 @@ function Timer({ startSeconds, onZero, fired }) {
     }, 1000);
   }, [secondsLeft, onZero, fired]);
   return (
-    <div className="mt-2 text-base leading-7 text-white font-bold bg-blue-600 rounded-md sm:text-2xl">
+    <div className="mt-2 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
       {fired ? "Fired" : secondsLeft}
     </div>
   );

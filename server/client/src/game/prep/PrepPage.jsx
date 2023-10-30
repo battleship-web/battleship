@@ -76,7 +76,7 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
         >
           <img className="object-right w-14 h-14" src={rotatePic} />
         </button>
-        <div className="rounded container bg-red-500 w-2000 h-100">
+        <div className=" text-center text-black font-bold rounded container bg-gradient-to-r from-orange-700 to-orange-800 border-2 border-orange-950 w-2000 h-100">
           {selectionMode}
         </div>
       </div>
@@ -93,7 +93,7 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
         >
           Clear Board
         </button>
-        <div className="container w-60 h-60 bg-blue-500">
+        <div className="container w-60 h-60 bg-sky-700">
           {Array(numShips)
             .fill(0)
             .map((_, index) => (

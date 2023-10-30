@@ -14,12 +14,12 @@ export default function InputNicknamePage({ setGameStage, setUser }) {
     <>
       <main className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover "
         style={{
-          backgroundImage: "url('/bluebkg.jpg')",
+          backgroundImage: "url('/src/assets/bluebkg.jpg')",
           backgroundSize: "100% 100%",}}>
         <div className="text-center">
         <div className="text-center bg-cover bg-opacity-50 px-10 py-10 items-center "
         style={{
-          backgroundImage: "url('/scroll.png')",
+          backgroundImage: "url('/src/assets/scroll.png')",
           backgroundSize: "100% 100%",}}>
             <h1 className="mt-0 text-12xl font-mono font-bold tracking-tight bg-gradient-to-r from-orange-950 via-orange-900 to-orange-800 inline-block px-2.5 py-1 text-transparent bg-clip-text sm:text-5xl">
               Input Nickname
