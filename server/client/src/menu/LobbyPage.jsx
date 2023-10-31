@@ -173,7 +173,9 @@ function LobbyPage({
                 <h2 className="my-3 mr-5 text-blue-950">General</h2>
                 <h1 className="my-3 mr-5 ">{client.nickname}</h1>
                 <h2 className="my-3 mr-5">({client.username})</h2>
-                <h2 className="my-3">Lv:{client.level}</h2>
+                {client.level ? (
+                  <h2 className="my-3">Lv:{client.level}</h2>
+                ) : null}
                 <button
                   className="mx-6 bg-gradient-to-r from-orange-600 to-orange-700 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-1xl border-2 border-orange-950"
                   onClick={() => {
