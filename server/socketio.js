@@ -770,11 +770,15 @@ export default function (io) {
             player1: {
               username: player1Info[index].username,
               nickname: player1Info[index].nickname,
+              level: player1Info[index].level,
+              profilePicture: player1Info[index].profilePicture,
               score: game.player1Score,
             },
             player2: {
               username: player2Info[index].username,
               nickname: player2Info[index].nickname,
+              level: player2Info[index].level,
+              profilePicture: player2Info[index].profilePicture,
               score: game.player2Score,
             },
           };
