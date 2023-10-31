@@ -1,4 +1,4 @@
-import { findUserByUsername } from "./dao/userDao.js";
+import { findUserByUsername, createUser } from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
@@ -6,9 +6,31 @@ import { nanoid } from "nanoid";
 export default function (io) {
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
-    socket.on("login", async (auth) => {
-      const { username, password } = auth;
+    socket.on("register", async (info) => {
       try {
+        const { username, password, nickname } = info;
+        if (await findUserByUsername(username)) {
+          socket.emit("registerResponse", {
+            success: false,
+            message: "Username already exists.",
+          });
+          return;
+        }
+        await createUser(username, password, nickname);
+        socket.emit("registerResponse", {
+          success: true,
+        });
+      } catch (error) {
+        console.log(error);
+        socket.emit("registerResponse", {
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    });
+    socket.on("login", async (auth) => {
+      try {
+        const { username, password } = auth;
         if (username === "guest") {
           const guestUsername = `guest:${nanoid(12)}`;
           const promise1 = redisClient.hSet(
@@ -56,13 +78,33 @@ export default function (io) {
             "nickname",
             user.nickname
           );
-          await Promise.all([promise1, promise2, promise3]);
+          const promise4 = redisClient.hSet(
+            `socketId:${socket.id}`,
+            "level",
+            user.level
+          );
+          const promise5 = redisClient.hSet(
+            `socketId:${socket.id}`,
+            "exp",
+            user.exp
+          );
+          await Promise.all([promise1, promise2, promise3, promise4, promise5]);
+          if (user.profilePicture) {
+            await redisClient.hSet(
+              `socketId:${socket.id}`,
+              "profilePicture",
+              user.profilePicture
+            );
+          }
           socket.emit("loginResponse", {
             success: true,
             message: {
               username: user.username,
               role: user.role,
               nickname: user.nickname,
+              level: user.level,
+              exp: user.exp,
+              profilePicture: user.profilePicture,
             },
           });
           return;
@@ -141,6 +183,8 @@ export default function (io) {
             nickname: client.data.nickname,
             username: client.data.username,
             socketId: client.socketId,
+            level: client.data.level,
+            profilePicture: client.data.profilePicture,
           };
         });
 
@@ -172,6 +216,8 @@ export default function (io) {
             username: client.data.username,
             socketId: client.socketId,
             gameId: client.data.game,
+            level: client.data.level,
+            profilePicture: client.data.profilePicture,
           };
         });
 
@@ -194,10 +240,20 @@ export default function (io) {
         `socketId:${socket.id}`,
         "username"
       );
+      const inviterLevel = await redisClient.hGet(
+        `socketId:${socket.id}`,
+        "level"
+      );
+      const inviterProfilePicture = await redisClient.hGet(
+        `socketId:${socket.id}`,
+        "profilePicture"
+      );
       socket.to(inviteeSocketId).emit("incomingInvite", {
         socketId: socket.id,
         nickname: inviterNickname,
         username: inviterUsername,
+        level: inviterLevel,
+        profilePicture: inviterProfilePicture,
       });
     });
     socket.on("acceptInvite", async (inviterSocketId) => {

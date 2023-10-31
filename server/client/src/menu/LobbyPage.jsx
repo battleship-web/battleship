@@ -166,12 +166,14 @@ function LobbyPage({
                 className="flex justify-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3"
                 style={{
                   backgroundImage: "url('/src/assets/scroll.png')",
-                  backgroundSize: "100% 100%",}}
+                  backgroundSize: "100% 100%",
+                }}
                 key={client.username}
               >
                 <h2 className="my-3 mr-5 text-blue-950">General</h2>
                 <h1 className="my-3 mr-5 ">{client.nickname}</h1>
-                <h2 className="my-3">({client.username})</h2>
+                <h2 className="my-3 mr-5">({client.username})</h2>
+                <h2 className="my-3">Lv:{client.level}</h2>
                 <button
                   className="mx-6 bg-gradient-to-r from-orange-600 to-orange-700 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-1xl border-2 border-orange-950"
                   onClick={() => {
@@ -194,15 +196,21 @@ function LobbyPage({
   }
 
   return (
-    <main className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
-    style={{
-      backgroundImage: "url('/src/assets/bluebkg.jpg')",
-      backgroundSize: "100% 100%",}}>
+    <main
+      className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
+      style={{
+        backgroundImage: "url('/src/assets/bluebkg.jpg')",
+        backgroundSize: "100% 100%",
+      }}
+    >
       <div className="text-center">
-      <div className="text-center bg-cover bg-opacity-50 px-10 py-10 items-center "
-        style={{
-          backgroundImage: "url('/src/assets/wood.png')",
-          backgroundSize: "100% 100%",}}>
+        <div
+          className="text-center bg-cover bg-opacity-50 px-10 py-10 items-center "
+          style={{
+            backgroundImage: "url('/src/assets/wood.png')",
+            backgroundSize: "100% 100%",
+          }}
+        >
           {display}
         </div>
         <div>
