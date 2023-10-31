@@ -11,13 +11,16 @@ export async function findUserByUsername(username) {
   }
 }
 
-export async function createUser(username, password) {
+export async function createUser(username, password, nickname) {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
     await User.create({
       username: username,
       passwordHash: passwordHash,
       role: "registered user",
+      nickname: nickname,
+      level: 1,
+      exp: 0,
     });
   } catch (error) {
     console.log(error);

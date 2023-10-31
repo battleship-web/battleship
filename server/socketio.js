@@ -1,4 +1,4 @@
-import { findUserByUsername } from "./dao/userDao.js";
+import { findUserByUsername, createUser } from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
@@ -6,9 +6,31 @@ import { nanoid } from "nanoid";
 export default function (io) {
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
-    socket.on("login", async (auth) => {
-      const { username, password } = auth;
+    socket.on("register", async (info) => {
       try {
+        const { username, password, nickname } = info;
+        if (await findUserByUsername(username)) {
+          socket.emit("registerResponse", {
+            success: false,
+            message: "Username already exists.",
+          });
+          return;
+        }
+        await createUser(username, password, nickname);
+        socket.emit("registerResponse", {
+          success: true,
+        });
+      } catch (error) {
+        console.log(error);
+        socket.emit("registerResponse", {
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    });
+    socket.on("login", async (auth) => {
+      try {
+        const { username, password } = auth;
         if (username === "guest") {
           const guestUsername = `guest:${nanoid(12)}`;
           const promise1 = redisClient.hSet(
