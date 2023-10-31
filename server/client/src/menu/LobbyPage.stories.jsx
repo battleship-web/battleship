@@ -9,10 +9,10 @@ export default {
 // const client={nickname:"hey",username:"hey.milf"}
 const user = { nickname: "hey", username: "hey.co" };
 const clientList = [
-  { nickname: "Leo", username: "leo123", socketId: "test1" },
-  { nickname: "night", username: "night123", socketId: "test2" },
-  { nickname: "punny", username: "king1234", socketId: "test3" },
-  { nickname: "pes", username: "noisy586", socketId: "test4" },
+  { nickname: "Leo", username: "leo123", socketId: "test1", level: 3 },
+  { nickname: "night", username: "night123", socketId: "test2", level: 5 },
+  { nickname: "punny", username: "king1234", socketId: "test3", level: 7 },
+  { nickname: "pes", username: "noisy586", socketId: "test4", level: 1 },
 ];
 const clientList2 = [];
 export const Default = {

@@ -15,6 +15,7 @@ import WinPage from "./game/battle/WinPage";
 import Loading from "./components/Loading";
 import ReplayPage from "./game/battle/ReplayPage";
 import OpponentQuitPage from "./game/battle/OpponentQuitPage";
+import RegisterPage from "./menu/RegisterPage";
 
 function App() {
   const [disconnectedByBacking, setDisconnectedByBacking] = useState(false);
@@ -85,6 +86,15 @@ function App() {
       handleQuitGame();
     }
 
+    const onRegisterResponse = (data) => {
+      if (data.success) {
+        setGameStage("menu:login");
+        setIsLoading(false);
+      } else {
+        setSocketError(data.message);
+        setIsLoading(false);
+      }
+    };
     const onLoginResponse = (data) => {
       if (data.success) {
         setUser(data.message);
@@ -177,7 +187,7 @@ function App() {
     if (disconnectedByBacking) {
       socket.connect();
     }
-
+    socket.on("registerResponse", onRegisterResponse);
     socket.on("loginResponse", onLoginResponse);
     socket.on("clientList", setClientList);
     socket.on("allClientList", setAllClientList);
@@ -219,6 +229,18 @@ function App() {
           setSocketError={setSocketError}
           isLoading={isLoading}
           setIsLoading={setIsLoading}
+          setGameStage={setGameStage}
+        />
+      );
+      break;
+    case "menu:register":
+      page = (
+        <RegisterPage
+          socketError={socketError}
+          setSocketError={setSocketError}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          setGameStage={setGameStage}
         />
       );
       break;
