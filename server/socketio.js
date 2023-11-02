@@ -2,6 +2,8 @@ import { findUserByUsername, createUser } from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
+import { convertBoardStrTo2DArray } from "./utils/board.js";
+import { reset } from "nodemon";
 
 export default function (io) {
   io.on("connection", (socket) => {
@@ -318,8 +320,51 @@ export default function (io) {
           board.push(column);
         }
 
+        if (isPlayer1) {
+          await redisClient.hSet(
+            `game:${gameId}`,
+            "player1NumberOfShips",
+            ships.length
+          );
+        } else {
+          await redisClient.hSet(
+            `game:${gameId}`,
+            "player2NumberOfShips",
+            ships.length
+          );
+        }
+
         // processing: take ship pos and place into board
-        for (const ship of ships) {
+        for (const [index, ship] of ships.entries()) {
+          // storing original ship position
+          const storePromise1 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "x",
+            ship.x
+          );
+          const storePromise2 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "y",
+            ship.y
+          );
+          const storePromise3 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "size",
+            ship.size
+          );
+          const storePromise4 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "rotated",
+            ship.rotated ? "true" : "false"
+          );
+
+          await Promise.all([
+            storePromise1,
+            storePromise2,
+            storePromise3,
+            storePromise4,
+          ]);
+
           if (ship.rotated) {
             // vertical
             for (let i = 0; i < 4; i++) {
@@ -395,9 +440,46 @@ export default function (io) {
           }
 
           // updating whose turn in redis game entry
-          // await redisClient.hSet(`game:${gameId}`, "turn", turn);
-
+          await redisClient.hSet(`game:${gameId}`, "turn", turn);
           message.turn = turn;
+
+          // send info to spectators
+          if (io.sockets.adapter.rooms.get(`watch:${gameId}`)) {
+            const otherPlayerSocketId = isPlayer1
+              ? player2SocketId
+              : player1SocketId;
+
+            const fieldForShipNumber = isPlayer1
+              ? "player2NumberOfShips"
+              : "player1NumberOfShips";
+
+            const otherPlayerNumberOfShips = redisClient.hGet(
+              `game:${gameId}`,
+              fieldForShipNumber
+            );
+
+            const getPromises = Array(otherPlayerNumberOfShips)
+              .fill()
+              .map((_, index) => {
+                return redisClient.hGetAll(
+                  `ship${index}:${otherPlayerSocketId}`
+                );
+              });
+
+            const otherPlayerOriginalBoard = await Promise.all(getPromises);
+            const sptMessage = {
+              p1OriginalBoard: isPlayer1 ? board : otherPlayerOriginalBoard,
+              p2OriginalBoard: isPlayer1 ? otherPlayerOriginalBoard : board,
+              p1BoardFireResults: null,
+              p2BoardFireResults: null,
+              turn: turn,
+              p1Score: player1Score,
+              p2Score: player2Score,
+            };
+
+            io.to(`watch:${gameId}`).emit("sptGameInfo", sptMessage);
+          }
+
           io.to(player1SocketId)
             .to(player2SocketId)
             .emit("startSignal", message);
@@ -513,7 +595,14 @@ export default function (io) {
           await redisClient.hSet(`game:${gameId}`, "lastWinner", socket.id);
         }
 
+        if (isPlayer1) {
+          await redisClient.hSet(`game:${gameId}`, "turn", player2SocketId);
+        } else {
+          await redisClient.hSet(`game:${gameId}`, "turn", player1SocketId);
+        }
+
         io.to(player1SocketId).to(player2SocketId).emit("fireResult", message);
+        io.to(`watch:${gameId}`).emit("sptFireResult", message);
       } catch (error) {
         console.log(error);
       }
@@ -524,6 +613,20 @@ export default function (io) {
         const isPlayer1 =
           (await redisClient.hGet(`game:${gameId}`, "player1SocketId")) ===
           socket.id;
+
+        // delete ship placement info from redis
+        let fieldForShipNumber = isPlayer1
+          ? "player1NumberOfShips"
+          : "player2NumberOfShips";
+
+        numberOfShips = await redisClient.hGet(
+          `game:${gameId}`,
+          fieldForShipNumber
+        );
+
+        for (let i = 0; i < numberOfShips; i++) {
+          await redisClient.del(`ship${i}:${socket.id}`);
+        }
 
         const wantsReplayInString = wantsReplay ? "true" : "false";
         // store player wants replay status in redis
@@ -597,6 +700,9 @@ export default function (io) {
               delGamePlayer1Promise,
               delGamePlayer2Promise,
             ]);
+
+            io.to(`watch:${gameId}`).emit("sptGameEnd");
+            io.socketsLeave(`watch:${gameId}`);
           } else {
             // delete old board data from redis
             await redisClient.hDel(`game:${gameId}`, "player1Board");
@@ -657,9 +763,46 @@ export default function (io) {
                 `game:${resetRequest.gameId}`,
                 "player2Board"
               );
+
+              // delete old ship placement info
+              const player1NumberOfShips = await redisClient.hGet(
+                `game:${resetRequest.gameId}`,
+                "player1NumberOfShips"
+              );
+
+              for (let i = 0; i < player1NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player1SocketId}`);
+              }
+
+              const player2NumberOfShips = await redisClient.hGet(
+                `game:${resetRequest.gameId}`,
+                "player2NumberOfShips"
+              );
+
+              for (let i = 0; i < player2NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player2SocketId}`);
+              }
             } else if (resetRequest.toReset === "cancel") {
               // handle when game end
 
+              // delete old ship placement info
+              const player1NumberOfShips = await redisClient.hGet(
+                `game:${resetRequest.gameId}`,
+                "player1NumberOfShips"
+              );
+
+              for (let i = 0; i < player1NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player1SocketId}`);
+              }
+
+              const player2NumberOfShips = await redisClient.hGet(
+                `game:${resetRequest.gameId}`,
+                "player2NumberOfShips"
+              );
+
+              for (let i = 0; i < player2NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player2SocketId}`);
+              }
               // remove game info entry
               const deleteGamePromise = redisClient.del(
                 `game:${resetRequest.gameId}`
@@ -690,6 +833,7 @@ export default function (io) {
             }
 
             io.to(player1SocketId).to(player2SocketId).emit("reset", message);
+            io.to(`watch:${gameId}`).emit("sptReset", message);
           }
         }
       } catch (error) {
@@ -716,6 +860,32 @@ export default function (io) {
           );
         }
 
+        const fieldForPlayer = isPlayer1
+          ? "player1NumberOfShips"
+          : "player2NumberOfShips";
+        const fieldForOther = isPlayer1
+          ? "player2NumberOfShips"
+          : "player1NumberOfShips";
+
+        // delete old ship placement info
+        const playerNumberOfShips = await redisClient.hGet(
+          `game:${gameId}`,
+          fieldForPlayer
+        );
+
+        for (let i = 0; i < playerNumberOfShips; i++) {
+          await redisClient.del(`ship${i}:${socket.id}`);
+        }
+
+        const OtherNumberOfShips = await redisClient.hGet(
+          `game:${gameId}`,
+          fieldForOther
+        );
+
+        for (let i = 0; i < OtherNumberOfShips; i++) {
+          await redisClient.del(`ship${i}:${otherPlayerSocketId}`);
+        }
+
         // remove game info entry
         const deleteGamePromise = redisClient.del(`game:${gameId}`);
 
@@ -740,6 +910,8 @@ export default function (io) {
         ]);
 
         io.to(otherPlayerSocketId).emit("opponentQuit");
+        io.to(`watch:${gameId}`).emit("sptGameEnd");
+        io.socketsLeave(`watch:${gameId}`);
       } catch (error) {
         console.log(error);
       }
@@ -773,6 +945,7 @@ export default function (io) {
               level: player1Info[index].level,
               profilePicture: player1Info[index].profilePicture,
               score: game.player1Score,
+              socketId: game.player1SocketId,
             },
             player2: {
               username: player2Info[index].username,
@@ -780,10 +953,77 @@ export default function (io) {
               level: player2Info[index].level,
               profilePicture: player2Info[index].profilePicture,
               score: game.player2Score,
+              socketId: game.player2SocketId,
             },
           };
         });
         socket.emit("gameList", formattedGameList);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    socket.on("watch", async (gameId) => {
+      try {
+        if (!(await redisClient.exists(`game:${gameId}`))) {
+          socket.emit("sptGameInfo", "The selected game is no longer active.");
+          return;
+        }
+        const gameInfo = await redisClient.hGetAll(`game:${gameId}`);
+        if (
+          typeof gameInfo.player1Board === "undefined" ||
+          typeof gameInfo.player2Board === "undefined"
+        ) {
+          return;
+        }
+
+        const p1ShipInfoPromises = Array(gameInfo.player1NumberOfShips)
+          .fill()
+          .map((_, index) => {
+            return redisClient.hGetAll(
+              `ship${index}:${gameInfo.player1SocketId}`
+            );
+          });
+        const p1OriginalBoard = await Promise.all(p1ShipInfoPromises);
+
+        const p2ShipInfoPromises = Array(gameInfo.player2NumberOfShips)
+          .fill()
+          .map((_, index) => {
+            return redisClient.hGetAll(
+              `ship${index}:${gameInfo.player2SocketId}`
+            );
+          });
+        const p2OriginalBoard = await Promise.all(p2ShipInfoPromises);
+
+        const p1BoardFireResults = convertBoardStrTo2DArray(
+          await redisClient.hGet(`game:${gameId}`, "player1Board")
+        );
+
+        const p2BoardFireResults = convertBoardStrTo2DArray(
+          await redisClient.hGet(`game:${gameId}`, "player2Board")
+        );
+
+        message = {
+          p1OriginalBoard: p1OriginalBoard,
+          p2OriginalBoard: p2OriginalBoard,
+          p1BoardFireResults: p1BoardFireResults,
+          p2BoardFireResults: p2BoardFireResults,
+          turn: gameInfo.turn,
+          p1Score: gameInfo.player1Score,
+          p2Score: gameInfo.player2Score,
+        };
+
+        socket.join(`watch:${gameId}`);
+        socket.emit("sptGameInfo", message);
+      } catch (error) {
+        console.log(error);
+        socket.emit("sptGameInfo", "Internal server error occurred.");
+      }
+    });
+
+    socket.on("sptLeaveRoom", (gameId) => {
+      try {
+        socket.leave(`watch:${gameId}`);
       } catch (error) {
         console.log(error);
       }
