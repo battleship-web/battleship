@@ -3,6 +3,7 @@ import { socket } from "../socket";
 export default function ResetButton({ text, options }) {
   return (
     <button
+
       onClick={() => {
         console.log(text);
         socket.emit("initiateReset", options);

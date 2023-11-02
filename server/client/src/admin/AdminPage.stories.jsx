@@ -70,7 +70,10 @@ const gameList1 = [
   },
 ];
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> refs/remotes/origin/main
 const gameList2 = [
   {
     gameId: "mock-id-1",
@@ -131,6 +134,12 @@ export const PopulatedSample1 = {
   args: {
     gameList: gameList1,
     clientList: clientList1,
+  },
+};
+
+export const PopulatedSample2 = {
+  args: {
+    gameList: gameList2,
   },
 };
 
