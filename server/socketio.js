@@ -788,5 +788,8 @@ export default function (io) {
         console.log(error);
       }
     });
+    socket.on("setProfilePicture", async (profilePicture) => {
+      await redisClient.hSet(`socketId:${socket.id}`, "profilePicture", profilePicture);
+    })
   });
 }
