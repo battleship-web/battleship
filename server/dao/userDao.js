@@ -27,3 +27,12 @@ export async function createUser(username, password, nickname) {
     throw new Error("User creation failed.");
   }
 }
+
+export async function setUserProfilePicture(username, profilePicture) {
+  try {
+    await User.updateOne({ username: username }, { $set: { profilePicture: profilePicture } });
+  } catch (error) {
+    console.log(error);
+    throw new Error("User set profile picture failed.");
+  }
+}

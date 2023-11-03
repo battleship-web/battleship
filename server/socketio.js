@@ -1,4 +1,4 @@
-import { findUserByUsername, createUser } from "./dao/userDao.js";
+import { findUserByUsername, createUser, setUserProfilePicture } from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
@@ -790,6 +790,7 @@ export default function (io) {
     });
     socket.on("setProfilePicture", async (profilePicture) => {
       await redisClient.hSet(`socketId:${socket.id}`, "profilePicture", profilePicture);
+      setUserProfilePicture(await redisClient.hGet(`socketId:${socket.id}`, "username"), profilePicture);
     })
   });
 }
