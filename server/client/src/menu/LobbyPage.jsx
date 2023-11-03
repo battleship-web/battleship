@@ -224,6 +224,14 @@ function LobbyPage({
           >
             Refresh
           </button>
+          <button
+            className="mx-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-2xl border-2 border-orange-950"
+            onClick={() => {
+              setGameStage("menu:arena");
+            }}
+          >
+            Go to game list page
+          </button>
         </div>
       </div>
     </main>

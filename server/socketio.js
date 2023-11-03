@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
 import { convertBoardStrTo2DArray } from "./utils/board.js";
-import { reset } from "nodemon";
 
 export default function (io) {
   io.on("connection", (socket) => {
@@ -131,12 +130,36 @@ export default function (io) {
         const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
         if (gameId) {
           const gameInfo = await redisClient.hGetAll(`game:${gameId}`);
-          const otherPlayerSocketId =
-            gameInfo.player1SocketId === socket.id
-              ? gameInfo.player2SocketId
-              : gameInfo.player1SocketId;
+          const isPlayer1 = socket.id === gameInfo.player1SocketId;
+          const otherPlayerSocketId = isPlayer1
+            ? gameInfo.player2SocketId
+            : gameInfo.player1SocketId;
 
           socket.to(otherPlayerSocketId).emit("opponentQuit");
+
+          const fieldForPlayer = isPlayer1
+            ? "player1NumberOfShips"
+            : "player2NumberOfShips";
+          const fieldForOther = isPlayer1
+            ? "player2NumberOfShips"
+            : "player1NumberOfShips";
+
+          // delete old ship placement info
+          const playerNumberOfShips = parseInt(
+            await redisClient.hGet(`game:${gameId}`, fieldForPlayer)
+          );
+
+          for (let i = 0; i < playerNumberOfShips; i++) {
+            await redisClient.del(`ship${i}:${socket.id}`);
+          }
+
+          const OtherNumberOfShips = parseInt(
+            await redisClient.hGet(`game:${gameId}`, fieldForOther)
+          );
+
+          for (let i = 0; i < OtherNumberOfShips; i++) {
+            await redisClient.del(`ship${i}:${otherPlayerSocketId}`);
+          }
 
           const promise1 = redisClient.del(`game:${gameId}`);
           const promise2 = redisClient.sRem("gameList", gameId);
@@ -453,9 +476,8 @@ export default function (io) {
               ? "player2NumberOfShips"
               : "player1NumberOfShips";
 
-            const otherPlayerNumberOfShips = redisClient.hGet(
-              `game:${gameId}`,
-              fieldForShipNumber
+            const otherPlayerNumberOfShips = parseInt(
+              await redisClient.hGet(`game:${gameId}`, fieldForShipNumber)
             );
 
             const getPromises = Array(otherPlayerNumberOfShips)
@@ -467,9 +489,18 @@ export default function (io) {
               });
 
             const otherPlayerOriginalBoard = await Promise.all(getPromises);
+
+            // parse string into appropriate types
+            otherPlayerOriginalBoard.forEach((ship, index) => {
+              otherPlayerOriginalBoard[index].x = parseInt(ship.x);
+              otherPlayerOriginalBoard[index].y = parseInt(ship.y);
+              otherPlayerOriginalBoard[index].size = parseInt(ship.size);
+              otherPlayerOriginalBoard[index].rotated = ship.rotated === "true";
+            });
+
             const sptMessage = {
-              p1OriginalBoard: isPlayer1 ? board : otherPlayerOriginalBoard,
-              p2OriginalBoard: isPlayer1 ? otherPlayerOriginalBoard : board,
+              p1OriginalBoard: isPlayer1 ? ships : otherPlayerOriginalBoard,
+              p2OriginalBoard: isPlayer1 ? otherPlayerOriginalBoard : ships,
               p1BoardFireResults: null,
               p2BoardFireResults: null,
               turn: turn,
@@ -619,9 +650,8 @@ export default function (io) {
           ? "player1NumberOfShips"
           : "player2NumberOfShips";
 
-        numberOfShips = await redisClient.hGet(
-          `game:${gameId}`,
-          fieldForShipNumber
+        const numberOfShips = parseInt(
+          await redisClient.hGet(`game:${gameId}`, fieldForShipNumber)
         );
 
         for (let i = 0; i < numberOfShips; i++) {
@@ -647,7 +677,7 @@ export default function (io) {
         // check if replay statuses in
         if (
           (await redisClient.hExists(`game:${gameId}`, "player1WantsReplay")) &&
-          redisClient.hExists(`game:${gameId}`, "player2WantsReplay")
+          (await redisClient.hExists(`game:${gameId}`, "player2WantsReplay"))
         ) {
           // handle when both replay statuses in
           // get replay statuses converted to boolean
@@ -765,18 +795,22 @@ export default function (io) {
               );
 
               // delete old ship placement info
-              const player1NumberOfShips = await redisClient.hGet(
-                `game:${resetRequest.gameId}`,
-                "player1NumberOfShips"
+              const player1NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player1NumberOfShips"
+                )
               );
 
               for (let i = 0; i < player1NumberOfShips; i++) {
                 await redisClient.del(`ship${i}:${player1SocketId}`);
               }
 
-              const player2NumberOfShips = await redisClient.hGet(
-                `game:${resetRequest.gameId}`,
-                "player2NumberOfShips"
+              const player2NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player2NumberOfShips"
+                )
               );
 
               for (let i = 0; i < player2NumberOfShips; i++) {
@@ -786,18 +820,22 @@ export default function (io) {
               // handle when game end
 
               // delete old ship placement info
-              const player1NumberOfShips = await redisClient.hGet(
-                `game:${resetRequest.gameId}`,
-                "player1NumberOfShips"
+              const player1NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player1NumberOfShips"
+                )
               );
 
               for (let i = 0; i < player1NumberOfShips; i++) {
                 await redisClient.del(`ship${i}:${player1SocketId}`);
               }
 
-              const player2NumberOfShips = await redisClient.hGet(
-                `game:${resetRequest.gameId}`,
-                "player2NumberOfShips"
+              const player2NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player2NumberOfShips"
+                )
               );
 
               for (let i = 0; i < player2NumberOfShips; i++) {
@@ -868,18 +906,16 @@ export default function (io) {
           : "player1NumberOfShips";
 
         // delete old ship placement info
-        const playerNumberOfShips = await redisClient.hGet(
-          `game:${gameId}`,
-          fieldForPlayer
+        const playerNumberOfShips = parseInt(
+          await redisClient.hGet(`game:${gameId}`, fieldForPlayer)
         );
 
         for (let i = 0; i < playerNumberOfShips; i++) {
           await redisClient.del(`ship${i}:${socket.id}`);
         }
 
-        const OtherNumberOfShips = await redisClient.hGet(
-          `game:${gameId}`,
-          fieldForOther
+        const OtherNumberOfShips = parseInt(
+          await redisClient.hGet(`game:${gameId}`, fieldForOther)
         );
 
         for (let i = 0; i < OtherNumberOfShips; i++) {
@@ -889,7 +925,7 @@ export default function (io) {
         // remove game info entry
         const deleteGamePromise = redisClient.del(`game:${gameId}`);
 
-        // remove gameId from game list
+        // remove gameId from game list ---- some error here
         const deleteGameEntryPromise = redisClient.sRem("gameList", gameId);
 
         const delPlayerGamePromise = redisClient.hDel(
@@ -974,10 +1010,13 @@ export default function (io) {
           typeof gameInfo.player1Board === "undefined" ||
           typeof gameInfo.player2Board === "undefined"
         ) {
+          socket.join(`watch:${gameId}`);
           return;
         }
 
-        const p1ShipInfoPromises = Array(gameInfo.player1NumberOfShips)
+        const p1ShipInfoPromises = Array(
+          parseInt(gameInfo.player1NumberOfShips)
+        )
           .fill()
           .map((_, index) => {
             return redisClient.hGetAll(
@@ -986,7 +1025,17 @@ export default function (io) {
           });
         const p1OriginalBoard = await Promise.all(p1ShipInfoPromises);
 
-        const p2ShipInfoPromises = Array(gameInfo.player2NumberOfShips)
+        // parse string into appropriate types
+        p1OriginalBoard.forEach((ship, index) => {
+          p1OriginalBoard[index].x = parseInt(ship.x);
+          p1OriginalBoard[index].y = parseInt(ship.y);
+          p1OriginalBoard[index].size = parseInt(ship.size);
+          p1OriginalBoard[index].rotated = ship.rotated === "true";
+        });
+
+        const p2ShipInfoPromises = Array(
+          parseInt(gameInfo.player2NumberOfShips)
+        )
           .fill()
           .map((_, index) => {
             return redisClient.hGetAll(
@@ -994,6 +1043,14 @@ export default function (io) {
             );
           });
         const p2OriginalBoard = await Promise.all(p2ShipInfoPromises);
+
+        // parse string into appropriate types
+        p2OriginalBoard.forEach((ship, index) => {
+          p2OriginalBoard[index].x = parseInt(ship.x);
+          p2OriginalBoard[index].y = parseInt(ship.y);
+          p2OriginalBoard[index].size = parseInt(ship.size);
+          p2OriginalBoard[index].rotated = ship.rotated === "true";
+        });
 
         const p1BoardFireResults = convertBoardStrTo2DArray(
           await redisClient.hGet(`game:${gameId}`, "player1Board")
@@ -1003,7 +1060,7 @@ export default function (io) {
           await redisClient.hGet(`game:${gameId}`, "player2Board")
         );
 
-        message = {
+        const message = {
           p1OriginalBoard: p1OriginalBoard,
           p2OriginalBoard: p2OriginalBoard,
           p1BoardFireResults: p1BoardFireResults,

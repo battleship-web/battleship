@@ -16,6 +16,11 @@ import Loading from "./components/Loading";
 import ReplayPage from "./game/battle/ReplayPage";
 import OpponentQuitPage from "./game/battle/OpponentQuitPage";
 import RegisterPage from "./menu/RegisterPage";
+import GameListPage from "./menu/GameListPage";
+import { setBoardFromFireResult, constructBoard } from "./utils/board";
+import WatchPage from "./game/spectator/WatchPage";
+import WinnerPage from "./game/spectator/WinnerPage";
+import SoundHeader from "./components/SoundHeader";
 
 function App() {
   const [disconnectedByBacking, setDisconnectedByBacking] = useState(false);
@@ -45,6 +50,17 @@ function App() {
   const [opponentBoardFireResults, setOpponentBoardFireResults] = useState([]);
   const [winner, setWinner] = useState(null);
 
+  // spectated game state
+  const [sptGameId, setSptGameId] = useState(null);
+  const [sptTurn, setSptTurn] = useState(null);
+  const [p1Score, setP1Score] = useState(null);
+  const [p2Score, setP2Score] = useState(null);
+  const [p1Info, setP1Info] = useState(null);
+  const [p2Info, setP2Info] = useState(null);
+  const [p1Board, setP1Board] = useState(null);
+  const [p2Board, setP2Board] = useState(null);
+  const [sptWinner, setSptWinner] = useState(null);
+
   let page = null;
 
   function handleQuitGame() {
@@ -68,6 +84,18 @@ function App() {
     setWinner(null);
   }
 
+  function handleSptQuitGame() {
+    setSptGameId(null);
+    setSptTurn(null);
+    setP1Score(null);
+    setP2Score(null);
+    setP1Info(null);
+    setP2Info(null);
+    setP1Board(null);
+    setP2Board(null);
+    setSptWinner(null);
+  }
+
   useEffect(() => {
     function resetAllState() {
       setGameStage("menu:title");
@@ -84,6 +112,7 @@ function App() {
       setIncomingInvite(null);
       setDisconnectedByBacking(true);
       handleQuitGame();
+      handleSptQuitGame();
     }
 
     const onRegisterResponse = (data) => {
@@ -175,6 +204,57 @@ function App() {
       }
     };
 
+    function handleSptGameInfo(gameInfo) {
+      console.log(gameInfo);
+      if (typeof gameInfo === "string") {
+        setGameStage("menu:arena");
+        handleSptQuitGame();
+        return;
+      }
+      if (gameStage === "spt:winner") {
+        setGameStage("spt:watch");
+      }
+      const constructedP1Board = constructBoard(
+        gameInfo.p1OriginalBoard,
+        gameInfo.p1BoardFireResults
+      );
+      const constructedP2Board = constructBoard(
+        gameInfo.p2OriginalBoard,
+        gameInfo.p2BoardFireResults
+      );
+
+      setP1Board(constructedP1Board);
+      setP2Board(constructedP2Board);
+      setSptTurn(gameInfo.turn);
+      setP1Score(gameInfo.p1Score);
+      setP2Score(gameInfo.p2Score);
+    }
+
+    function handleSptFireResult(result) {
+      const formattedResult = {
+        rowIndex: result.y,
+        columnIndex: result.x,
+        hit: result.hit,
+      };
+      if (sptTurn === p1Info.socketId) {
+        // fire on player 2's board
+        setBoardFromFireResult(p2Board, setP2Board, formattedResult);
+        setSptTurn(p2Info.socketId);
+      } else {
+        // fire on player 1's board
+        setBoardFromFireResult(p1Board, setP1Board, formattedResult);
+        setSptTurn(p1Info.socketId);
+      }
+      if (result.winner) {
+        setGameStage("spt:winner");
+        setSptWinner(result.winner);
+      }
+    }
+
+    function handleSptGameEnd() {
+      setGameStage("menu:arena");
+      handleSptQuitGame();
+    }
     const cleanup = () => {
       if (opponentInfo) {
         socket.emit("quit");
@@ -201,6 +281,9 @@ function App() {
     socket.on("opponentQuit", handleOpponentQuit);
     socket.on("reset", handleReset);
     socket.on("gameList", setGameList);
+    socket.on("sptGameInfo", handleSptGameInfo);
+    socket.on("sptFireResult", handleSptFireResult);
+    socket.on("sptGameEnd", handleSptGameEnd);
 
     window.addEventListener("pagehide", cleanup);
 
@@ -216,6 +299,12 @@ function App() {
     playerBoardFireResults,
     opponentInfo,
     disconnectedByBacking,
+    sptTurn,
+    p1Info,
+    p2Info,
+    p2Board,
+    p1Board,
+    gameStage,
   ]);
 
   switch (gameStage) {
@@ -269,6 +358,17 @@ function App() {
           setInviting={setInviting}
           setIncomingInvite={setIncomingInvite}
           setOpponentInfo={setOpponentInfo}
+        />
+      );
+      break;
+    case "menu:arena":
+      page = (
+        <GameListPage
+          gameList={gameList}
+          setSptGameId={setSptGameId}
+          setP1Info={setP1Info}
+          setP2Info={setP2Info}
+          setGameStage={setGameStage}
         />
       );
       break;
@@ -347,12 +447,45 @@ function App() {
         />
       );
       break;
+    case "spt:watch":
+      page = (
+        <WatchPage
+          turn={sptTurn}
+          gameId={sptGameId}
+          p1Score={p1Score}
+          p2Score={p2Score}
+          p1Board={p1Board}
+          p2Board={p2Board}
+          p1Info={p1Info}
+          p2Info={p2Info}
+          handleSptQuitGame={handleSptQuitGame}
+          setGameStage={setGameStage}
+        />
+      );
+      break;
+    case "spt:winner":
+      page = (
+        <WinnerPage
+          gameId={sptGameId}
+          winner={sptWinner}
+          p1Info={p1Info}
+          p2Info={p2Info}
+          setGameStage={setGameStage}
+          handleSptQuitGame={handleSptQuitGame}
+        />
+      );
+      break;
     case "admin":
       page = <AdminPage clientList={allClientList} gameList={gameList} />;
       break;
     default:
       page = <NotFoundPage />;
   }
-  return page;
+  return (
+    <>
+      {/* <SoundHeader /> */}
+      {page}
+    </>
+  );
 }
 export default App;

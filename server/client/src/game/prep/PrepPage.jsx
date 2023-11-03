@@ -54,6 +54,7 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
     const toAppend = {
       x: columnIndex,
       y: rowIndex,
+      size: 4,
       rotated: !(selectionMode === "row"),
     };
     setInfoToSend([...infoTosend, toAppend]);
