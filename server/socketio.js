@@ -300,7 +300,7 @@ export default function (io) {
     socket.on("refuseInvite", (inviterSocketId) => {
       socket.to(inviterSocketId).emit("inviteRefused", socket.id);
     });
-    socket.on("placement", async (ships) => {
+    socket.on("placement", async (ships, boardWidth) => {
       try {
         // get gameid
         const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
@@ -310,26 +310,25 @@ export default function (io) {
 
         // make board
         const board = []; // or columns
-        for (let x = 0; x < 8; x++) {
+        for (let x = 0; x < boardWidth; x++) {
           let column = [];
-          for (let y = 0; y < 8; y++) {
+          for (let y = 0; y < boardWidth; y++) {
             column.push("B");
           }
           board.push(column);
         }
+        await redisClient.hSet(`game:${gameId}`, "boardWidth", boardWidth); // store boardwidth for string conversion usage
 
         // processing: take ship pos and place into board
         for (const ship of ships) {
           if (ship.rotated) {
             // vertical
-            for (let i = 0; i < 4; i++) {
-              // 4 square long ships
+            for (let i = 0; i < ship.size; i++) {
               board[ship.x][ship.y + i] = "S";
             }
           } else {
             // horizontal
-            for (let i = 0; i < 4; i++) {
-              // 4 square long ships
+            for (let i = 0; i < ship.size; i++) {
               board[ship.x + i][ship.y] = "S";
             }
           }
@@ -423,13 +422,14 @@ export default function (io) {
         }
 
         // convert board string to 2d array
+        const boardWidth = parseInt(await redisClient.hGet(`game:${gameId}`, "boardWidth"));
         let board = [];
         let start = 0;
-        let end = 8;
-        for (let i = 0; i < 8; i++) {
+        let end = boardWidth;
+        for (let i = 0; i < boardWidth; i++) {
           board.push(boardStr.slice(start, end));
-          start += 8;
-          end += 8;
+          start += boardWidth;
+          end += boardWidth;
         }
         board = board.map((columnStr) => columnStr.split(""));
 
