@@ -1,4 +1,5 @@
 import { socket } from "../socket";
+import BrightnessButton from "../darkmode/BrightnessButton";
 
 export default function WinLose({ setGameStage, handleQuitGame, win }) {
   const declareText = win ? "VICTORY!" : "DEFEAT!";
@@ -54,6 +55,10 @@ export default function WinLose({ setGameStage, handleQuitGame, win }) {
           </button>
         </div>
       </div>
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </main>
+    
   );
 }

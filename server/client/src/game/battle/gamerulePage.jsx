@@ -1,3 +1,5 @@
+import BrightnessButton from "../../darkmode/BrightnessButton";
+
 function GamerulePage({ setGameStage }) {
   const onhandleClick = () => {
     setGameStage("game:prep");
@@ -45,6 +47,9 @@ function GamerulePage({ setGameStage }) {
           Next
         </button>
       </div>
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </main>
   );
 }

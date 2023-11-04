@@ -3,6 +3,7 @@ import Instruction from "../../components/Instruction";
 import Loading from "../../components/Loading";
 import { useEffect, useState } from "react";
 import { socket } from "../../socket";
+import BrightnessButton from "../../darkmode/BrightnessButton";
 
 function ScorepointPage({
   instruction,
@@ -132,6 +133,9 @@ function ScorepointPage({
           backgroundImage: "url('/src/assets/bluebkg.jpg')",
           backgroundSize: "100% 100%",}}>
       {scorePageDisplay}
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </main>
   );
 }

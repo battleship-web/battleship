@@ -3,6 +3,7 @@ import { socket } from "../socket";
 import Loading from "../components/Loading";
 import RefreshButton from "./RefreshButton";
 import ResetButton from "./ResetButton";
+import BrightnessButton from "../darkmode/BrightnessButton";
 
 //Display Game list and current score
 // Component function
@@ -148,6 +149,9 @@ function AdminPage({ gameList, clientList }) {
             <RefreshButton />
           </div>
         </div>
+        <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
       </div>
     </>
   );

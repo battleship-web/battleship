@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { socket } from "../socket";
+import BrightnessButton from "../darkmode/BrightnessButton";
+
 export default function InputNicknamePage({ setGameStage, setUser }) {
   const [nickname, setNickname] = useState("");
   const onHandleNicknameSubmit = () => {
@@ -43,6 +45,9 @@ export default function InputNicknamePage({ setGameStage, setUser }) {
             </button>
           </p>
         </div>
+        <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
       </main>
     </>
   );

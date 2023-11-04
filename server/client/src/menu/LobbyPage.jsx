@@ -7,6 +7,7 @@ import InviteRefused from "../components/InviteRefused";
 import IncomingInvite from "../components/IncomingInvite";
 import { socket } from "../socket";
 import { PropTypes } from "prop-types";
+import BrightnessButton from "../darkmode/BrightnessButton";
 
 function LobbyPage({
   clientList,
@@ -226,6 +227,9 @@ function LobbyPage({
           </button>
         </div>
       </div>
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </main>
   );
 }

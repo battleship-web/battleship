@@ -4,6 +4,7 @@ import Board from "../../squarenboard/Board";
 import shipPic from "../../assets/ship.png";
 import rotatePic from "../../assets/rotate.png";
 import { socket } from "../../socket";
+import BrightnessButton from "../../darkmode/BrightnessButton";
 
 const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
   const [boardState, setBoardState] = useState(
@@ -136,6 +137,9 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
           </button>
         </div>
       </div>
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </div>
   );
 };

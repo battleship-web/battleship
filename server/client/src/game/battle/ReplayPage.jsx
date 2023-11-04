@@ -1,3 +1,5 @@
+import BrightnessButton from "../../darkmode/BrightnessButton";
+
 function ReplayPage({ text, handleOkay }) {
   return (
     <main className="grid w-screen min-h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
@@ -16,6 +18,9 @@ function ReplayPage({ text, handleOkay }) {
           Okay
         </button>
       </div>
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </main>
   );
 }
