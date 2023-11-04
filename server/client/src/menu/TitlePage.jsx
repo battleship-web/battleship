@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import BrightnessButton from "../darkmode/BrightnessButton";
 
 export default function TitlePage({ setGameStage }) {
   return (
@@ -28,6 +29,9 @@ export default function TitlePage({ setGameStage }) {
             </button>
           </div>
         </div>
+        <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
       </main>
     </>
   );

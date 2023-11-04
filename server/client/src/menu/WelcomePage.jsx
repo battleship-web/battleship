@@ -1,9 +1,11 @@
+import BrightnessButton from "../darkmode/BrightnessButton";
+
 function WelcomePage({ user, setGameStage }) {
   const onhandleClick = () => {
     setGameStage("menu:lobby");
   };
   return (
-    <main className="grid h-screen w-screen place-items-center  px-6  sm:py-32 lg:px-8 bg-cover"
+    <main className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
         style={{
           backgroundImage: "url('/src/assets/bluebkg.jpg')",
           backgroundSize: "100% 100%",}}>
@@ -42,6 +44,9 @@ function WelcomePage({ user, setGameStage }) {
           Next
         </button>
       </div>
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </main>
   );
 }

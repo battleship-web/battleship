@@ -1,6 +1,8 @@
 import Loading from "../components/Loading";
 import { socket } from "../socket";
 import { useState } from "react";
+import BrightnessButton from "../darkmode/BrightnessButton";
+
 function LoginPage({
   socketError,
   setSocketError,
@@ -99,6 +101,9 @@ function LoginPage({
       }}
     >
       {display}
+      <div className="text-right" style={{ position: "absolute", bottom: "0", right: "0" }}>
+            <BrightnessButton />
+          </div>
     </main>
   );
 }

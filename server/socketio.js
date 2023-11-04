@@ -158,6 +158,13 @@ export default function (io) {
         console.log(error);
       }
     });
+    socket.on("setProfilePicture", async (selectedPicture) => {
+      try {
+        await redisClient.hSet(`socketId:${socket.id}`, "nicknameselectedPicture", selectedPicture);
+      } catch (error) {
+        console.log(error);
+      }
+    });
     socket.on("clientListRequest", async () => {
       try {
         const connectedSockets = Array.from(io.sockets.sockets.keys());
