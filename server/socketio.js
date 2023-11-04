@@ -434,19 +434,32 @@ export default function (io) {
         board = board.map((columnStr) => columnStr.split(""));
 
         // check if ship
-        let isHit = false;
+        let isHitArr = [false, false, false, false];
+        let isHitArrIndex = 0;
+        let bombWidth = 1;
 
-        if (Object.keys(position).length !== 0) {
-          // check if empty object
-          if (board[position.x][position.y] === "S") {
-            // hit
-            board[position.x][position.y] = "H";
-            isHit = true;
-          } else if (board[position.x][position.y] === "B") {
-            // miss
-            board[position.x][position.y] = "M";
+        if (position.bomb) {
+          bombWidth = 2;
+        }
+
+        for (let i = 0; i < bombWidth; i++) {
+          for (let j = 0; j < bombWidth; j++) {
+            const xPos = position.x + j;
+            const yPos = position.y + i;
+
+            if (xPos < boardWidth && yPos < boardWidth) { // check if in board
+              if (board[xPos][yPos] === "S") {
+                // hit
+                board[xPos][yPos] = "H";
+                isHitArr[isHitArrIndex] = true;
+              } else if (board[xPos][yPos] === "B") {
+                // miss
+                board[xPos][yPos] = "M";
+              }
+              // for rest board remain unchanged
+            }
+            isHitArrIndex++;
           }
-          // for rest board remain unchanged
         }
 
         // update redis
@@ -480,9 +493,15 @@ export default function (io) {
         let message = {
           x: position.x,
           y: position.y,
-          hit: isHit,
+          hit: isHitArr[0],
+          bomb: position.bomb,
           winner: null,
         };
+
+        // for bomb case
+        if (position.bomb) {
+          message.hit = isHitArr;
+        }
 
         // check if won
         let numOfHits = 0;
