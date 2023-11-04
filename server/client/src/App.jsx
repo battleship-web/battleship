@@ -20,6 +20,7 @@ import GameListPage from "./menu/GameListPage";
 import { setBoardFromFireResult, constructBoard } from "./utils/board";
 import WatchPage from "./game/spectator/WatchPage";
 import WinnerPage from "./game/spectator/WinnerPage";
+import GameHeader from "./components/GameHeader";
 
 function App() {
   const [disconnectedByBacking, setDisconnectedByBacking] = useState(false);
@@ -497,6 +498,11 @@ function App() {
     default:
       page = <NotFoundPage />;
   }
-  return <>{page}</>;
+  return (
+    <>
+      <GameHeader gameStage={gameStage} />
+      {page}
+    </>
+  );
 }
 export default App;
