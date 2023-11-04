@@ -20,7 +20,6 @@ import GameListPage from "./menu/GameListPage";
 import { setBoardFromFireResult, constructBoard } from "./utils/board";
 import WatchPage from "./game/spectator/WatchPage";
 import WinnerPage from "./game/spectator/WinnerPage";
-import SoundHeader from "./components/SoundHeader";
 
 function App() {
   const [disconnectedByBacking, setDisconnectedByBacking] = useState(false);
@@ -196,11 +195,13 @@ function App() {
         setPlayerScore(0);
         setOpponentScore(0);
       } else if (message.toReset === "game") {
-        handleNewGame();
-        setGameStage("game:prep");
+        setSptTurn(null);
+        setP1Board(null);
+        setP2Board(null);
+        setSptWinner(null);
       } else if (message.toReset === "cancel") {
-        handleQuitGame();
-        setGameStage("menu:lobby");
+        handleSptQuitGame();
+        setGameStage("menu:arena");
       }
     };
 
@@ -255,6 +256,20 @@ function App() {
       setGameStage("menu:arena");
       handleSptQuitGame();
     }
+
+    function handleSptReset(message) {
+      if (message.toReset === "score") {
+        setP1Score(0);
+        setP2Score(0);
+      } else if (message.toReset === "game") {
+        handleNewGame();
+        setGameStage("game:prep");
+      } else if (message.toReset === "cancel") {
+        handleQuitGame();
+        setGameStage("menu:lobby");
+      }
+    }
+
     const cleanup = () => {
       if (opponentInfo) {
         socket.emit("quit");
@@ -284,6 +299,7 @@ function App() {
     socket.on("sptGameInfo", handleSptGameInfo);
     socket.on("sptFireResult", handleSptFireResult);
     socket.on("sptGameEnd", handleSptGameEnd);
+    socket.on("sptReset", handleSptReset);
 
     window.addEventListener("pagehide", cleanup);
 
@@ -481,11 +497,6 @@ function App() {
     default:
       page = <NotFoundPage />;
   }
-  return (
-    <>
-      {/* <SoundHeader /> */}
-      {page}
-    </>
-  );
+  return <>{page}</>;
 }
 export default App;

@@ -64,6 +64,22 @@ export default function (io) {
         }
         const match = await bcrypt.compare(password, user.passwordHash);
         if (match) {
+          if (user.role === "admin") {
+            await redisClient.hSet(
+              `socketId:${socket.id}`,
+              "username",
+              user.username
+            );
+            await redisClient.hSet(`socketId:${socket.id}`, "role", user.role);
+            socket.emit("loginResponse", {
+              success: true,
+              message: {
+                username: user.username,
+                role: user.role,
+              },
+            });
+            return;
+          }
           const promise1 = redisClient.hSet(
             `socketId:${socket.id}`,
             "username",
@@ -871,7 +887,7 @@ export default function (io) {
             }
 
             io.to(player1SocketId).to(player2SocketId).emit("reset", message);
-            io.to(`watch:${gameId}`).emit("sptReset", message);
+            io.to(`watch:${resetRequest.gameId}`).emit("sptReset", message);
           }
         }
       } catch (error) {

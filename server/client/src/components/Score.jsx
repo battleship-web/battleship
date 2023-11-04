@@ -58,15 +58,18 @@ function Score({
 
   return (
     <main className="text-center">
-     <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40"
+      <div
+        className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40"
         style={{
           backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",}}>
+          backgroundSize: "100% 100%",
+        }}
+      >
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-orange-950 sm:text-5xl pt-5">
           BATTLESHIP{" "}
         </h1>
         {turn === socket.id ? (
-          <Timer startSeconds={20} onZero={handleZero} fired={fired} />
+          <Timer startSeconds={10} onZero={handleZero} fired={fired} />
         ) : (
           <h1 className="mt-2 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
             Opponent&apos;s Turn

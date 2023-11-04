@@ -18,8 +18,8 @@ const useAudio = (url) => {
   return [playing, toggle];
 };
 
-function TestSound() {
-  const [playing, toggle] = useAudio("/src/assets/test.mp3");
+function TestSound({ music }) {
+  const [playing, toggle] = useAudio(music);
 
   return (
     <div>
