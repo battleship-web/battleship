@@ -864,8 +864,12 @@ export default function (io) {
       }
     });
     socket.on("setProfilePicture", async (profilePicture) => {
-      await redisClient.hSet(`socketId:${socket.id}`, "profilePicture", profilePicture);
-      setUserProfilePicture(await redisClient.hGet(`socketId:${socket.id}`, "username"), profilePicture);
+      try {
+        await redisClient.hSet(`socketId:${socket.id}`, "profilePicture", profilePicture);
+        setUserProfilePicture(await redisClient.hGet(`socketId:${socket.id}`, "username"), profilePicture);
+      } catch (error) {
+        console.log(error);
+      }
     })
     socket.on("requestLeaderboard", (sorting) => {
       try {
