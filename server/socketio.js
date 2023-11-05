@@ -1,7 +1,8 @@
-import { findUserByUsername, createUser, setUserProfilePicture } from "./dao/userDao.js";
+import { findUserByUsername, createUser, setUserProfilePicture, incrementNumOfRoundsPlayed, incrementNumOfRoundsWon, getAllUsersArr } from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
+import e from "express";
 
 export default function (io) {
   io.on("connection", (socket) => {
@@ -574,6 +575,17 @@ export default function (io) {
           }
 
           await redisClient.hSet(`game:${gameId}`, "lastWinner", socket.id);
+
+          // update mongodb
+          const player1Username = await redisClient.hGet(`socketId:${player1SocketId}`, "username");
+          const player2Username = await redisClient.hGet(`socketId:${player2SocketId}`, "username");
+          incrementNumOfRoundsPlayed(player1Username);
+          incrementNumOfRoundsPlayed(player2Username);
+          if (isPlayer1) {
+            incrementNumOfRoundsWon(player1Username);
+          } else {
+            incrementNumOfRoundsWon(player2Username);
+          }
         }
 
         io.to(player1SocketId).to(player2SocketId).emit("fireResult", message);
@@ -855,5 +867,48 @@ export default function (io) {
       await redisClient.hSet(`socketId:${socket.id}`, "profilePicture", profilePicture);
       setUserProfilePicture(await redisClient.hGet(`socketId:${socket.id}`, "username"), profilePicture);
     })
+    socket.on("requestLeaderboard", (sorting) => {
+      try {
+        let allUsersArr = getAllUsersArr();
+        if (sorting === "byWins") {
+          allUsersArr.sort((a, b) => {
+            if (a.numOfRoundsWon > b.numOfRoundsWon) {
+              return -1;
+            } else if (a.numOfRoundsWon < b.numOfRoundsWon) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        } else if (sorting === "byWinRatio") {
+          allUsersArr.sort((a, b) => {
+            const aWinRatio = a.numOfRoundsWon / a.numOfRoundsPlayed;
+            const bWinRatio = b.numOfRoundsWon / b.numOfRoundsPlayed;
+
+            if (aWinRatio > bWinRatio) {
+              return -1;
+            } else if (aWinRatio < bWinRatio) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        } else if (sorting === "byLevel") {
+          allUsersArr.sort((a, b) => {
+            if (a.level > b.level) {
+              return -1;
+            } else if (a.level < b.level) {
+              return 1;
+            } else {
+              return 0;
+            }
+          })
+        }
+
+        // send message
+        io.to(socket.id).emit("leaderboard", allUsersArr);
+      } catch (error) {
+        console.log(error);
+      })
   });
 }

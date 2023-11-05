@@ -8,6 +8,9 @@ const userSchema = new mongoose.Schema({
   level: { type: Number, required: true },
   exp: { type: Number, required: true },
   profilePicture: String,
+  // user game stats
+  numOfRoundsPlayed: { type: Number, required: true },
+  numOfRoundsWon: { type: Number, required: true }
 });
 
 export default mongoose.model("User", userSchema);

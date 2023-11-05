@@ -21,6 +21,9 @@ export async function createUser(username, password, nickname) {
       nickname: nickname,
       level: 1,
       exp: 0,
+      // user game stats
+      numOfRoundsPlayed: 0,
+      numOfRoundsWon: 0
     });
   } catch (error) {
     console.log(error);
@@ -34,5 +37,32 @@ export async function setUserProfilePicture(username, profilePicture) {
   } catch (error) {
     console.log(error);
     throw new Error("User set profile picture failed.");
+  }
+}
+
+export async function incrementNumOfRoundsPlayed(username) {
+  try {
+    await User.updateOne({ username: username }, { $inc: { numOfRoundsPlayed: 1 } });
+  } catch (error) {
+    console.log(error);
+    throw new Error("User increment number of rounds played failed.");
+  }
+}
+
+export async function incrementNumOfRoundsWon(username) {
+  try {
+    await User.updateOne({ username: username }, { $inc: { numOfRoundsWon: 1 } });
+  } catch (error) {
+    console.log(error);
+    throw new Error("User increment number of rounds won failed.");
+  }
+}
+
+export async function getAllUsersArr() {
+  try {
+    return await User.find({});
+  } catch (error) {
+    console.log(error);
+    throw new Error("Get all users array failed.");
   }
 }
