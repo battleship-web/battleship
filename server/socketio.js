@@ -300,8 +300,10 @@ export default function (io) {
     socket.on("refuseInvite", (inviterSocketId) => {
       socket.to(inviterSocketId).emit("inviteRefused", socket.id);
     });
-    socket.on("placement", async (ships, boardWidth) => {
+    socket.on("placement", async (ships) => {
       try {
+        const boardWidth = 8;
+
         // get gameid
         const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
         const isPlayer1 =
@@ -317,7 +319,6 @@ export default function (io) {
           }
           board.push(column);
         }
-        await redisClient.hSet(`game:${gameId}`, "boardWidth", boardWidth); // store boardwidth for string conversion usage
 
         // processing: take ship pos and place into board
         for (const ship of ships) {
@@ -422,7 +423,7 @@ export default function (io) {
         }
 
         // convert board string to 2d array
-        const boardWidth = parseInt(await redisClient.hGet(`game:${gameId}`, "boardWidth"));
+        const boardWidth = 8;
         let board = [];
         let start = 0;
         let end = boardWidth;
