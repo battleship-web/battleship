@@ -2,6 +2,8 @@ import Board from "../squarenboard/Board";
 import { socket } from "../socket";
 import { useEffect, useState } from "react";
 import Timer from "./Timer";
+import bombPic from "../assets/bomb.png";
+
 function Score({
   handleClickInstruction,
   user,
@@ -18,11 +20,19 @@ function Score({
   setGameStage,
 }) {
   const [fired, setFired] = useState(false);
+  const [bombSelected, setBombSelected] = useState(false);
+  const [bombUsed, setBombUsed] = useState(false);
   const handleOpponentBoardClick = (rowIndex, columnIndex, state) => {
     if (state !== "blank" || turn !== socket.id || fired) {
       return;
     }
-    socket.emit("fire", { x: columnIndex, y: rowIndex });
+    if (bombSelected) {
+      socket.emit("fire", { x: columnIndex, y: rowIndex, bomb: true });
+      setBombUsed(true);
+      setBombSelected(false);
+    } else {
+      socket.emit("fire", { x: columnIndex, y: rowIndex, bomb: false });
+    }
     const newBoard = opponentBoard.map((row) => row.slice());
     newBoard[rowIndex][columnIndex] = "selected";
     setOpponentBoard(newBoard);
@@ -65,9 +75,6 @@ function Score({
           backgroundSize: "100% 100%",
         }}
       >
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-orange-950 sm:text-5xl pt-5">
-          BATTLESHIP{" "}
-        </h1>
         {turn === socket.id ? (
           <Timer startSeconds={10} onZero={handleZero} fired={fired} />
         ) : (
@@ -103,13 +110,30 @@ function Score({
               <Board
                 board={opponentBoard}
                 onClick={handleOpponentBoardClick}
-                size="big"
+                size="small"
               />
             </h1>
             <h1 className="mt-20 text-orange-950 sm:text-8xl font-bold">vs</h1>
             <h1 className="ml-2">
-              <Board board={playerBoard} onClick={() => {}} size="big" />
+              <Board board={playerBoard} onClick={() => {}} size="small" />
             </h1>
+            <button
+              className={`self-start ml-3 ${
+                bombSelected
+                  ? "bg-green-400 rounded border-2 border-green-700"
+                  : ""
+              } ${
+                bombUsed ? "bg-red-400 rounded border-2 border-red-700" : ""
+              }`}
+              onClick={() => {
+                if (bombUsed) {
+                  return;
+                }
+                setBombSelected(!bombSelected);
+              }}
+            >
+              <img src={bombPic} className="w-12 h-12" />
+            </button>
           </div>
         </div>
       </div>

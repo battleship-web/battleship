@@ -1,6 +1,6 @@
 import { useAudio } from "../utils/sound";
 import { useEffect } from "react";
-function GameHeader({ gameStage }) {
+function GameHeader({ gameStage, isDarkMode, setIsDarkMode }) {
   const urls = [
     "/src/assets/OpeningMusic.wav",
     "/src/assets/Music.wav",
@@ -52,6 +52,13 @@ function GameHeader({ gameStage }) {
         }}
       >
         {soundOn ? "Pause" : "Play"}
+      </button>
+      <button
+        onClick={() => {
+          setIsDarkMode(!isDarkMode);
+        }}
+      >
+        Set Dark Mode
       </button>
     </nav>
   );

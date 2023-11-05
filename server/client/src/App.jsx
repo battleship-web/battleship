@@ -23,6 +23,7 @@ import WinnerPage from "./game/spectator/WinnerPage";
 import GameHeader from "./components/GameHeader";
 
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [disconnectedByBacking, setDisconnectedByBacking] = useState(false);
   const [gameStage, setGameStage] = useState("menu:title");
   const [user, setUser] = useState(null);
@@ -163,13 +164,31 @@ function App() {
       if (turn === socket.id) {
         setOpponentBoardFireResults([
           ...opponentBoardFireResults,
-          { rowIndex: result.y, columnIndex: result.x, hit: result.hit },
+          {
+            rowIndex: result.y,
+            columnIndex: result.x,
+            hit: result.hit,
+            lightning: result.lightning,
+            lightningRowIndex: result.lightningY,
+            lightningColumnIndex: result.lightningX,
+            lightningHit: result.lightningHit,
+            bomb: result.bomb,
+          },
         ]);
         setTurn(opponentInfo.socketId);
       } else {
         setPlayerBoardFireResults([
           ...playerBoardFireResults,
-          { rowIndex: result.y, columnIndex: result.x, hit: result.hit },
+          {
+            rowIndex: result.y,
+            columnIndex: result.x,
+            hit: result.hit,
+            lightning: result.lightning,
+            lightningRowIndex: result.lightningY,
+            lightningColumnIndex: result.lightningX,
+            lightningHit: result.lightningHit,
+            bomb: result.bomb,
+          },
         ]);
         setTurn(socket.id);
       }
@@ -237,6 +256,11 @@ function App() {
         rowIndex: result.y,
         columnIndex: result.x,
         hit: result.hit,
+        lightning: result.lightning,
+        lightningRowIndex: result.lightningY,
+        lightningColumnIndex: result.lightningX,
+        lightningHit: result.lightningHit,
+        bomb: result.bomb,
       };
       if (sptTurn === p1Info.socketId) {
         // fire on player 2's board
@@ -499,10 +523,14 @@ function App() {
       page = <NotFoundPage />;
   }
   return (
-    <>
-      <GameHeader gameStage={gameStage} />
+    <div className={`${isDarkMode ? "dark" : ""}`}>
+      <GameHeader
+        gameStage={gameStage}
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+      />
       {page}
-    </>
+    </div>
   );
 }
 export default App;

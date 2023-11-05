@@ -2,18 +2,39 @@ import { useState } from "react";
 import "./Grid.css";
 import Board from "../../squarenboard/Board";
 import shipPic from "../../assets/ship.png";
+import shipBigPic from "../../assets/shipbig.png";
+import shipSmallPic from "../../assets/shipsmall.png";
 import rotatePic from "../../assets/rotate.png";
 import { socket } from "../../socket";
 
 const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
+  const sets = [
+    [4, 4, 4, 4],
+    [5, 5, 3, 3],
+    [4, 3, 3, 3, 3],
+    [5, 4, 4, 3],
+  ];
   const [boardState, setBoardState] = useState(
     new Array(8).fill(0).map(() => new Array(8).fill("blank"))
   );
   const [infoTosend, setInfoToSend] = useState([]);
+  const [selectedSet, setSelectedSet] = useState(0);
   const [placementCount, setPlacementCount] = useState(0);
-  const maxPlacements = 4;
+  const maxPlacements = sets[selectedSet].length;
   const [selectionMode, setSelectionMode] = useState("row");
-  const numShips = 4 - placementCount;
+
+  const shipArray = [];
+  for (let i = placementCount; i < maxPlacements; i++) {
+    let shipToPush = null;
+    if (sets[selectedSet][i] === 5) {
+      shipToPush = <img src={shipBigPic} className="h-12 w-56" />;
+    } else if (sets[selectedSet][i] === 4) {
+      shipToPush = <img src={shipPic} className="h-12 w-44" />;
+    } else if (sets[selectedSet][i] === 3) {
+      shipToPush = <img src={shipSmallPic} className="h-12 w-32" />;
+    }
+    shipArray.push(shipToPush);
+  }
   const handleClick = (rowIndex, columnIndex) => {
     if (placementCount >= maxPlacements) {
       alert("You have reached the maximum number of placements.");
@@ -25,36 +46,53 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
     });
 
     if (selectionMode === "row") {
-      if (columnIndex > 4) {
+      if (columnIndex + sets[selectedSet][placementCount] > 8) {
         alert("Invalid battleship placement.");
         return;
       }
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < sets[selectedSet][placementCount]; i++) {
         if (newGrid[rowIndex][columnIndex + i] !== "blank") {
           alert("Battleships should not overlap.");
           return;
         }
-        newGrid[rowIndex][columnIndex + i] = `ship${4 - i}`;
+        let shipType = null;
+        if (sets[selectedSet][placementCount] === 5) {
+          shipType = "shipBig";
+        } else if (sets[selectedSet][placementCount] === 4) {
+          shipType = "ship";
+        } else if (sets[selectedSet][placementCount] === 3) {
+          shipType = "shipSmall";
+        }
+        newGrid[rowIndex][columnIndex + i] = `${shipType}${
+          sets[selectedSet][placementCount] - i
+        }`;
       }
     } else {
-      if (rowIndex > 4) {
+      if (rowIndex + sets[selectedSet][placementCount] > 8) {
         alert("Invalid battleship placement.");
         return;
       }
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < sets[selectedSet][placementCount]; i++) {
         if (newGrid[rowIndex + i][columnIndex] !== "blank") {
           alert("Battleships should not overlap.");
           return;
         }
-
-        newGrid[rowIndex + i][columnIndex] = `ship${i + 1}r`;
+        let shipType = null;
+        if (sets[selectedSet][placementCount] === 5) {
+          shipType = "shipBig";
+        } else if (sets[selectedSet][placementCount] === 4) {
+          shipType = "ship";
+        } else if (sets[selectedSet][placementCount] === 3) {
+          shipType = "shipSmall";
+        }
+        newGrid[rowIndex + i][columnIndex] = `${shipType}${i + 1}r`;
       }
     }
 
     const toAppend = {
       x: columnIndex,
       y: rowIndex,
-      size: 4,
+      size: sets[selectedSet][placementCount],
       rotated: !(selectionMode === "row"),
     };
     setInfoToSend([...infoTosend, toAppend]);
@@ -65,6 +103,8 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
   const toggleSelectionMode = () => {
     setSelectionMode((prevMode) => (prevMode === "row" ? "column" : "row"));
   };
+
+  // const handleShuffleShip = () => {};
 
   return (
     <div className="page-background">
@@ -94,26 +134,40 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
         >
           Clear Board
         </button>
+        <div className="flex">
+          {/* eslint-disable-next-line no-unused-vars*/}
+          {Array.from(Array(sets.length), (_, index) => (
+            <button
+              key={index}
+              className="rounded bg-purple-600 border border-purple-800 p-1 grow"
+              onClick={() => {
+                setSelectedSet(index);
+                setBoardState(
+                  new Array(8).fill(0).map(() => new Array(8).fill("blank"))
+                );
+                setInfoToSend([]);
+                setPlacementCount(0);
+              }}
+            >
+              {index}
+            </button>
+          ))}
+        </div>
         <div className="container w-60 h-60 bg-sky-700">
-          {Array(numShips)
-            .fill(0)
-            .map((_, index) => (
-              <button
-                key={index}
-                className="mx-5 flex rounded bg-blue-500 border-blue-700 hover:bg-blue-600 active-bg-blue-700 focus-outline-none focus-ring focus-ring-blue-300"
-              >
-                <img
-                  className="color-button w-full h-full object-contain"
-                  src={shipPic}
-                />
-              </button>
-            ))}
+          {shipArray.map((ship, index) => (
+            <button
+              key={index}
+              className="mx-5 flex rounded bg-blue-500 border-blue-700 hover:bg-blue-600 active-bg-blue-700 focus-outline-none focus-ring focus-ring-blue-300"
+            >
+              {ship}
+            </button>
+          ))}
         </div>
         <div className="container flex h-10">
           <button
             className="flex-1 rounded border-2 bg-gradient-to-r border-lime-900 from-green-500 to-green-600 hover:bg-green-800 text-sm font-bold text-lime-900 shadow-sm sm:text-1xl"
             onClick={() => {
-              if (placementCount !== 4) {
+              if (placementCount !== maxPlacements) {
                 alert("Must place all ships before confirming.");
                 return;
               }

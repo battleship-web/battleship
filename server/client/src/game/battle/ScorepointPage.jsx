@@ -3,6 +3,7 @@ import Instruction from "../../components/Instruction";
 import Loading from "../../components/Loading";
 import { useEffect, useState } from "react";
 import { socket } from "../../socket";
+import { setBoardFromFireResult } from "../../utils/board";
 
 function ScorepointPage({
   instruction,
@@ -60,12 +61,9 @@ function ScorepointPage({
     if (playerBoardFireResults.length <= numFireOnPlayerBoard) {
       return;
     }
-    const newPlayerBoard = playerBoard.map((row) => row.slice());
     const latestFireResult =
       playerBoardFireResults[playerBoardFireResults.length - 1];
-    newPlayerBoard[latestFireResult.rowIndex][latestFireResult.columnIndex] =
-      latestFireResult.hit ? "hit" : "miss";
-    setPlayerBoard(newPlayerBoard);
+    setBoardFromFireResult(playerBoard, setPlayerBoard, latestFireResult);
     setNumFireOnPlayerBoard(numFireOnPlayerBoard + 1);
   }, [
     playerBoard,
@@ -78,12 +76,9 @@ function ScorepointPage({
     if (opponentBoardFireResults.length <= numFireOnOpponentBoard) {
       return;
     }
-    const newOpponentBoard = opponentBoard.map((row) => row.slice());
     const latestFireResult =
       opponentBoardFireResults[opponentBoardFireResults.length - 1];
-    newOpponentBoard[latestFireResult.rowIndex][latestFireResult.columnIndex] =
-      latestFireResult.hit ? "hit" : "miss";
-    setOpponentBoard(newOpponentBoard);
+    setBoardFromFireResult(opponentBoard, setOpponentBoard, latestFireResult);
     setNumFireOnOpponentBoard(numFireOnOpponentBoard + 1);
   }, [opponentBoard, opponentBoardFireResults, numFireOnOpponentBoard]);
 

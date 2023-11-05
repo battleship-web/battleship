@@ -2888,6 +2888,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/addon-themes@npm:7.4.6":
+  version: 7.4.6
+  resolution: "@storybook/addon-themes@npm:7.4.6"
+  dependencies:
+    "@storybook/client-logger": 7.4.6
+    "@storybook/components": 7.4.6
+    "@storybook/core-events": 7.4.6
+    "@storybook/manager-api": 7.4.6
+    "@storybook/preview-api": 7.4.6
+    "@storybook/theming": 7.4.6
+    "@storybook/types": 7.4.6
+    ts-dedent: ^2.0.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 256fe1eeb046cd8f8e9a69e603f3d9debc7dc3dabff2f2e7ee7439f478246764deca23b2cb23b02fa64d86a3cf98b36f32ee1099013385dc67d11ae312c8ae33
+  languageName: node
+  linkType: hard
+
 "@storybook/addon-toolbars@npm:7.4.6":
   version: 7.4.6
   resolution: "@storybook/addon-toolbars@npm:7.4.6"
@@ -5101,6 +5125,7 @@ __metadata:
     "@storybook/addon-interactions": 7.4.6
     "@storybook/addon-links": 7.4.6
     "@storybook/addon-onboarding": 1.0.8
+    "@storybook/addon-themes": 7.4.6
     "@storybook/blocks": 7.4.6
     "@storybook/react": 7.4.6
     "@storybook/react-vite": 7.4.6
