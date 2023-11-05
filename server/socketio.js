@@ -462,6 +462,45 @@ export default function (io) {
           }
         }
 
+        // lightning event
+        let lightning = false;
+        let lightningX = -1;
+        let lightningY = -1;
+        let lightningHit = false;
+        if (Math.random() < 0.1) { // 10% chance
+          lightning = true;
+
+          // count how many available squares
+          let posOfSquaresNotHitArr = [];
+          for (let i = 0; i < boardWidth; i++) {
+            for (let j = 0; j < boardWidth; j++) {
+              if (board[i][j] === "S" || board[i][j] === "B") {
+                posOfSquaresNotHitArr.push({
+                  x: i,
+                  y: j
+                });
+              }
+            }
+          }
+
+          // random choose
+          if (posOfSquaresNotHitArr.length > 0) {
+            let chosenPos = Math.floor(Math.random() * posOfSquaresNotHitArr.length); // zero-index
+            lightningX = posOfSquaresNotHitArr[chosenPos].x;
+            lightningY = posOfSquaresNotHitArr[chosenPos].y;
+
+            // update board
+            if (board[posOfSquaresNotHitArr[chosenPos].x][posOfSquaresNotHitArr[chosenPos].y] === "S") {
+              // hit
+              board[posOfSquaresNotHitArr[chosenPos].x][posOfSquaresNotHitArr[chosenPos].y] = "H";
+              lightningHit = true;
+            } else if (board[posOfSquaresNotHitArr[chosenPos].x][posOfSquaresNotHitArr[chosenPos].y] === "B") {
+              // miss
+              board[posOfSquaresNotHitArr[chosenPos].x][posOfSquaresNotHitArr[chosenPos].y] = "M";
+            }
+          }
+        }
+
         // update redis
         const player1SocketId = await redisClient.hGet(
           `game:${gameId}`,
@@ -495,7 +534,11 @@ export default function (io) {
           y: position.y,
           hit: isHitArr[0],
           bomb: position.bomb,
-          winner: null,
+          lightning: lightning,
+          lightningX: lightningX,
+          lightningY: lightningY,
+          lightningHit: lightningHit,
+          winner: null
         };
 
         // for bomb case
