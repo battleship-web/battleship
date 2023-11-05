@@ -7,6 +7,7 @@ import InviteRefused from "../components/InviteRefused";
 import IncomingInvite from "../components/IncomingInvite";
 import { socket } from "../socket";
 import { PropTypes } from "prop-types";
+import ProfilePicture from "../components/ProfilePicture";
 
 function LobbyPage({
   clientList,
@@ -43,12 +44,20 @@ function LobbyPage({
     setOpponentInfo(inviteeInfo);
   };
 
-  function handleInvite(opponentSocketId, opponentNickname, opponentUsername) {
+  function handleInvite(
+    opponentSocketId,
+    opponentNickname,
+    opponentUsername,
+    opponentLevel,
+    opponentProfilePicture
+  ) {
     setInviting(true);
     setInviteeInfo({
       socketId: opponentSocketId,
       nickname: opponentNickname,
       username: opponentUsername,
+      level: opponentLevel,
+      profilePicture: opponentProfilePicture,
     });
     socket.emit("invite", opponentSocketId);
   }
@@ -56,13 +65,17 @@ function LobbyPage({
   function acceptInvitation(
     opponentSocketId,
     opponentNickname,
-    opponentUsername
+    opponentUsername,
+    opponentLevel,
+    opponentProfilePicture
   ) {
     socket.emit("acceptInvite", opponentSocketId);
     setOpponentInfo({
       socketId: opponentSocketId,
       nickname: opponentNickname,
       username: opponentUsername,
+      level: opponentLevel,
+      profilePicture: opponentProfilePicture,
     });
     setGameStage("game:gamerule");
     setIncomingInvite(null);
@@ -87,7 +100,9 @@ function LobbyPage({
             acceptInvitation(
               incomingInvite.socketId,
               incomingInvite.nickname,
-              incomingInvite.username
+              incomingInvite.username,
+              incomingInvite.level,
+              incomingInvite.profilePicture
             );
           }}
           refuseInvitation={() => {
@@ -163,7 +178,7 @@ function LobbyPage({
           const listToDisplay = clientExcludingMe.map((client) => {
             return (
               <li
-                className="flex justify-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3"
+                className="flex justify-center items-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3"
                 style={{
                   backgroundImage: "url('/src/assets/scroll.png')",
                   backgroundSize: "100% 100%",
@@ -173,8 +188,14 @@ function LobbyPage({
                 <h2 className="my-3 mr-5 text-blue-950">General</h2>
                 <h1 className="my-3 mr-5 ">{client.nickname}</h1>
                 <h2 className="my-3 mr-5">({client.username})</h2>
+                {client.profilePicture ? (
+                  <ProfilePicture
+                    picture={client.profilePicture}
+                    size="small"
+                  />
+                ) : null}
                 {client.level ? (
-                  <h2 className="my-3">Lv:{client.level}</h2>
+                  <h2 className="ml-1 my-3">Lv:{client.level}</h2>
                 ) : null}
                 <button
                   className="mx-6 bg-gradient-to-r from-orange-600 to-orange-700 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-1xl border-2 border-orange-950"
@@ -182,7 +203,9 @@ function LobbyPage({
                     handleInvite(
                       client.socketId,
                       client.nickname,
-                      client.username
+                      client.username,
+                      client.level,
+                      client.profilePicture
                     );
                   }}
                 >

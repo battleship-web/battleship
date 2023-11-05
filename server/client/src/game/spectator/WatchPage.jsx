@@ -1,6 +1,7 @@
 import Loading from "../../components/Loading";
 import Board from "../../squarenboard/Board";
 import { socket } from "../../socket";
+import ProfilePicture from "../../components/ProfilePicture";
 function WatchPage({
   turn,
   gameId,
@@ -17,7 +18,7 @@ function WatchPage({
     ? p1Board
         .map((row) =>
           row.reduce((acc, cur) => {
-            if (cur === "hit") {
+            if (cur === "hit" || cur === "lightningHit") {
               return acc + 1;
             } else {
               return acc;
@@ -31,7 +32,7 @@ function WatchPage({
     ? p2Board
         .map((row) =>
           row.reduce((acc, cur) => {
-            if (cur === "hit") {
+            if (cur === "hit" || cur === "lightningHit") {
               return acc + 1;
             } else {
               return acc;
@@ -54,47 +55,78 @@ function WatchPage({
             backgroundSize: "100% 100%",
           }}
         >
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-orange-950 sm:text-5xl pt-5">
-            BATTLESHIP{" "}
-          </h1>
-          <h1 className="mt-2 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
+          <h1 className="mt-5 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
             {turn === p1Info.socketId
               ? `${p1Info.nickname}'s Turn`
               : `${p2Info.nickname}'s Turn`}
           </h1>
-          <div className="mt-8 text-center items-center">
-            <div className="flex-row">
-              <div className="inline-flex mr-10 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-                General {p1Info.nickname}
+          <div className="mt-5 text-center">
+            <div className="flex justify-between">
+              <div className="flex gap-1 items-center">
+                <div className="flex flex-col">
+                  <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                    General {p1Info.nickname}
+                  </span>
+                  {p1Info.level ? (
+                    <div className="items-center rounded-md bg-red-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                      Lvl: {p1Info.level}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div>
+                  <ProfilePicture picture={p1Info.profilePicture} size="big" />
+                </div>
+                <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-base font-bold text-red-950 border-2 border-red-950">
+                  POINT {p1Score}
+                </span>
+                <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-base font-bold text-red-950 border-2 border-red-950">
+                  No. of Hits: {numHitOnP2Board}
+                </span>
               </div>
-              <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-                POINT {p1Score}
-              </span>
-              <span className="inline-flex ml-10 mr-20 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-                No. of Hits: {numHitOnP2Board}
-              </span>
-              <span className="inline-flex ml-20 mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-                General {p2Info.nickname}
-              </span>
-              <span className="inline-flex mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-                POINT {p2Score}
-              </span>
-              <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-                No. of Hits: {numHitOnP1Board}
-              </span>
+              <div className="flex gap-1 items-center mr-14">
+                <div className="flex flex-col">
+                  <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-xl font-bold text-green-950 border-2 border-green-950">
+                    General {p2Info.nickname}
+                  </span>
+                  {p2Info.level ? (
+                    <div className="items-center rounded-md bg-green-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                      Lvl: {p2Info.level}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div>
+                  <ProfilePicture picture={p2Info.profilePicture} size="big" />
+                </div>
+                <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-base font-bold text-green-950 border-2 border-green-950">
+                  POINT {p2Score}
+                </span>
+                <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-base font-bold text-green-950 border-2 border-green-950">
+                  No. of Hits: {numHitOnP1Board}
+                </span>
+              </div>
             </div>
           </div>
           <div className="mt-2 mb-12">
             <div className="flex flex-row">
-              <h1 className="mr-2">
+              <div className="mr-2">
                 <Board board={p1Board} onClick={() => {}} size="big" />
-              </h1>
-              <h1 className="mt-20 text-orange-950 sm:text-8xl font-bold">
-                vs
-              </h1>
-              <h1 className="ml-2">
+              </div>
+              <div className="flex flex-col justify-between">
+                <div className="flex flex-col items-center">
+                  <h1 className="font-bold">{`${p1Info.nickname}'s Emote`}</h1>
+                  <div className="w-12 h-12 bg-red-500"></div>
+                </div>
+                <h1 className="text-orange-950 sm:text-8xl font-bold">vs</h1>
+                <div className="flex flex-col items-center">
+                  <h1 className="font-bold">{`${p2Info.nickname}'s Emote`}</h1>
+                  <div className="w-12 h-12 bg-blue-500"></div>
+                </div>
+              </div>
+              <div className="ml-2">
                 <Board board={p2Board} onClick={() => {}} size="big" />
-              </h1>
+              </div>
             </div>
           </div>
         </div>

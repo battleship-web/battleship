@@ -3,6 +3,7 @@ import { socket } from "../socket";
 import { useEffect, useState } from "react";
 import Timer from "./Timer";
 import bombPic from "../assets/bomb.png";
+import ProfilePicture from "./ProfilePicture";
 
 function Score({
   handleClickInstruction,
@@ -82,41 +83,81 @@ function Score({
             Opponent&apos;s Turn
           </h1>
         )}
-        <div className="mt-8 text-center items-center">
-          <div className="flex-row">
-            <div className="inline-flex mr-10 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-              General {opponentInfo.nickname}
+        <div className="mt-5 text-center">
+          <div className="flex justify-between">
+            <div className="flex gap-1 items-center">
+              <div className="flex flex-col">
+                <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                  General {opponentInfo.nickname}
+                </span>
+                {opponentInfo.level ? (
+                  <div className="items-center rounded-md bg-red-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                    Lvl: {opponentInfo.level}
+                  </div>
+                ) : null}
+              </div>
+
+              <div>
+                <ProfilePicture
+                  picture={opponentInfo.profilePicture}
+                  size="big"
+                />
+              </div>
+              <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-base font-bold text-red-950 border-2 border-red-950">
+                POINT {opponentScore}
+              </span>
+              <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-base font-bold text-red-950 border-2 border-red-950">
+                No. of Hits: {numHitOnPlayerBoard}
+              </span>
             </div>
-            <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-              POINT {opponentScore}
-            </span>
-            <span className="inline-flex ml-10 mr-20 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-              No. of Hits: {numHitOnPlayerBoard}
-            </span>
-            <span className="inline-flex ml-20 mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-              General {user.nickname}
-            </span>
-            <span className="inline-flex mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-              POINT {playerScore}
-            </span>
-            <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-              No. of Hits: {numHitOnOpponentBoard}
-            </span>
+            <div className="flex gap-1 items-center mr-14">
+              <div className="flex flex-col">
+                <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-xl font-bold text-green-950 border-2 border-green-950">
+                  General {user.nickname}
+                </span>
+                {user.level ? (
+                  <div className="items-center rounded-md bg-green-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                    Lvl: {user.level}
+                  </div>
+                ) : null}
+              </div>
+
+              <div>
+                <ProfilePicture picture={user.profilePicture} size="big" />
+              </div>
+              <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-base font-bold text-green-950 border-2 border-green-950">
+                POINT {playerScore}
+              </span>
+              <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-base font-bold text-green-950 border-2 border-green-950">
+                No. of Hits: {numHitOnOpponentBoard}
+              </span>
+            </div>
           </div>
         </div>
         <div className="mt-2 mb-12">
           <div className="flex flex-row">
-            <h1 className="mr-2">
+            <div className="mr-2">
               <Board
                 board={opponentBoard}
                 onClick={handleOpponentBoardClick}
                 size="small"
               />
-            </h1>
-            <h1 className="mt-20 text-orange-950 sm:text-8xl font-bold">vs</h1>
-            <h1 className="ml-2">
+            </div>
+            <div className="flex flex-col justify-between">
+              <div className="flex flex-col items-center">
+                <h1 className="font-bold">{`${opponentInfo.nickname}'s Emote`}</h1>
+                <div className="w-12 h-12 bg-red-500"></div>
+              </div>
+              <h1 className="text-orange-950 sm:text-8xl font-bold">vs</h1>
+              <div className="flex flex-col items-center">
+                <h1 className="font-bold">{`${user.nickname}'s Emote`}</h1>
+                <div className="w-12 h-12 bg-blue-500"></div>
+              </div>
+            </div>
+
+            <div className="ml-2">
               <Board board={playerBoard} onClick={() => {}} size="small" />
-            </h1>
+            </div>
             <button
               className={`self-start ml-3 ${
                 bombSelected

@@ -3,7 +3,6 @@ import { socket } from "./socket";
 import AdminPage from "./admin/AdminPage";
 import TitlePage from "./menu/TitlePage";
 import LoginPage from "./menu/LoginPage";
-import InputNicknamePage from "./menu/InputNicknamePage";
 import WelcomePage from "./menu/WelcomePage";
 import LobbyPage from "./menu/LobbyPage";
 import PrepPage from "./game/prep/PrepPage";
@@ -21,6 +20,7 @@ import { setBoardFromFireResult, constructBoard } from "./utils/board";
 import WatchPage from "./game/spectator/WatchPage";
 import WinnerPage from "./game/spectator/WinnerPage";
 import GameHeader from "./components/GameHeader";
+import ChooseProfilePicture from "./menu/ChooseProfilePicture";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -220,10 +220,16 @@ function App() {
         setP2Board(null);
         setSptWinner(null);
       } else if (message.toReset === "cancel") {
+        socket.emit("sptLeaveRoom", sptGameId);
         handleSptQuitGame();
         setGameStage("menu:arena");
       }
     };
+
+    function handleLevelInfo(levelInfo) {
+      const { level, exp } = levelInfo;
+      setUser({ ...user, level: level, exp: exp });
+    }
 
     function handleSptGameInfo(gameInfo) {
       console.log(gameInfo);
@@ -325,6 +331,7 @@ function App() {
     socket.on("sptFireResult", handleSptFireResult);
     socket.on("sptGameEnd", handleSptGameEnd);
     socket.on("sptReset", handleSptReset);
+    socket.on("levelInfo", handleLevelInfo);
 
     window.addEventListener("pagehide", cleanup);
 
@@ -346,6 +353,8 @@ function App() {
     p2Board,
     p1Board,
     gameStage,
+    sptGameId,
+    user,
   ]);
 
   switch (gameStage) {
@@ -376,7 +385,11 @@ function App() {
       break;
     case "menu:nickname":
       page = (
-        <InputNicknamePage setGameStage={setGameStage} setUser={setUser} />
+        <ChooseProfilePicture
+          setGameStage={setGameStage}
+          user={user}
+          setUser={setUser}
+        />
       );
       break;
     case "menu:welcome":
@@ -525,6 +538,7 @@ function App() {
   return (
     <div className={`${isDarkMode ? "dark" : ""}`}>
       <GameHeader
+        user={user}
         gameStage={gameStage}
         isDarkMode={isDarkMode}
         setIsDarkMode={setIsDarkMode}

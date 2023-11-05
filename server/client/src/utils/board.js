@@ -25,7 +25,7 @@ export function setBoardFromFireResult(board, setBoard, fireResult) {
 
   if (fireResult.lightning) {
     newBoard[fireResult.lightningRowIndex][fireResult.lightningColumnIndex] =
-      fireResult.lightningHit ? "lhit" : "lmiss";
+      fireResult.lightningHit ? "lightningHit" : "lightningMiss";
   }
   setBoard(newBoard);
 }
@@ -36,13 +36,22 @@ export function constructBoard(shipPlacement, fireResults) {
     .map(() => Array(8).fill("blank"));
 
   shipPlacement.forEach((ship) => {
+    let shipType = null;
+    if (ship.size === 5) {
+      shipType = "shipBig";
+    } else if (ship.size === 4) {
+      shipType = "ship";
+    } else if (ship.size === 3) {
+      shipType = "shipSmall";
+    }
+
     if (ship.rotated) {
       for (let i = 0; i < ship.size; i++) {
-        board[ship.y + i][ship.x] = `ship${i + 1}r`;
+        board[ship.y + i][ship.x] = `${shipType}${i + 1}r`;
       }
     } else {
       for (let i = 0; i < ship.size; i++) {
-        board[ship.y][ship.x + i] = `ship${ship.size - i}`;
+        board[ship.y][ship.x + i] = `${shipType}${ship.size - i}`;
       }
     }
   });
@@ -59,6 +68,12 @@ export function constructBoard(shipPlacement, fireResults) {
           break;
         case "M":
           board[i][j] = "miss";
+          break;
+        case "L":
+          board[i][j] = "lightningHit";
+          break;
+        case "V":
+          board[i][j] = "lightningMiss";
           break;
       }
     }

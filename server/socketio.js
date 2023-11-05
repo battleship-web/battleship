@@ -7,13 +7,14 @@ import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
 import { convertBoardStrTo2DArray } from "./utils/board.js";
+import { updateExp } from "./utils/exp.js";
 
 export default function (io) {
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
     socket.on("register", async (info) => {
       try {
-        const { username, password, nickname } = info;
+        const { username, password, nickname, profilePicture } = info;
         if (await findUserByUsername(username)) {
           socket.emit("registerResponse", {
             success: false,
@@ -21,7 +22,7 @@ export default function (io) {
           });
           return;
         }
-        await createUser(username, password, nickname);
+        await createUser(username, password, nickname, profilePicture);
         socket.emit("registerResponse", {
           success: true,
         });
@@ -109,14 +110,20 @@ export default function (io) {
             "exp",
             user.exp
           );
-          await Promise.all([promise1, promise2, promise3, promise4, promise5]);
-          if (user.profilePicture) {
-            await redisClient.hSet(
-              `socketId:${socket.id}`,
-              "profilePicture",
-              user.profilePicture
-            );
-          }
+          const promise6 = redisClient.hSet(
+            `socketId:${socket.id}`,
+            "profilePicture",
+            user.profilePicture
+          );
+          await Promise.all([
+            promise1,
+            promise2,
+            promise3,
+            promise4,
+            promise5,
+            promise6,
+          ]);
+
           socket.emit("loginResponse", {
             success: true,
             message: {
@@ -155,8 +162,20 @@ export default function (io) {
             ? gameInfo.player2SocketId
             : gameInfo.player1SocketId;
 
-          socket.to(otherPlayerSocketId).emit("opponentQuit");
+          await updateExp(
+            io,
+            gameId,
+            gameInfo.player1SocketId,
+            gameInfo.player2SocketId,
+            gameInfo.player1Score,
+            gameInfo.player2Score
+          );
 
+          socket.to(otherPlayerSocketId).emit("opponentQuit");
+          if (io.sockets.adapter.rooms.get(`watch:${gameId}`)) {
+            io.to(`watch:${gameId}`).emit("sptGameEnd");
+            io.socketsLeave(`watch:${gameId}`);
+          }
           const fieldForPlayer = isPlayer1
             ? "player1NumberOfShips"
             : "player2NumberOfShips";
@@ -602,8 +621,8 @@ export default function (io) {
         let lightningX = -1;
         let lightningY = -1;
         let lightningHit = false;
-        if (Math.random() < 0.1) {
-          // 10% chance
+        if (Math.random() < 0.2) {
+          // 20% chance
           lightning = true;
 
           // count how many available squares
@@ -636,7 +655,7 @@ export default function (io) {
               // hit
               board[posOfSquaresNotHitArr[chosenPos].x][
                 posOfSquaresNotHitArr[chosenPos].y
-              ] = "H";
+              ] = "L";
               lightningHit = true;
             } else if (
               board[posOfSquaresNotHitArr[chosenPos].x][
@@ -646,7 +665,7 @@ export default function (io) {
               // miss
               board[posOfSquaresNotHitArr[chosenPos].x][
                 posOfSquaresNotHitArr[chosenPos].y
-              ] = "M";
+              ] = "V";
             }
           }
         }
@@ -700,7 +719,7 @@ export default function (io) {
         let numOfHits = 0;
 
         for (let i = 0; i < boardStr.length; i++) {
-          if (boardStr[i] === "H") {
+          if (boardStr[i] === "H" || boardStr[i] === "L") {
             numOfHits++;
           }
         }
@@ -806,6 +825,7 @@ export default function (io) {
 
           // end game
           if (!bothWantsReplay) {
+            await updateExp(io, gameId, player1SocketId, player2SocketId);
             // handle when both dont want replay
             // remove game info entry
             const deleteGamePromise = redisClient.del(`game:${gameId}`);
@@ -829,9 +849,10 @@ export default function (io) {
               delGamePlayer1Promise,
               delGamePlayer2Promise,
             ]);
-
-            io.to(`watch:${gameId}`).emit("sptGameEnd");
-            io.socketsLeave(`watch:${gameId}`);
+            if (io.sockets.adapter.rooms.get(`watch:${gameId}`)) {
+              io.to(`watch:${gameId}`).emit("sptGameEnd");
+              io.socketsLeave(`watch:${gameId}`);
+            }
           } else {
             // delete old board data from redis
             await redisClient.hDel(`game:${gameId}`, "player1Board");
@@ -1020,7 +1041,9 @@ export default function (io) {
         for (let i = 0; i < OtherNumberOfShips; i++) {
           await redisClient.del(`ship${i}:${otherPlayerSocketId}`);
         }
-
+        const player1SocketId = isPlayer1 ? socket.id : otherPlayerSocketId;
+        const player2SocketId = isPlayer1 ? otherPlayerSocketId : socket.id;
+        await updateExp(io, gameId, player1SocketId, player2SocketId);
         // remove game info entry
         const deleteGamePromise = redisClient.del(`game:${gameId}`);
 
@@ -1194,6 +1217,24 @@ export default function (io) {
         await redisClient.hGet(`socketId:${socket.id}`, "username"),
         profilePicture
       );
+    });
+
+    socket.on("requestLevelInfo", async () => {
+      try {
+        const username = await redisClient.hGet(
+          `socketId:${socket.id}`,
+          "username"
+        );
+        const user = await findUserByUsername(username);
+        if (!user) {
+          return;
+        }
+        await redisClient.hSet(`socketId:${socket.id}`, "level", user.level);
+        await redisClient.hSet(`socketId:${socket.id}`, "exp", user.exp);
+        socket.emit("levelInfo", { level: user.level, exp: user.exp });
+      } catch (error) {
+        console.log(error);
+      }
     });
   });
 }

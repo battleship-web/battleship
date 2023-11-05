@@ -30,22 +30,44 @@ function ScorepointPage({
 
   const numHitOnPlayerBoard = playerBoardFireResults.reduce(
     (accumulator, currentValue) => {
-      if (currentValue.hit) {
-        return accumulator + 1;
+      let hitIncrease = 0;
+      if (currentValue.bomb) {
+        for (let i = 0; i < 4; i++) {
+          if (currentValue.hit[i]) {
+            hitIncrease += 1;
+          }
+        }
       } else {
-        return accumulator;
+        if (currentValue.hit) {
+          hitIncrease += 1;
+        }
       }
+      if (currentValue.lightning && currentValue.lightningHit) {
+        hitIncrease += 1;
+      }
+      return accumulator + hitIncrease;
     },
     0
   );
 
   const numHitOnOpponentBoard = opponentBoardFireResults.reduce(
     (accumulator, currentValue) => {
-      if (currentValue.hit) {
-        return accumulator + 1;
+      let hitIncrease = 0;
+      if (currentValue.bomb) {
+        for (let i = 0; i < 4; i++) {
+          if (currentValue.hit[i]) {
+            hitIncrease += 1;
+          }
+        }
       } else {
-        return accumulator;
+        if (currentValue.hit) {
+          hitIncrease += 1;
+        }
       }
+      if (currentValue.lightning && currentValue.lightningHit) {
+        hitIncrease += 1;
+      }
+      return accumulator + hitIncrease;
     },
     0
   );

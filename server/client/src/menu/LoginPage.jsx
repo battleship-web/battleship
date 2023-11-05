@@ -87,7 +87,6 @@ function LoginPage({
         >
           Register
         </button>
-        <div className="h-10 w-10 bg-slate-300"></div>
       </div>
     </div>
   );

@@ -5,8 +5,13 @@ export default {
   title: "Game watching page",
 };
 
-const p1Info = { nickname: "Alice", socketId: "1" };
-const p2Info = { nickname: "Bob", socketId: "2" };
+const p1Info = {
+  nickname: "Alice",
+  socketId: "1",
+  profilePicture: "cat",
+  level: 4,
+};
+const p2Info = { nickname: "Bob", socketId: "2", profilePicture: "elephant" };
 const p1Score = 3;
 const p2Score = 1;
 const turn = "1";
