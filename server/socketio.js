@@ -1,4 +1,8 @@
-import { findUserByUsername, createUser } from "./dao/userDao.js";
+import {
+  findUserByUsername,
+  createUser,
+  setUserProfilePicture,
+} from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
@@ -343,6 +347,8 @@ export default function (io) {
     });
     socket.on("placement", async (ships) => {
       try {
+        const boardWidth = 8;
+
         // get gameid
         const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
         const isPlayer1 =
@@ -351,9 +357,9 @@ export default function (io) {
 
         // make board
         const board = []; // or columns
-        for (let x = 0; x < 8; x++) {
+        for (let x = 0; x < boardWidth; x++) {
           let column = [];
-          for (let y = 0; y < 8; y++) {
+          for (let y = 0; y < boardWidth; y++) {
             column.push("B");
           }
           board.push(column);
@@ -406,14 +412,12 @@ export default function (io) {
 
           if (ship.rotated) {
             // vertical
-            for (let i = 0; i < 4; i++) {
-              // 4 square long ships
+            for (let i = 0; i < ship.size; i++) {
               board[ship.x][ship.y + i] = "S";
             }
           } else {
             // horizontal
-            for (let i = 0; i < 4; i++) {
-              // 4 square long ships
+            for (let i = 0; i < ship.size; i++) {
               board[ship.x + i][ship.y] = "S";
             }
           }
@@ -552,30 +556,99 @@ export default function (io) {
         }
 
         // convert board string to 2d array
+        const boardWidth = 8;
         let board = [];
         let start = 0;
-        let end = 8;
-        for (let i = 0; i < 8; i++) {
+        let end = boardWidth;
+        for (let i = 0; i < boardWidth; i++) {
           board.push(boardStr.slice(start, end));
-          start += 8;
-          end += 8;
+          start += boardWidth;
+          end += boardWidth;
         }
         board = board.map((columnStr) => columnStr.split(""));
 
         // check if ship
-        let isHit = false;
+        let isHitArr = [false, false, false, false];
+        let isHitArrIndex = 0;
+        let bombWidth = 1;
 
-        if (Object.keys(position).length !== 0) {
-          // check if empty object
-          if (board[position.x][position.y] === "S") {
-            // hit
-            board[position.x][position.y] = "H";
-            isHit = true;
-          } else if (board[position.x][position.y] === "B") {
-            // miss
-            board[position.x][position.y] = "M";
+        if (position.bomb) {
+          bombWidth = 2;
+        }
+
+        for (let i = 0; i < bombWidth; i++) {
+          for (let j = 0; j < bombWidth; j++) {
+            const xPos = position.x + j;
+            const yPos = position.y + i;
+
+            if (xPos < boardWidth && yPos < boardWidth) {
+              // check if in board
+              if (board[xPos][yPos] === "S") {
+                // hit
+                board[xPos][yPos] = "H";
+                isHitArr[isHitArrIndex] = true;
+              } else if (board[xPos][yPos] === "B") {
+                // miss
+                board[xPos][yPos] = "M";
+              }
+              // for rest board remain unchanged
+            }
+            isHitArrIndex++;
           }
-          // for rest board remain unchanged
+        }
+
+        // lightning event
+        let lightning = false;
+        let lightningX = -1;
+        let lightningY = -1;
+        let lightningHit = false;
+        if (Math.random() < 0.1) {
+          // 10% chance
+          lightning = true;
+
+          // count how many available squares
+          let posOfSquaresNotHitArr = [];
+          for (let i = 0; i < boardWidth; i++) {
+            for (let j = 0; j < boardWidth; j++) {
+              if (board[i][j] === "S" || board[i][j] === "B") {
+                posOfSquaresNotHitArr.push({
+                  x: i,
+                  y: j,
+                });
+              }
+            }
+          }
+
+          // random choose
+          if (posOfSquaresNotHitArr.length > 0) {
+            let chosenPos = Math.floor(
+              Math.random() * posOfSquaresNotHitArr.length
+            ); // zero-index
+            lightningX = posOfSquaresNotHitArr[chosenPos].x;
+            lightningY = posOfSquaresNotHitArr[chosenPos].y;
+
+            // update board
+            if (
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] === "S"
+            ) {
+              // hit
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] = "H";
+              lightningHit = true;
+            } else if (
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] === "B"
+            ) {
+              // miss
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] = "M";
+            }
+          }
         }
 
         // update redis
@@ -609,9 +682,19 @@ export default function (io) {
         let message = {
           x: position.x,
           y: position.y,
-          hit: isHit,
+          hit: isHitArr[0],
+          bomb: position.bomb,
+          lightning: lightning,
+          lightningX: lightningX,
+          lightningY: lightningY,
+          lightningHit: lightningHit,
           winner: null,
         };
+
+        // for bomb case
+        if (position.bomb) {
+          message.hit = isHitArr;
+        }
 
         // check if won
         let numOfHits = 0;
@@ -1100,6 +1183,17 @@ export default function (io) {
       } catch (error) {
         console.log(error);
       }
+    });
+    socket.on("setProfilePicture", async (profilePicture) => {
+      await redisClient.hSet(
+        `socketId:${socket.id}`,
+        "profilePicture",
+        profilePicture
+      );
+      setUserProfilePicture(
+        await redisClient.hGet(`socketId:${socket.id}`, "username"),
+        profilePicture
+      );
     });
   });
 }
