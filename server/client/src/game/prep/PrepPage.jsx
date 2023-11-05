@@ -104,7 +104,78 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
     setSelectionMode((prevMode) => (prevMode === "row" ? "column" : "row"));
   };
 
-  // const handleShuffleShip = () => {};
+  const handleShuffleShip = () => {
+    const newBoard = Array(8)
+      .fill()
+      .map(() => Array(8).fill("blank"));
+    const newInfoToSend = [];
+    let newPlacementCount = 0;
+    for (let i = 0; i < sets[selectedSet].length; i++) {
+      let toAppend = null;
+      const shipLength = sets[selectedSet][newPlacementCount];
+      let shipType = null;
+      if (shipLength === 5) {
+        shipType = "shipBig";
+      } else if (shipLength === 4) {
+        shipType = "ship";
+      } else if (shipLength === 3) {
+        shipType = "shipSmall";
+      }
+
+      let gotValidPos = false;
+      while (!gotValidPos) {
+        gotValidPos = true;
+        const rotated = Math.random() < 0.5;
+        if (rotated) {
+          const ranX = Math.floor(Math.random() * 8);
+          const ranY = Math.floor(Math.random() * (9 - shipLength));
+          for (let j = 0; j < shipLength; j++) {
+            if (ranY + j > 7 || newBoard[ranY + j][ranX] !== "blank") {
+              gotValidPos = false;
+              break;
+            }
+          }
+          if (gotValidPos) {
+            for (let j = 0; j < shipLength; j++) {
+              newBoard[ranY + j][ranX] = `${shipType}${j + 1}r`;
+            }
+            toAppend = {
+              x: ranX,
+              y: ranY,
+              size: shipLength,
+              rotated: rotated,
+            };
+          }
+        } else {
+          const ranX = Math.floor(Math.random() * (9 - shipLength));
+          const ranY = Math.floor(Math.random() * 8);
+          for (let j = 0; j < shipLength; j++) {
+            if (ranX + j > 7 || newBoard[ranY][ranX + j] !== "blank") {
+              gotValidPos = false;
+              break;
+            }
+          }
+          if (gotValidPos) {
+            for (let j = 0; j < shipLength; j++) {
+              newBoard[ranY][ranX + j] = `${shipType}${shipLength - j}`;
+            }
+            toAppend = {
+              x: ranX,
+              y: ranY,
+              size: shipLength,
+              rotated: rotated,
+            };
+          }
+        }
+      }
+
+      newInfoToSend.push(toAppend);
+      newPlacementCount += 1;
+    }
+    setBoardState(newBoard);
+    setInfoToSend(newInfoToSend);
+    setPlacementCount(newPlacementCount);
+  };
 
   return (
     <div className="page-background">
@@ -178,7 +249,12 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
           >
             Confirm
           </button>
-
+          <button
+            className="flex-1 rounded border-2 bg-gradient-to-r border-lime-900 from-blue-500 to-blue-600 hover:bg-blue-800 text-sm font-bold text-blue-900 shadow-sm sm:text-1xl"
+            onClick={handleShuffleShip}
+          >
+            Shuffle
+          </button>
           <button
             className="flex-1 bg-gradient-to-r from-red-500 to-red-600 rounded text-sm font-bold text-red-900 shadow-sm sm:text-1xl border-2 border-red-900 hover:bg-red-800"
             onClick={() => {
