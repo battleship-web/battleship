@@ -194,7 +194,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("allClientListRequest", async () => {
       try {
         const connectedSockets = Array.from(io.sockets.sockets.keys());
@@ -227,7 +226,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("invite", async (inviteeSocketId) => {
       if (!io.sockets.sockets.has(inviteeSocketId)) {
         socket.emit("inviteeLeft", inviteeSocketId);
@@ -819,7 +817,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("gameListRequest", async () => {
       try {
         const redisSearchPromise = redisClient.sMembers("gameList");
@@ -870,7 +867,7 @@ export default function (io) {
       } catch (error) {
         console.log(error);
       }
-    })
+    });
     socket.on("requestLeaderboard", (sorting) => {
       try {
         let allUsersArr = getAllUsersArr();
@@ -913,6 +910,7 @@ export default function (io) {
         io.to(socket.id).emit("leaderboard", allUsersArr);
       } catch (error) {
         console.log(error);
-      })
+      }
+    });
   });
 }
