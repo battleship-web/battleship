@@ -470,7 +470,11 @@ function App() {
       );
       break;
     case "game:waitForReplay":
-      page = <Loading text="Did the opponent escape?" />;
+      page = (
+        <div className=" h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] bg-cover">
+          <Loading text="Did the opponent escape?" />
+        </div>
+      );
       break;
     case "game:beforeReplay":
       page = (
@@ -536,7 +540,7 @@ function App() {
       page = <NotFoundPage />;
   }
   return (
-    <div className={`${isDarkMode ? "dark" : ""}`}>
+    <div className={`${isDarkMode ? "dark" : ""} h-screen w-[calc(100%)]`}>
       <GameHeader
         user={user}
         gameStage={gameStage}

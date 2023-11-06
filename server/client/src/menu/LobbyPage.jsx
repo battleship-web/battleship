@@ -221,13 +221,7 @@ function LobbyPage({
   }
 
   return (
-    <main
-      className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
-      style={{
-        backgroundImage: "url('/src/assets/bluebkg.jpg')",
-        backgroundSize: "100% 100%",
-      }}
-    >
+    <main className="grid h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
       <div className="text-center">
         <div
           className="text-center bg-cover bg-opacity-50 px-10 py-10 items-center "

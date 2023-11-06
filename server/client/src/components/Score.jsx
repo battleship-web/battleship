@@ -69,13 +69,7 @@ function Score({
 
   return (
     <main className="text-center">
-      <div
-        className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40"
-        style={{
-          backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",
-        }}
-      >
+      <div className="text-center bg-[length:100%_100%] bg-[url('/src/assets/scroll.png')] items-center mb-6 relative isolate overflow-hidden px-20 py-40">
         {turn === socket.id ? (
           <Timer startSeconds={10} onZero={handleZero} fired={fired} />
         ) : (

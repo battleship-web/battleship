@@ -1,7 +1,7 @@
 import { useAudio } from "../utils/sound";
 import { useEffect } from "react";
 import ProfilePicture from "./ProfilePicture";
-// import classNames from "classnames";
+
 function GameHeader({ user, gameStage, isDarkMode, setIsDarkMode }) {
   const urls = [
     "/src/assets/OpeningMusic.wav",
@@ -44,11 +44,8 @@ function GameHeader({ user, gameStage, isDarkMode, setIsDarkMode }) {
     changeMusic(currentTrack);
   }, [currentTrack, changeMusic]);
 
-  // const expClass = classNames("bg-purple-500 h-8 rounded", {
-  //   [`w-[${user.exp}%]`]: user && user.exp,
-  // });
   return (
-    <nav className="flex border border-orange-900 bg-orange-300 p-1 justify-between">
+    <nav className="flex border border-orange-900 bg-orange-300 p-1 justify-between absolute w-[calc(100%)]">
       <div className="flex items-center gap-2">
         {user && user.nickname && user.username ? (
           <h1 className="font-bold text-cyan-800">{`${user.nickname} (${user.username})`}</h1>

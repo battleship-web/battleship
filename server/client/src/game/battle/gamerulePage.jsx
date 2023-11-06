@@ -3,25 +3,21 @@ function GamerulePage({ setGameStage }) {
     setGameStage("game:prep");
   };
 
-
   return (
-    <main className="grid h-screen place-items-center bg-cover "
-        style={{
-          backgroundImage: "url('/src/assets/bluebkg.jpg')",
-          backgroundSize: "100% 100%",}}>
+    <main className="grid place-items-center bg-cover w-[calc(100%)] h-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')]">
       <div className="text-center">
-      <div className="text-center bg-cover bg-opacity-50 px-10 py-3"
-        style={{
-          backgroundImage: "url('/src/assets/wood.png')",
-          backgroundSize: "100% 100%",}}>
+        <div className="text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">
             Instructions
           </h1>
         </div>
-        <div className="text-center bg-cover bg-opacity-50 px-10 py-10"
-        style={{
-          backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",}}>
+        <div
+          className="text-center bg-cover bg-opacity-50 px-10 py-10"
+          style={{
+            backgroundImage: "url('/src/assets/scroll.png')",
+            backgroundSize: "100% 100%",
+          }}
+        >
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             ⛴ 1 ⛴
           </h1>

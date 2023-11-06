@@ -78,13 +78,7 @@ function GameListPage({
     }
   }
   return (
-    <div
-      className="w-screen min-h-screen flex flex-col items-center gap-4 p-4"
-      style={{
-        backgroundImage: "url('/src/assets/bluebkg.jpg')",
-        backgroundSize: "100% 100%",
-      }}
-    >
+    <div className="flex flex-col items-center gap-4 p-4 pt-24 min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')]">
       <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">
         Games
       </h1>

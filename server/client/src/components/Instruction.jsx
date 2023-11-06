@@ -1,24 +1,12 @@
 function Instruction({ handleClickOut }) {
   return (
     <main className="text-center">
-      <div
-        className="text-center bg-opacity-50 px-10 py-3 "
-        style={{
-          backgroundImage: "url('/src/assets/wood.png')",
-          backgroundSize: "100% 100%",
-        }}
-      >
+      <div className="text-center bg-opacity-50 px-10 py-3 h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')]">
         <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">
           Instructions
         </h1>
       </div>
-      <div
-        className="text-center bg-opacity-50 px-10 py-10 "
-        style={{
-          backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",
-        }}
-      >
+      <div className="text-center bg-opacity-50 px-10 py-10 bg[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
         <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
           ⛴ 1) ⛴
         </h1>
