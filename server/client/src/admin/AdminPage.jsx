@@ -123,7 +123,7 @@ function AdminPage({ gameList, clientList }) {
 
   return (
     <>
-      <div className="min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] flex flex-col items-center gap-4 p-4 pt-16">
+      <div className="min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] flex flex-col items-center gap-4 p-4 pt-16 dark:bg-[url('/src/assets/darkbluebkg.png')]">
         <div className="w-full align-top flex justify-center">
           <h1 className="bg-sky-400  border-4 border-orange-950 font-bold p-2 rounded-md">
             ADMIN PAGE

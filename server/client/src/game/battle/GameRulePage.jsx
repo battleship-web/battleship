@@ -11,13 +11,7 @@ function GamerulePage({ setGameStage }) {
             Instructions
           </h1>
         </div>
-        <div
-          className="text-center bg-cover bg-opacity-50 px-10 py-10"
-          style={{
-            backgroundImage: "url('/src/assets/scroll.png')",
-            backgroundSize: "100% 100%",
-          }}
-        >
+        <div className="text-center bg-opacity-50 px-10 py-10 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             ⛴ 1 ⛴
           </h1>

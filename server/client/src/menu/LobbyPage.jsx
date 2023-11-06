@@ -178,11 +178,7 @@ function LobbyPage({
           const listToDisplay = clientExcludingMe.map((client) => {
             return (
               <li
-                className="flex justify-center items-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3"
-                style={{
-                  backgroundImage: "url('/src/assets/scroll.png')",
-                  backgroundSize: "100% 100%",
-                }}
+                className="flex justify-center items-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]"
                 key={client.username}
               >
                 <h2 className="my-3 mr-5 text-blue-950">General</h2>
@@ -223,13 +219,7 @@ function LobbyPage({
   return (
     <main className="grid h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
       <div className="text-center">
-        <div
-          className="text-center bg-cover bg-opacity-50 px-10 py-10 items-center "
-          style={{
-            backgroundImage: "url('/src/assets/wood.png')",
-            backgroundSize: "100% 100%",
-          }}
-        >
+        <div className="text-center bg-opacity-50 px-10 py-10 items-center bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
           {display}
         </div>
         <div>
