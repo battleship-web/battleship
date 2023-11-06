@@ -23,7 +23,8 @@ export async function createUser(username, password, nickname) {
       exp: 0,
       // user game stats
       numOfRoundsPlayed: 0,
-      numOfRoundsWon: 0
+      numOfRoundsWon: 0,
+      records: []
     });
   } catch (error) {
     console.log(error);
@@ -64,5 +65,23 @@ export async function getAllUsersArr() {
   } catch (error) {
     console.log(error);
     throw new Error("Get all users array failed.");
+  }
+}
+
+export async function pushGameRecord(username, gameRecord) {
+  try {
+    await User.updateOne({ username: username }, { $push: { records: gameRecord } }); // gameRecord object should match gameRecord schema
+  } catch (error) {
+    console.log(error);
+    throw new Error("Push user game record failed.");
+  }
+}
+
+export async function getGameRecordsArr(username) {
+  try {
+    return (await User.findOne({ username: username })).records;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Get user game records failed.");
   }
 }

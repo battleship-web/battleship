@@ -1,4 +1,4 @@
-import { findUserByUsername, createUser, setUserProfilePicture, incrementNumOfRoundsPlayed, incrementNumOfRoundsWon, getAllUsersArr } from "./dao/userDao.js";
+import { findUserByUsername, createUser, setUserProfilePicture, incrementNumOfRoundsPlayed, incrementNumOfRoundsWon, getAllUsersArr, pushGameRecord, getGameRecordsArr } from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
@@ -575,6 +575,7 @@ export default function (io) {
           await redisClient.hSet(`game:${gameId}`, "lastWinner", socket.id);
 
           // update mongodb
+          // stats for leaderboard
           const player1Username = await redisClient.hGet(`socketId:${player1SocketId}`, "username");
           const player2Username = await redisClient.hGet(`socketId:${player2SocketId}`, "username");
           incrementNumOfRoundsPlayed(player1Username);
@@ -583,6 +584,46 @@ export default function (io) {
             incrementNumOfRoundsWon(player1Username);
           } else {
             incrementNumOfRoundsWon(player2Username);
+          }
+
+          // for game records
+          const gameTimestamp = new Date();
+          if (isPlayer1) {
+            // push win record
+            pushGameRecord(player1Username, {
+              gameId: gameId,
+              time: gameTimestamp,
+              win: true,
+
+              opponent: findUserByUsername(player2Username)
+            });
+
+            // push lose record
+            pushGameRecord(player2Username, {
+              gameId: gameId,
+              time: gameTimestamp,
+              win: false,
+
+              opponent: findUserByUsername(player1Username)
+            });
+          } else {
+            // push win record
+            pushGameRecord(player2Username, {
+              gameId: gameId,
+              time: gameTimestamp,
+              win: true,
+
+              opponent: findUserByUsername(player1Username)
+            });
+
+            // push lose record
+            pushGameRecord(player1Username, {
+              gameId: gameId,
+              time: gameTimestamp,
+              win: false,
+
+              opponent: findUserByUsername(player2Username)
+            });
           }
         }
 
@@ -912,5 +953,12 @@ export default function (io) {
         console.log(error);
       }
     });
+    socket.on("requestRecord", async () => {
+      try {
+        io.to(socket.id).emit("record", getGameRecordsArr(await redisClient.hGet(`socketId:${socket.id}`, "username")));
+      } catch (error) {
+        console.log(error);
+      }
+    })
   });
 }
