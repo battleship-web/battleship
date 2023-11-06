@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Timer from "./Timer";
 import bombPic from "../assets/bomb.png";
 import ProfilePicture from "./ProfilePicture";
+import Emote from "./Emote";
 
 function Score({
   handleClickInstruction,
@@ -19,10 +20,15 @@ function Score({
   numHitOnOpponentBoard,
   handleQuitGame,
   setGameStage,
+  emote,
+  setEmote,
+  opponentEmote,
 }) {
   const [fired, setFired] = useState(false);
   const [bombSelected, setBombSelected] = useState(false);
   const [bombUsed, setBombUsed] = useState(false);
+
+  const emotes = ["thumbsup", "thumbdown", "happy", "angry", "ohno"];
   const handleOpponentBoardClick = (rowIndex, columnIndex, state) => {
     if (state !== "blank" || turn !== socket.id || fired) {
       return;
@@ -140,35 +146,57 @@ function Score({
             <div className="flex flex-col justify-between">
               <div className="flex flex-col items-center">
                 <h1 className="font-bold">{`${opponentInfo.nickname}'s Emote`}</h1>
-                <div className="w-12 h-12 bg-red-500"></div>
+                {opponentEmote ? (
+                  <Emote emote={opponentEmote} />
+                ) : (
+                  <div className="w-12 h-12">None</div>
+                )}
               </div>
               <h1 className="text-orange-950 sm:text-8xl font-bold">vs</h1>
               <div className="flex flex-col items-center">
                 <h1 className="font-bold">{`${user.nickname}'s Emote`}</h1>
-                <div className="w-12 h-12 bg-blue-500"></div>
+                {emote ? (
+                  <Emote emote={emote} />
+                ) : (
+                  <div className="w-12 h-12">None</div>
+                )}
               </div>
             </div>
 
             <div className="ml-2">
               <Board board={playerBoard} onClick={() => {}} size="small" />
             </div>
-            <button
-              className={`self-start ml-3 ${
-                bombSelected
-                  ? "bg-green-400 rounded border-2 border-green-700"
-                  : ""
-              } ${
-                bombUsed ? "bg-red-400 rounded border-2 border-red-700" : ""
-              }`}
-              onClick={() => {
-                if (bombUsed) {
-                  return;
-                }
-                setBombSelected(!bombSelected);
-              }}
-            >
-              <img src={bombPic} className="w-12 h-12" />
-            </button>
+            <div className="flex flex-col">
+              <button
+                className={`self-start ml-3 mb-3 ${
+                  bombSelected
+                    ? "bg-green-400 rounded border-2 border-green-700"
+                    : ""
+                } ${
+                  bombUsed ? "bg-red-400 rounded border-2 border-red-700" : ""
+                }`}
+                onClick={() => {
+                  if (bombUsed) {
+                    return;
+                  }
+                  setBombSelected(!bombSelected);
+                }}
+              >
+                <img src={bombPic} className="w-12 h-12" />
+              </button>
+              {emotes.map((emote, index) => (
+                <button
+                  key={index}
+                  className="ml-3"
+                  onClick={() => {
+                    setEmote(emote);
+                    socket.emit("sendEmote", emote);
+                  }}
+                >
+                  <Emote emote={emote} />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

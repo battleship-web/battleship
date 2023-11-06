@@ -49,5 +49,7 @@ export const Default = {
     gameId: gameId,
     p1Score: p1Score,
     p2Score: p2Score,
+    p1Emote: null,
+    p2Emote: "thumbsup",
   },
 };

@@ -41,6 +41,8 @@ export const Default = {
     playerBoardFireResults: [],
     opponentBoardFireResults: [],
     winner: null,
+    emote: "happy",
+    opponentEmote: "angry",
   },
 };
 

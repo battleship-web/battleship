@@ -50,6 +50,8 @@ function App() {
   const [playerBoardFireResults, setPlayerBoardFireResults] = useState([]);
   const [opponentBoardFireResults, setOpponentBoardFireResults] = useState([]);
   const [winner, setWinner] = useState(null);
+  const [emote, setEmote] = useState(null);
+  const [opponentEmote, setOpponentEmote] = useState(null);
 
   // spectated game state
   const [sptGameId, setSptGameId] = useState(null);
@@ -61,6 +63,8 @@ function App() {
   const [p1Board, setP1Board] = useState(null);
   const [p2Board, setP2Board] = useState(null);
   const [sptWinner, setSptWinner] = useState(null);
+  const [p1Emote, setP1Emote] = useState(null);
+  const [p2Emote, setP2Emote] = useState(null);
 
   let page = null;
 
@@ -74,6 +78,8 @@ function App() {
     setPlayerBoardFireResults([]);
     setOpponentBoardFireResults([]);
     setWinner(null);
+    setEmote(null);
+    setOpponentEmote(null);
   }
 
   function handleNewGame() {
@@ -83,6 +89,8 @@ function App() {
     setPlayerBoardFireResults([]);
     setOpponentBoardFireResults([]);
     setWinner(null);
+    setEmote(null);
+    setOpponentEmote(null);
   }
 
   function handleSptQuitGame() {
@@ -95,6 +103,8 @@ function App() {
     setP1Board(null);
     setP2Board(null);
     setSptWinner(null);
+    setP1Emote(null);
+    setP2Emote(null);
   }
 
   useEffect(() => {
@@ -210,22 +220,18 @@ function App() {
       setGameStage("game:opponentQuit");
     };
 
-    const handleReset = (message) => {
+    function handleReset(message) {
       if (message.toReset === "score") {
         setPlayerScore(0);
         setOpponentScore(0);
       } else if (message.toReset === "game") {
-        setSptTurn(null);
-        setP1Board(null);
-        setP2Board(null);
-        setSptWinner(null);
+        handleNewGame();
+        setGameStage("game:prep");
       } else if (message.toReset === "cancel") {
-        socket.emit("sptLeaveRoom", sptGameId);
-        handleSptQuitGame();
-        setGameStage("menu:arena");
+        handleQuitGame();
+        setGameStage("menu:lobby");
       }
-    };
-
+    }
     function handleLevelInfo(levelInfo) {
       const { level, exp } = levelInfo;
       setUser({ ...user, level: level, exp: exp });
@@ -255,6 +261,8 @@ function App() {
       setSptTurn(gameInfo.turn);
       setP1Score(gameInfo.p1Score);
       setP2Score(gameInfo.p2Score);
+      setP1Emote(null);
+      setP2Emote(null);
     }
 
     function handleSptFireResult(result) {
@@ -288,16 +296,30 @@ function App() {
       handleSptQuitGame();
     }
 
-    function handleSptReset(message) {
+    const handleSptReset = (message) => {
       if (message.toReset === "score") {
         setP1Score(0);
         setP2Score(0);
       } else if (message.toReset === "game") {
-        handleNewGame();
-        setGameStage("game:prep");
+        // have to set turn to null to display loading
+        setSptTurn(null);
+        setP1Board(null);
+        setP2Board(null);
+        setSptWinner(null);
+        setP1Emote(null);
+        setP2Emote(null);
       } else if (message.toReset === "cancel") {
-        handleQuitGame();
-        setGameStage("menu:lobby");
+        socket.emit("sptLeaveRoom", sptGameId);
+        handleSptQuitGame();
+        setGameStage("menu:arena");
+      }
+    };
+
+    function handleSptEmote(message) {
+      if (message.socketId === p1Info.socketId) {
+        setP1Emote(message.emote);
+      } else {
+        setP2Emote(message.emote);
       }
     }
 
@@ -332,6 +354,8 @@ function App() {
     socket.on("sptGameEnd", handleSptGameEnd);
     socket.on("sptReset", handleSptReset);
     socket.on("levelInfo", handleLevelInfo);
+    socket.on("emote", setOpponentEmote);
+    socket.on("sptEmote", handleSptEmote);
 
     window.addEventListener("pagehide", cleanup);
 
@@ -466,6 +490,9 @@ function App() {
           winner={winner}
           setWinner={setWinner}
           handleQuitGame={handleQuitGame}
+          emote={emote}
+          setEmote={setEmote}
+          opponentEmote={opponentEmote}
         />
       );
       break;
@@ -516,6 +543,8 @@ function App() {
           p2Board={p2Board}
           p1Info={p1Info}
           p2Info={p2Info}
+          p1Emote={p1Emote}
+          p2Emote={p2Emote}
           handleSptQuitGame={handleSptQuitGame}
           setGameStage={setGameStage}
         />

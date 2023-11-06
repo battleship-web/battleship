@@ -1236,5 +1236,24 @@ export default function (io) {
         console.log(error);
       }
     });
+
+    socket.on("sendEmote", async (emote) => {
+      const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+      const player1SocketId = await redisClient.hGet(
+        `game:${gameId}`,
+        "player1SocketId"
+      );
+      const player2SocketId = await redisClient.hGet(
+        `game:${gameId}`,
+        "player2SocketId"
+      );
+      const isPlayer1 = player1SocketId === socket.id;
+      const otherPlayerSocketId = isPlayer1 ? player2SocketId : player1SocketId;
+      io.to(otherPlayerSocketId).emit("emote", emote);
+      io.to(`watch:${gameId}`).emit("sptEmote", {
+        emote: emote,
+        socketId: socket.id,
+      });
+    });
   });
 }

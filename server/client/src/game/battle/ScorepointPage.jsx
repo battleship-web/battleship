@@ -21,6 +21,9 @@ function ScorepointPage({
   winner,
   setWinner,
   handleQuitGame,
+  emote,
+  setEmote,
+  opponentEmote,
 }) {
   const [opponentBoard, setOpponentBoard] = useState(
     new Array(8).fill().map(() => new Array(8).fill("blank"))
@@ -138,6 +141,9 @@ function ScorepointPage({
           numHitOnOpponentBoard={numHitOnOpponentBoard}
           handleQuitGame={handleQuitGame}
           setGameStage={setGameStage}
+          emote={emote}
+          setEmote={setEmote}
+          opponentEmote={opponentEmote}
         />
       </h1>
     );

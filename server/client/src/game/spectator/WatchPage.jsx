@@ -2,6 +2,8 @@ import Loading from "../../components/Loading";
 import Board from "../../squarenboard/Board";
 import { socket } from "../../socket";
 import ProfilePicture from "../../components/ProfilePicture";
+import Emote from "../../components/Emote";
+
 function WatchPage({
   turn,
   gameId,
@@ -11,6 +13,8 @@ function WatchPage({
   p2Board,
   p1Info,
   p2Info,
+  p1Emote,
+  p2Emote,
   handleSptQuitGame,
   setGameStage,
 }) {
@@ -48,13 +52,7 @@ function WatchPage({
   } else {
     display = (
       <div className="text-center">
-        <div
-          className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40"
-          style={{
-            backgroundImage: "url('/src/assets/scroll.png')",
-            backgroundSize: "100% 100%",
-          }}
-        >
+        <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
           <h1 className="mt-5 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
             {turn === p1Info.socketId
               ? `${p1Info.nickname}'s Turn`
@@ -116,12 +114,20 @@ function WatchPage({
               <div className="flex flex-col justify-between">
                 <div className="flex flex-col items-center">
                   <h1 className="font-bold">{`${p1Info.nickname}'s Emote`}</h1>
-                  <div className="w-12 h-12 bg-red-500"></div>
+                  {p1Emote ? (
+                    <Emote emote={p1Emote} />
+                  ) : (
+                    <div className="w-12 h-12">None</div>
+                  )}
                 </div>
                 <h1 className="text-orange-950 sm:text-8xl font-bold">vs</h1>
                 <div className="flex flex-col items-center">
                   <h1 className="font-bold">{`${p2Info.nickname}'s Emote`}</h1>
-                  <div className="w-12 h-12 bg-blue-500"></div>
+                  {p2Emote ? (
+                    <Emote emote={p2Emote} />
+                  ) : (
+                    <div className="w-12 h-12">None</div>
+                  )}
                 </div>
               </div>
               <div className="ml-2">
@@ -145,13 +151,7 @@ function WatchPage({
     );
   }
   return (
-    <div
-      className="grid w-screen min-h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
-      style={{
-        backgroundImage: "url('/src/assets/bluebkg.jpg')",
-        backgroundSize: "100% 100%",
-      }}
-    >
+    <div className="grid w-[calc(100%)] min-h-[calc(100%)] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover bg-[url('/src/assets/bluebkg.jpg')]">
       {display}
     </div>
   );
