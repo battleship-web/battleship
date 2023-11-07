@@ -101,7 +101,7 @@ function RegisterPage({
         </div>
         <div className="flex flex-col items-start">
           <label className="text-orange-950 font-bold" htmlFor="nickname">
-            Nickname:
+            nickname:
           </label>
           <input
             className="border-2 border-blue-950"
