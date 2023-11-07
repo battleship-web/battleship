@@ -78,7 +78,7 @@ function GameListPage({
     }
   }
   return (
-    <div className="flex flex-col items-center gap-4 p-4 pt-24 min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')]">
+    <div className="flex flex-col items-center gap-4 p-4 pt-24 min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')]">
       <h1 className="bg-sky-300 border-2 border-orange-950 font-bold p-2 rounded-md">
         Games
       </h1>

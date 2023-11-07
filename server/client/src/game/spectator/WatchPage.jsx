@@ -52,7 +52,7 @@ function WatchPage({
   } else {
     display = (
       <div className="text-center">
-        <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+        <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
           <h1 className="mt-5 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
             {turn === p1Info.socketId
               ? `${p1Info.nickname}'s Turn`
@@ -151,7 +151,7 @@ function WatchPage({
     );
   }
   return (
-    <div className="grid w-[calc(100%)] min-h-[calc(100%)] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover bg-[url('/src/assets/bluebkg.jpg')]">
+    <div className="grid w-[calc(100%)] min-h-[calc(100%)] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')]">
       {display}
     </div>
   );

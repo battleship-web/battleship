@@ -178,7 +178,7 @@ const Grid = ({ setGameStage, setPlayerBoard, handleQuitGame }) => {
   };
 
   return (
-    <div className="bg-[url('/src/assets/bluebkg.jpg')] bg-cover w-[calc(100%)] h-[calc(100%)] flex items-center justify-center">
+    <div className="bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] bg-cover w-[calc(100%)] h-[calc(100%)] flex items-center justify-center">
       <Board board={boardState} size="big" onClick={handleClick} />
       <div className="container w-10"></div>
       <div className="rotate-container">

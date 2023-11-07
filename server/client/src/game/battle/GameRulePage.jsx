@@ -4,14 +4,14 @@ function GamerulePage({ setGameStage }) {
   };
 
   return (
-    <main className="grid place-items-center bg-cover w-[calc(100%)] h-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')]">
+    <main className="grid place-items-center bg-cover w-[calc(100%)] h-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')]">
       <div className="text-center">
         <div className="text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">
             Instructions
           </h1>
         </div>
-        <div className="text-center bg-opacity-50 px-10 py-10 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+        <div className="text-center bg-opacity-50 px-10 py-10 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             ⛴ 1 ⛴
           </h1>

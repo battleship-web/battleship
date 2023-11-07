@@ -31,13 +31,7 @@ function LoginPage({
     <Loading />
   ) : (
     <div className="text-center">
-      <div
-        className="text-center bg-opacity-50 px-20 py-10"
-        style={{
-          backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",
-        }}
-      >
+      <div className="text-center bg-opacity-50 px-20 py-10 items-centers bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%] dark:bg-[url('/src/assets/darkscroll.png')]">
         <div className="flex flex-col items-start">
           <label className="text-orange-950 font-bold" htmlFor="username">
             username:
@@ -91,7 +85,7 @@ function LoginPage({
     </div>
   );
   return (
-    <main className="grid h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover ">
+    <main className="grid box-border h-[calc(100%)] w-[calc(100%)] place-items-center pt-24 bg-[url('/src/assets/bluebkg.jpg')] bg-cover dark:bg-[url('/src/assets/darkbluebkg.png')]">
       {display}
     </main>
   );

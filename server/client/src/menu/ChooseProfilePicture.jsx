@@ -42,9 +42,9 @@ export default function ChooseProfilePicture({ setGameStage, user, setUser }) {
   const profilePictures = [profile1, profile2, profile3, profile4, profile5];
   return (
     <>
-      <main className="grid h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
+    <main className="grid box-border h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
         <div className="text-center">
-          <div className="text-center  bg-opacity-50 px-10 py-10 items-center bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+        <div className="text-center bg-opacity-50 px-10 py-10 items-centers bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%] dark:bg-[url('/src/assets/darkscroll.png')]">
             <h1 className="mt-0 text-12xl font-mono font-bold tracking-tight bg-gradient-to-r from-orange-950 via-orange-900 to-orange-800 inline-block px-2.5 py-1 text-transparent bg-clip-text sm:text-5xl">
               Choose Profile Picture
             </h1>
