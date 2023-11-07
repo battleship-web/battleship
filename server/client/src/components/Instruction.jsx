@@ -1,7 +1,7 @@
 function Instruction({ handleClickOut }) {
   return (
     <main className="text-center">
-      <div className="text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
+      <div className="text-center bg-opacity-50 px-10 py-10 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]">
         <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">
           Instructions
         </h1>

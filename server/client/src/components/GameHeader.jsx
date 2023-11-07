@@ -51,7 +51,7 @@ function GameHeader({
   }, [currentTrack, changeMusic]);
 
   return (
-    <nav className="flex border border-orange-900 bg-orange-300 p-1 justify-between absolute w-[calc(100%)]">
+    <nav className="flex border border-orange-900 bg-orange-300 dark:bg-orange-800 p-1 justify-between absolute w-[calc(100%)]">
       <div className="flex items-center gap-2">
         {user && user.nickname && user.username ? (
           <h1 className="font-bold text-cyan-800">{`${user.nickname} (${user.username})`}</h1>
@@ -94,12 +94,12 @@ function GameHeader({
           {soundOn ? "Pause" : "Play"}
         </button>
         <button
-          className="bg-slate-700 border border-slate-900 rounded text-slate-300 p-1"
+          className="text-bold dark:text-bold bg-slate-300 dark:bg-slate-800 border border-slate-900 rounded dark:text-slate-300 text-slate-900 p-1"
           onClick={() => {
             setIsDarkMode(!isDarkMode);
           }}
         >
-          Set Dark Mode
+          {isDarkMode ? "Set Light Mode" : "Set Dark Mode"}
         </button>
       </div>
     </nav>

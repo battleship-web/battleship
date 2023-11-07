@@ -3,12 +3,12 @@ function WelcomePage({ user, setGameStage }) {
     setGameStage("menu:lobby");
   };
   return (
-    <main className="grid h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] place-items-center  px-6  sm:py-32 lg:px-8 bg-cover">
+    <main className="grid h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] place-items-center  px-6  sm:py-32 lg:px-8 bg-cover">
       <div className="text-center">
-        <div className="text-center bg-opacity-50 px-10 py-4 items-center bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
+        <div className="text-center bg-opacity-50 px-10 py-4 items-center bg-[url('/src/assets/wood.png')] dark:bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">{`Welcome General ${user.nickname} (${user.username})`}</h1>
         </div>
-        <div className="text-center bg-opacity-50 px-20 py-20 items-center bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+        <div className="text-center bg-opacity-50 px-20 py-20 items-center bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             ⛴ In the world of maritime conquest, where battleships rule the
             waves and strategic brilliance reigns supreme, you have chosen the
