@@ -2,6 +2,12 @@ import {
   findUserByUsername,
   createUser,
   setUserProfilePicture,
+  setUserNickname,
+  incrementNumOfRoundsPlayed,
+  incrementNumOfRoundsWon,
+  getAllUsersArr,
+  pushGameRecord,
+  getGameRecordsArr,
 } from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
@@ -217,7 +223,15 @@ export default function (io) {
     });
     socket.on("setNickname", async (nickname) => {
       try {
+        const role = await redisClient.hGet(`socketId:${socket.id}`, "role");
+        const username = await redisClient.hGet(
+          `socketId:${socket.id}`,
+          "username"
+        );
         await redisClient.hSet(`socketId:${socket.id}`, "nickname", nickname);
+        if (role === "registered user") {
+          await setUserNickname(username, nickname);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -257,7 +271,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("allClientListRequest", async () => {
       try {
         const connectedSockets = Array.from(io.sockets.sockets.keys());
@@ -290,7 +303,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("invite", async (inviteeSocketId) => {
       if (!io.sockets.sockets.has(inviteeSocketId)) {
         socket.emit("inviteeLeft", inviteeSocketId);
@@ -742,6 +754,93 @@ export default function (io) {
           }
 
           await redisClient.hSet(`game:${gameId}`, "lastWinner", socket.id);
+
+          // update mongodb
+          // stats for leaderboard
+          const player1Info = await redisClient.hGetAll(
+            `socketId:${player1SocketId}`
+          );
+          const player2Info = await redisClient.hGetAll(
+            `socketId:${player2SocketId}`
+          );
+          const player1InfoTosend = {
+            nickname: player1Info.nickname,
+            username: player1Info.username,
+            role: player1Info.role,
+            level: player1Info.level,
+            profilePicture: player1Info.profilePicture,
+          };
+          const player2InfoTosend = {
+            nickname: player2Info.nickname,
+            username: player2Info.username,
+            role: player2Info.role,
+            level: player2Info.level,
+            profilePicture: player2Info.profilePicture,
+          };
+
+          if (player1Info.role === "registered user") {
+            await incrementNumOfRoundsPlayed(player1Info.username);
+          }
+          if (player2Info.role === "registered user") {
+            await incrementNumOfRoundsPlayed(player2Info.username);
+          }
+
+          if (isPlayer1) {
+            if (player1Info.role === "registered user") {
+              await incrementNumOfRoundsWon(player1Info.username);
+            }
+          } else {
+            if (player2Info.role === "registered user")
+              await incrementNumOfRoundsWon(player2Info.username);
+          }
+
+          // for game records
+          const gameTimestamp = new Date();
+          if (isPlayer1) {
+            // push win record
+            if (player1Info.role === "registered user") {
+              await pushGameRecord(player1Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: true,
+
+                opponent: player2InfoTosend,
+              });
+            }
+
+            // push lose record
+            if (player2Info.role === "registered user") {
+              await pushGameRecord(player2Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: false,
+
+                opponent: player1InfoTosend,
+              });
+            }
+          } else {
+            // push win record
+            if (player2Info.role === "registered user") {
+              await pushGameRecord(player2Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: true,
+
+                opponent: player1InfoTosend,
+              });
+            }
+
+            // push lose record
+            if (player1Info.role === "registered user") {
+              await pushGameRecord(player1Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: false,
+
+                opponent: player2InfoTosend,
+              });
+            }
+          }
         }
 
         if (isPlayer1) {
@@ -1074,7 +1173,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("gameListRequest", async () => {
       try {
         const redisSearchPromise = redisClient.sMembers("gameList");
@@ -1208,15 +1306,22 @@ export default function (io) {
       }
     });
     socket.on("setProfilePicture", async (profilePicture) => {
-      await redisClient.hSet(
-        `socketId:${socket.id}`,
-        "profilePicture",
-        profilePicture
-      );
-      setUserProfilePicture(
-        await redisClient.hGet(`socketId:${socket.id}`, "username"),
-        profilePicture
-      );
+      try {
+        const role = await redisClient.hGet(`socketId:${socket.id}`, "role");
+        await redisClient.hSet(
+          `socketId:${socket.id}`,
+          "profilePicture",
+          profilePicture
+        );
+        if (role === "registered user") {
+          await setUserProfilePicture(
+            await redisClient.hGet(`socketId:${socket.id}`, "username"),
+            profilePicture
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     socket.on("requestLevelInfo", async () => {
@@ -1254,6 +1359,72 @@ export default function (io) {
         emote: emote,
         socketId: socket.id,
       });
+    });
+    socket.on("requestLeaderboard", async (sorting) => {
+      try {
+        let allUsersArr = await getAllUsersArr();
+        if (sorting === "byWins") {
+          allUsersArr.sort((a, b) => {
+            if (a.numOfRoundsWon > b.numOfRoundsWon) {
+              return -1;
+            } else if (a.numOfRoundsWon < b.numOfRoundsWon) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        } else if (sorting === "byWinRatio") {
+          allUsersArr.sort((a, b) => {
+            let aWinRatio = 0;
+            let bWinRatio = 0;
+            if (a.numOfRoundsPlayed !== 0) {
+              aWinRatio = a.numOfRoundsWon / a.numOfRoundsPlayed;
+            }
+            if (b.numOfRoundsPlayed !== 0) {
+              bWinRatio = b.numOfRoundsWon / b.numOfRoundsPlayed;
+            }
+
+            if (aWinRatio > bWinRatio) {
+              return -1;
+            } else if (aWinRatio < bWinRatio) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        } else if (sorting === "byLevel") {
+          allUsersArr.sort((a, b) => {
+            if (a.level > b.level) {
+              return -1;
+            } else if (a.level < b.level) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        }
+
+        // send message
+        io.to(socket.id).emit("leaderboard", allUsersArr);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    socket.on("requestRecord", async () => {
+      try {
+        const role = await redisClient.hGet(`socketId:${socket.id}`, "role");
+        if (role === "guest") {
+          return;
+        }
+        io.to(socket.id).emit(
+          "record",
+          await getGameRecordsArr(
+            await redisClient.hGet(`socketId:${socket.id}`, "username")
+          )
+        );
+      } catch (error) {
+        console.log(error);
+      }
     });
   });
 }

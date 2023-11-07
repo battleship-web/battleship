@@ -39,7 +39,7 @@ function AdminPage({ gameList, clientList }) {
         );
       });
       clientListDisplay = (
-        <table>
+        <table className="border-collapse">
           <thead>
             <tr>
               <th className="border-2 border-orange-950 text-center p-2">
