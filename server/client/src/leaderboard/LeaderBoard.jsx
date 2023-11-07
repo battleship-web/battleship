@@ -48,7 +48,7 @@ function LeaderBoard({ leaderboard, setGameStage }) {
         </td>
         <td className="border-2 border-orange-950 text-center p-2">
           {entry.numOfRoundsPlayed !== 0
-            ? entry.numOfRoundsWon / entry.numOfRoundsPlayed
+            ? (entry.numOfRoundsWon / entry.numOfRoundsPlayed).toPrecision(4)
             : 0}
         </td>
       </tr>

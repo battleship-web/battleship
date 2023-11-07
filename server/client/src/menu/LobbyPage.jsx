@@ -172,7 +172,7 @@ function LobbyPage({
         if (clientExcludingMe.length === 0) {
           display = (
             <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl animate-pulse ">
-              No other online player who are free...
+              No other online players who are free...
             </h1>
           );
         } else {

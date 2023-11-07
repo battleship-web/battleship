@@ -10,20 +10,21 @@ function WelcomePage({ user, setGameStage }) {
         </div>
         <div className="text-center bg-opacity-50 px-20 py-20 items-center bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
-            ⛴ In the beginning, before the human race was born, before dinosaurs
-            went extinct, there was only violence. Every single living thing
-            tried to adapt, survive, and most importantly, kill each other.
-            Therefore, in every single era, there are wars. war to survive, war
-            to conquer food, war for mating. Every reason can cause a war.
-            Nowadays people have law and rule to minimise conflicts between each
-            other. However the thirst for war isn&apos;t going anywhere, it is
-            still inside of every single human. Since one man named Dr.Necern
-            has found gunium particles. The technology of warships is forever
-            changed, and wars occur everywhere. Just to conquer even one more
-            grain of sand. And now several individuals are trying to conquer
-            your island. But it is not that easy because this island has a
-            warship too!!!. Use it, general!! Protect this island!!! Conquer the
-            world!!!! ⛴
+            ⛴ In the world of maritime conquest, where battleships rule the waves and strategic brilliance reigns supreme, you have 
+            chosen the symbol of your command. As you embark on this thrilling naval adventure, you are about to become a legendary 
+            General of the high seas. With determination and skill, you are about to carve yor name into the annals of Battleship history!
+          </h1>
+
+          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
+          ⛴ Set sail and navigate through treacherous waters, seeking out enemy ships and rival Generals who dare to challenge 
+            your fleet. Engage in thrilling battles and outwit your rivals in your mission to discover and conquer the seas. Rise above
+            the ranks of other Generals, sinking their ships and capturing their treasures and prestige. But beware, for the sea is 
+            unforgiving to all... 
+          </h1>
+
+          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
+          ⛴ So prepare your strategy to win every battle and your fleet to outperform any other General's. May the tides shift in your 
+            favour as the fate of the sea is in your hands! Are you ready? Your Battleship adventure awaits!
           </h1>
         </div>
         <button
