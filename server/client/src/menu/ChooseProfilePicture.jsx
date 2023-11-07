@@ -30,6 +30,7 @@ export default function ChooseProfilePicture({ setGameStage, user, setUser }) {
       selectedPicture === `/src/assets/${user.profilePicture}.png` &&
       nickname === user.nickname
     ) {
+      alert("There is no change.");
       return;
     }
     const profileString = selectedPicture.slice(12).split(".")[0];

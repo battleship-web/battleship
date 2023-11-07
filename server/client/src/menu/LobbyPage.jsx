@@ -24,6 +24,7 @@ function LobbyPage({
   inviting,
   setInviting,
   setOpponentInfo,
+  role,
 }) {
   const [inviteeInfo, setInviteeInfo] = useState(null);
 
@@ -237,8 +238,26 @@ function LobbyPage({
               setGameStage("menu:arena");
             }}
           >
-            Go to game list page
+            Go to Game List Page
           </button>
+          <button
+            className="mx-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-2xl border-2 border-orange-950"
+            onClick={() => {
+              setGameStage("leaderboard");
+            }}
+          >
+            Go to Leaderboard Page
+          </button>
+          {role === "registered user" ? (
+            <button
+              className="mx-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-2xl border-2 border-orange-950"
+              onClick={() => {
+                setGameStage("history");
+              }}
+            >
+              Go to Battle History Page
+            </button>
+          ) : null}
         </div>
       </div>
     </main>

@@ -21,6 +21,8 @@ import WatchPage from "./game/spectator/WatchPage";
 import WinnerPage from "./game/spectator/WinnerPage";
 import GameHeader from "./components/GameHeader";
 import ChooseProfilePicture from "./menu/ChooseProfilePicture";
+import LeaderBoard from "./leaderboard/LeaderBoard";
+import BattleRecord from "./battlerecord/BattleRecord";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -32,6 +34,8 @@ function App() {
   const [allClientList, setAllClientList] = useState(null);
   const [socketError, setSocketError] = useState(null);
   const [gameList, setGameList] = useState(null);
+  const [leaderboard, setLeaderboard] = useState(null);
+  const [battleRecord, setBattleRecord] = useState(null);
 
   // lobby states
   const [inviteAccepted, setInviteAccepted] = useState(null);
@@ -356,6 +360,8 @@ function App() {
     socket.on("levelInfo", handleLevelInfo);
     socket.on("emote", setOpponentEmote);
     socket.on("sptEmote", handleSptEmote);
+    socket.on("leaderboard", setLeaderboard);
+    socket.on("record", setBattleRecord);
 
     window.addEventListener("pagehide", cleanup);
 
@@ -436,6 +442,7 @@ function App() {
           setInviting={setInviting}
           setIncomingInvite={setIncomingInvite}
           setOpponentInfo={setOpponentInfo}
+          role={user.role}
         />
       );
       break;
@@ -562,6 +569,14 @@ function App() {
         />
       );
       break;
+    case "leaderboard":
+      page = (
+        <LeaderBoard leaderboard={leaderboard} setGameStage={setGameStage} />
+      );
+      break;
+    case "history":
+      page = <BattleRecord record={battleRecord} setGameStage={setGameStage} />;
+      break;
     case "admin":
       page = <AdminPage clientList={allClientList} gameList={gameList} />;
       break;
@@ -573,6 +588,7 @@ function App() {
       <GameHeader
         user={user}
         gameStage={gameStage}
+        setGameStage={setGameStage}
         isDarkMode={isDarkMode}
         setIsDarkMode={setIsDarkMode}
       />

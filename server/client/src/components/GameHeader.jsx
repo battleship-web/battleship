@@ -2,7 +2,13 @@ import { useAudio } from "../utils/sound";
 import { useEffect } from "react";
 import ProfilePicture from "./ProfilePicture";
 
-function GameHeader({ user, gameStage, isDarkMode, setIsDarkMode }) {
+function GameHeader({
+  user,
+  gameStage,
+  setGameStage,
+  isDarkMode,
+  setIsDarkMode,
+}) {
   const urls = [
     "/src/assets/OpeningMusic.wav",
     "/src/assets/Music.wav",
@@ -51,7 +57,17 @@ function GameHeader({ user, gameStage, isDarkMode, setIsDarkMode }) {
           <h1 className="font-bold text-cyan-800">{`${user.nickname} (${user.username})`}</h1>
         ) : null}
         {user && user.profilePicture ? (
-          <ProfilePicture picture={user.profilePicture} size="big" />
+          <button
+            onClick={() => {
+              if (gameStage === "menu:nickname") {
+                setGameStage("menu:lobby");
+              } else {
+                setGameStage("menu:nickname");
+              }
+            }}
+          >
+            <ProfilePicture picture={user.profilePicture} size="big" />
+          </button>
         ) : null}
         {user && user.level ? (
           <div className="flex items-center">

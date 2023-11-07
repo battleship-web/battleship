@@ -93,8 +93,10 @@ export async function incrementNumOfRoundsWon(username) {
 
 export async function getAllUsersArr() {
   try {
-    const allUsersArr = await User.find({});
-
+    let allUsersArr = await User.find({});
+    allUsersArr = allUsersArr.filter((user) => {
+      return user.role !== "admin";
+    });
     // omit password hash, exp, and battle records from data to send
     return allUsersArr.map((user) => {
       delete user.passwordHash;
@@ -111,7 +113,7 @@ export async function getAllUsersArr() {
 export async function pushGameRecord(username, gameRecord) {
   try {
     const user = await User.findOne({ username: username });
-    user.records.push(gameRecord);
+    user.records.unshift(gameRecord);
     // gameRecord object should match gameRecord schema
     await user.save();
   } catch (error) {
@@ -122,7 +124,11 @@ export async function pushGameRecord(username, gameRecord) {
 
 export async function getGameRecordsArr(username) {
   try {
-    return (await User.findOne({ username: username })).records;
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user.records;
   } catch (error) {
     console.log(error);
     throw new Error("Get user game records failed.");

@@ -779,19 +779,19 @@ export default function (io) {
           };
 
           if (player1Info.role === "registered user") {
-            await incrementNumOfRoundsPlayed(player1Username);
+            await incrementNumOfRoundsPlayed(player1Info.username);
           }
           if (player2Info.role === "registered user") {
-            await incrementNumOfRoundsPlayed(player2Username);
+            await incrementNumOfRoundsPlayed(player2Info.username);
           }
 
           if (isPlayer1) {
             if (player1Info.role === "registered user") {
-              await incrementNumOfRoundsWon(player1Username);
+              await incrementNumOfRoundsWon(player1Info.username);
             }
           } else {
             if (player2Info.role === "registered user")
-              await incrementNumOfRoundsWon(player2Username);
+              await incrementNumOfRoundsWon(player2Info.username);
           }
 
           // for game records
@@ -799,7 +799,7 @@ export default function (io) {
           if (isPlayer1) {
             // push win record
             if (player1Info.role === "registered user") {
-              await pushGameRecord(player1Username, {
+              await pushGameRecord(player1Info.username, {
                 gameId: gameId,
                 time: gameTimestamp,
                 win: true,
@@ -810,7 +810,7 @@ export default function (io) {
 
             // push lose record
             if (player2Info.role === "registered user") {
-              await pushGameRecord(player2Username, {
+              await pushGameRecord(player2Info.username, {
                 gameId: gameId,
                 time: gameTimestamp,
                 win: false,
@@ -821,7 +821,7 @@ export default function (io) {
           } else {
             // push win record
             if (player2Info.role === "registered user") {
-              await pushGameRecord(player2Username, {
+              await pushGameRecord(player2Info.username, {
                 gameId: gameId,
                 time: gameTimestamp,
                 win: true,
@@ -832,7 +832,7 @@ export default function (io) {
 
             // push lose record
             if (player1Info.role === "registered user") {
-              await pushGameRecord(player1Username, {
+              await pushGameRecord(player1Info.username, {
                 gameId: gameId,
                 time: gameTimestamp,
                 win: false,
@@ -1360,9 +1360,9 @@ export default function (io) {
         socketId: socket.id,
       });
     });
-    socket.on("requestLeaderboard", (sorting) => {
+    socket.on("requestLeaderboard", async (sorting) => {
       try {
-        let allUsersArr = getAllUsersArr();
+        let allUsersArr = await getAllUsersArr();
         if (sorting === "byWins") {
           allUsersArr.sort((a, b) => {
             if (a.numOfRoundsWon > b.numOfRoundsWon) {
@@ -1375,8 +1375,14 @@ export default function (io) {
           });
         } else if (sorting === "byWinRatio") {
           allUsersArr.sort((a, b) => {
-            const aWinRatio = a.numOfRoundsWon / a.numOfRoundsPlayed;
-            const bWinRatio = b.numOfRoundsWon / b.numOfRoundsPlayed;
+            let aWinRatio = 0;
+            let bWinRatio = 0;
+            if (a.numOfRoundsPlayed !== 0) {
+              aWinRatio = a.numOfRoundsWon / a.numOfRoundsPlayed;
+            }
+            if (b.numOfRoundsPlayed !== 0) {
+              bWinRatio = b.numOfRoundsWon / b.numOfRoundsPlayed;
+            }
 
             if (aWinRatio > bWinRatio) {
               return -1;
@@ -1412,7 +1418,7 @@ export default function (io) {
         }
         io.to(socket.id).emit(
           "record",
-          getGameRecordsArr(
+          await getGameRecordsArr(
             await redisClient.hGet(`socketId:${socket.id}`, "username")
           )
         );

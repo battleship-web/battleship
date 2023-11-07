@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
+const opponentUserSchema = new mongoose.Schema({
+  nickname: { type: String, required: true },
+  username: { type: String, required: true },
+  role: { type: String, required: true },
+  level: Number,
+  profilePicture: String,
+});
+
 // subschema to store array of gameRecords
 const gameRecord = new mongoose.Schema({
   // game info
@@ -24,14 +32,6 @@ const userSchema = new mongoose.Schema({
   numOfRoundsWon: { type: Number, required: true },
   // battle records
   records: { type: [gameRecord], required: true },
-});
-
-const opponentUserSchema = new mongoose.Schema({
-  nickname: { type: String, required: true },
-  username: { type: String, required: true },
-  role: { type: String, required: true },
-  level: Number,
-  profilePicture: String,
 });
 
 export default mongoose.model("User", userSchema);
