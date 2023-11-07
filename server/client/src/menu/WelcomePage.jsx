@@ -10,21 +10,28 @@ function WelcomePage({ user, setGameStage }) {
         </div>
         <div className="text-center bg-opacity-50 px-20 py-20 items-center bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
-            ⛴ In the world of maritime conquest, where battleships rule the waves and strategic brilliance reigns supreme, you have 
-            chosen the symbol of your command. As you embark on this thrilling naval adventure, you are about to become a legendary 
-            General of the high seas. With determination and skill, you are about to carve yor name into the annals of Battleship history!
+            ⛴ In the world of maritime conquest, where battleships rule the
+            waves and strategic brilliance reigns supreme, you have chosen the
+            symbol of your command. As you embark on this thrilling naval
+            adventure, you are about to become a legendary General of the high
+            seas. With determination and skill, you are about to carve yor name
+            into the annals of Battleship history!
           </h1>
 
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
-          ⛴ Set sail and navigate through treacherous waters, seeking out enemy ships and rival Generals who dare to challenge 
-            your fleet. Engage in thrilling battles and outwit your rivals in your mission to discover and conquer the seas. Rise above
-            the ranks of other Generals, sinking their ships and capturing their treasures and prestige. But beware, for the sea is 
-            unforgiving to all... 
+            ⛴ Set sail and navigate through treacherous waters, seeking out
+            enemy ships and rival Generals who dare to challenge your fleet.
+            Engage in thrilling battles and outwit your rivals in your mission
+            to discover and conquer the seas. Rise above the ranks of other
+            Generals, sinking their ships and capturing their treasures and
+            prestige. But beware, for the sea is unforgiving to all...
           </h1>
 
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
-          ⛴ So prepare your strategy to win every battle and your fleet to outperform any other General's. May the tides shift in your 
-            favour as the fate of the sea is in your hands! Are you ready? Your Battleship adventure awaits!
+            ⛴ So prepare your strategy to win every battle and your fleet to
+            outperform any other General&apos;s. May the tides shift in your
+            favour as the fate of the sea is in your hands! Are you ready? Your
+            Battleship adventure awaits!
           </h1>
         </div>
         <button

@@ -1,7 +1,7 @@
 function OpponentQuitPage({ handleOkay }) {
   return (
     <main className="grid min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
-      <div className="text-center py-10 px-10 bg-[url(/src/assets/scroll.png')] bg-[length:100%_100%]">
+      <div className="text-center py-10 px-10 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
         <h1 className="font-bold text-orange-950 text-lg">
           Your opponent quit!
         </h1>

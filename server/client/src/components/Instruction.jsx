@@ -1,4 +1,4 @@
-function Instruction(handleClickOut) {
+function Instruction({ handleClickOut }) {
   return (
     <main className="text-center">
       <div className="text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">

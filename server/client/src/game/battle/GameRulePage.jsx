@@ -11,11 +11,11 @@ function GamerulePage({ setGameStage }) {
             Instructions
           </h1>
         </div>
-        <div className="text-center bg-opacity-50 px-10 py-10 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+        <div className="text-center bg-opacity-50 px-10 py-40 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             {`⛴ 1) Game setup: ⛴`}
           </h1>
-          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
+          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl mx-16">
             Each player has a fleet of 4 battlehips. Choose your battleships on
             the righthandside, selecting their placement to be either on a row
             or column. Place your ships on the grid, forming your fleet. During
@@ -27,7 +27,7 @@ function GamerulePage({ setGameStage }) {
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             {`⛴ 2) Battleship: ⛴`}
           </h1>
-          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
+          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl mx-16">
             There are 2 grids. The one on the left is your opponent&apos;s and
             the one on the right is yours. Each round, you need to attack one
             square of your opponent&apos;s grid seeking to destroy their ships.
@@ -39,7 +39,7 @@ function GamerulePage({ setGameStage }) {
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             {`⛴ 3) Special Events: ⛴`}
           </h1>
-          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
+          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl mx-16">
             Each battle, you may also choose to use one bomb. This special
             missile can hit 4 neighbouring squares and can be used once at any
             point in the game, according to your strategy. But beware, the sea
@@ -49,7 +49,7 @@ function GamerulePage({ setGameStage }) {
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             {`⛴ 4) Ultimate goal: ⛴`}
           </h1>
-          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
+          <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl mx-16">
             Your ultimate goal is to be the first to destroy all the ships of
             your enemy in order to conquer their fleet and win the battle.
             Choose your fleet and attack strategy wisely, because your opponent
