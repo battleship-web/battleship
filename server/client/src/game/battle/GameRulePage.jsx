@@ -11,7 +11,7 @@ function GamerulePage({ setGameStage }) {
             Instructions
           </h1>
         </div>
-        <div className="text-center bg-opacity-50 px-10 py-40 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+        <div className="text-center bg-opacity-50 px-10 py-40 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]">
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
             {`⛴ 1) Game setup: ⛴`}
           </h1>

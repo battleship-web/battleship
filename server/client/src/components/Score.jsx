@@ -171,7 +171,7 @@ function Score({
                 className={`self-start ml-3 mb-3 ${
                   bombSelected
                     ? "bg-green-400 rounded border-2 border-green-700"
-                    : ""
+                    : "bg-blue-400 rounded border-2 border-blue-700"
                 } ${
                   bombUsed ? "bg-red-400 rounded border-2 border-red-700" : ""
                 }`}
