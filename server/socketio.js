@@ -1405,7 +1405,7 @@ export default function (io) {
         }
 
         // send message
-        io.to(socket.id).emit("leaderboard", allUsersArr);
+        io.to(socket.id).emit("leaderboard", allUsersArr.slice(0, 10));
       } catch (error) {
         console.log(error);
       }

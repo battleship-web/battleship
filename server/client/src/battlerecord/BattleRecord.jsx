@@ -40,11 +40,11 @@ function BattleRecord({ record, setGameStage }) {
         <ProfilePicture picture={battle.opponent.profilePicture} size="small" />
       </li>
     ));
-    display = <ul>{display}</ul>;
+    display = <ul className="overflow-y-scroll">{display}</ul>;
   }
   return (
-    <div className="h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] bg-cover px-6 py-24">
-      <div className="flex flex-col items-center bg-[url('/src/assets/wood.png')] bg-[length:100%_100%] p-10">
+    <div className="min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] bg-cover px-6 py-24">
+      <div className="flex flex-col max-h-[40rem] items-center bg-[url('/src/assets/wood.png')] bg-[length:100%_100%] p-10">
         <h1 className="text-3xl font-extrabold py-3">Battle History</h1>
         {display}
       </div>
