@@ -1,11 +1,11 @@
 import Loading from "../components/Loading";
 import { socket } from "../socket";
 import { useState } from "react";
-import profile1 from "../assets/cat.png";
-import profile2 from "../assets/dog.png";
-import profile3 from "../assets/pig.png";
-import profile4 from "../assets/elephant.png";
-import profile5 from "../assets/rabbit.png";
+import profile1 from "/cat.png";
+import profile2 from "/dog.png";
+import profile3 from "/pig.png";
+import profile4 from "/elephant.png";
+import profile5 from "/rabbit.png";
 
 function RegisterPage({
   socketError,
@@ -54,7 +54,7 @@ function RegisterPage({
       username: username,
       password: password,
       nickname: nickname,
-      profilePicture: selectedPicture.slice(12).split(".")[0],
+      profilePicture: selectedPicture.slice(1).split(".")[0],
     });
     setPassword("");
     setRePassword("");
@@ -66,13 +66,7 @@ function RegisterPage({
     <Loading />
   ) : (
     <div className="text-center">
-      <div
-        className="text-center bg-opacity-50 px-20 py-28 flex"
-        style={{
-          backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",
-        }}
-      >
+      <div className="text-center bg-opacity-50 px-20 py-28 flex bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]">
         <div>
           <h1 className="font-bold text-3xl pb-4">Register</h1>
           <div className="flex flex-col items-start">

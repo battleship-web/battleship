@@ -31,7 +31,7 @@ function GamerulePage({ setGameStage }) {
             There are 2 grids. The one on the left is your opponent&apos;s and
             the one on the right is yours. Each round, you need to attack one
             square of your opponent&apos;s grid seeking to destroy their ships.
-            You have 20 seconds to decide on your target. If you manage to hit a
+            You have 10 seconds to decide on your target. If you manage to hit a
             square of their ships, your missile will appear in a mass of
             destroyed planks. If you miss your shot, your missile will remain in
             empty waters...

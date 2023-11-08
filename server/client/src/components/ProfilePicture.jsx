@@ -1,5 +1,5 @@
 function ProfilePicture({ picture, size }) {
-  const pictureSrc = `/src/assets/${picture}.png`;
+  const pictureSrc = `/${picture}.png`;
   return (
     <img
       src={pictureSrc}

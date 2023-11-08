@@ -2,21 +2,33 @@ export function setBoardFromFireResult(board, setBoard, fireResult) {
   const newBoard = board.map((row) => row.slice());
 
   if (fireResult.bomb) {
-    newBoard[fireResult.rowIndex][fireResult.columnIndex] = fireResult.hit[0]
-      ? "hit"
-      : "miss";
-    newBoard[fireResult.rowIndex][fireResult.columnIndex + 1] = fireResult
-      .hit[1]
-      ? "hit"
-      : "miss";
-    newBoard[fireResult.rowIndex + 1][fireResult.columnIndex] = fireResult
-      .hit[2]
-      ? "hit"
-      : "miss";
-    newBoard[fireResult.rowIndex + 1][fireResult.columnIndex + 1] = fireResult
-      .hit[3]
-      ? "hit"
-      : "miss";
+    let arrIndex = 0;
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 2; j++) {
+        if (fireResult.rowIndex + i > 7 || fireResult.columnIndex + j > 7) {
+          arrIndex += 1;
+          continue;
+        }
+        if (
+          fireResult.hit[arrIndex] &&
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j].slice(
+            0,
+            4
+          ) === "ship"
+        ) {
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
+            "hit";
+        } else if (
+          !fireResult[arrIndex] &&
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
+            "blank"
+        ) {
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
+            "miss";
+        }
+        arrIndex += 1;
+      }
+    }
   } else {
     newBoard[fireResult.rowIndex][fireResult.columnIndex] = fireResult.hit
       ? "hit"

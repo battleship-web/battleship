@@ -179,7 +179,7 @@ function LobbyPage({
           const listToDisplay = clientExcludingMe.map((client) => {
             return (
               <li
-                className="flex justify-center items-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]"
+                className="flex justify-center items-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]"
                 key={client.username}
               >
                 <h2 className="my-3 mr-5 text-blue-950">General</h2>

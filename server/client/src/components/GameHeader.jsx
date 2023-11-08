@@ -10,10 +10,10 @@ function GameHeader({
   setIsDarkMode,
 }) {
   const urls = [
-    "/src/assets/OpeningMusic.wav",
-    "/src/assets/Music.wav",
-    "/src/assets/VictoryMusic.wav",
-    "/src/assets/DefeatedMusic.wav",
+    "/OpeningMusic.wav",
+    "/Music.wav",
+    "/VictoryMusic.wav",
+    "/DefeatedMusic.wav",
   ];
   const [soundOn, toggle, changeMusic] = useAudio(urls);
   let currentTrack = null;
@@ -61,7 +61,7 @@ function GameHeader({
             onClick={() => {
               if (gameStage === "menu:nickname") {
                 setGameStage("menu:lobby");
-              } else {
+              } else if (gameStage === "menu:lobby") {
                 setGameStage("menu:nickname");
               }
             }}
