@@ -505,7 +505,7 @@ function App() {
       break;
     case "game:waitForReplay":
       page = (
-        <div className=" h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] bg-cover">
+        <div className=" h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] bg-cover">
           <Loading text="Did the opponent escape?" />
         </div>
       );

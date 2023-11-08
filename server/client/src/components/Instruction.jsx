@@ -1,12 +1,12 @@
 function Instruction({ handleClickOut }) {
   return (
     <main className="text-center">
-      <div className="text-center bg-opacity-50 px-10 py-10 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]">
+      <div className="text-center bg-opacity-50 px-10 py-10 bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
         <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-2xl ">
           Instructions
         </h1>
       </div>
-      <div className="text-center bg-opacity-50 px-40 py-40 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+      <div className="text-center bg-opacity-50 px-40 py-40 bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%] dark:bg-[url('/src/assets/darkscroll.png')]">
         <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
           {`⛴ 1) Game setup: ⛴`}
         </h1>

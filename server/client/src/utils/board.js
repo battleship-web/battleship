@@ -10,22 +10,20 @@ export function setBoardFromFireResult(board, setBoard, fireResult) {
           continue;
         }
         if (
-          fireResult.hit[arrIndex] &&
-          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j].slice(
-            0,
-            4
-          ) === "ship"
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
+            "hit" ||
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
+            "miss" ||
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
+            "lightningHit" ||
+          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
+            "lightningMiss"
         ) {
-          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
-            "hit";
-        } else if (
-          !fireResult[arrIndex] &&
-          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
-            "blank"
-        ) {
-          newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] ===
-            "miss";
+          arrIndex += 1;
+          continue;
         }
+        newBoard[fireResult.rowIndex + i][fireResult.columnIndex + j] =
+          fireResult.hit[arrIndex] ? "hit" : "miss";
         arrIndex += 1;
       }
     }

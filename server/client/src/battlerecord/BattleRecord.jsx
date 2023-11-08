@@ -15,7 +15,7 @@ function BattleRecord({ record, setGameStage }) {
     display = record.map((battle) => (
       <li
         key={battle.gameId}
-        className="flex gap-3 items-center bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%] px-8 py-10"
+        className="flex gap-3 items-center bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%] px-8 py-10"
       >
         <h1 className="font-semibold">
           {new Date(battle.time).toLocaleTimeString("en-GB")}
@@ -43,7 +43,7 @@ function BattleRecord({ record, setGameStage }) {
     display = <ul>{display}</ul>;
   }
   return (
-    <div className="h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] bg-cove px-6 py-24">
+    <div className="h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] bg-cover px-6 py-24">
       <div className="flex flex-col items-center bg-[url('/src/assets/wood.png')] bg-[length:100%_100%] p-10">
         <h1 className="text-3xl font-extrabold py-3">Battle History</h1>
         {display}

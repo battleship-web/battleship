@@ -1273,11 +1273,11 @@ export default function (io) {
         });
 
         const p1BoardFireResults = convertBoardStrTo2DArray(
-          await redisClient.hGet(`game:${gameId}`, "player1Board")
+          gameInfo.player1Board
         );
 
         const p2BoardFireResults = convertBoardStrTo2DArray(
-          await redisClient.hGet(`game:${gameId}`, "player2Board")
+          gameInfo.player2Board
         );
 
         const message = {

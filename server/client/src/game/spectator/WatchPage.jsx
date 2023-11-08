@@ -52,7 +52,7 @@ function WatchPage({
   } else {
     display = (
       <div className="text-center">
-        <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/scroll.png')] bg-[length:100%_100%]">
+        <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]">
           <h1 className="mt-5 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
             {turn === p1Info.socketId
               ? `${p1Info.nickname}'s Turn`
