@@ -37,14 +37,14 @@ img {
   overflow: hidden;
 }
 
-.page-background {
+/* .page-background {
   background-image: url("/src/assets/bluebkg.jpg");
   background-size: cover;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-}
+} */
 
 .color-buttons-container {
   display: flex;

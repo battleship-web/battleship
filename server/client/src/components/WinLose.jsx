@@ -11,14 +11,9 @@ export default function WinLose({ setGameStage, handleQuitGame, win }) {
     : "You almost got it, maybe try again?";
 
   return (
-    <main className="grid min-h-full place-items-center px-6 py-24 sm:py-32 lg:px-8"
-    style={{
-          backgroundImage: "url('/src/assets/bluebkg.jpg')",
-          backgroundSize: "100% 100%",}}>
-      <div className="text-center py-20 px-10 "
-        style={{
-          backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",}}>
+    <main
+      className="grid min-h-[calc(100%)] w-[calc(100%)] bg-[length:100%_100%] dark:bg-[url('/src/assets/darkbluebkg.png')] bg-[url('/src/assets/bluebkg.jpg')] place-items-center px-6 py-24 sm:py-32 lg:px-8">
+      <div className="text-center py-20 px-10 bg-[length:100%_100%] dark:bg-[url('/src/assets/darkscroll.png')] bg-[url('/src/assets/scroll.png')]">
         <span
           className={`mt-2 text-12xl font-mono font-bold tracking-tight bg-gradient-to-r ${greenRed} animate-pulse inline-block text-transparent bg-clip-text sm:text-7xl `}
         >

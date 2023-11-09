@@ -2,6 +2,10 @@ import Board from "../squarenboard/Board";
 import { socket } from "../socket";
 import { useEffect, useState } from "react";
 import Timer from "./Timer";
+import bombPic from "../assets/bomb.png";
+import ProfilePicture from "./ProfilePicture";
+import Emote from "./Emote";
+
 function Score({
   handleClickInstruction,
   user,
@@ -16,13 +20,26 @@ function Score({
   numHitOnOpponentBoard,
   handleQuitGame,
   setGameStage,
+  emote,
+  setEmote,
+  opponentEmote,
 }) {
   const [fired, setFired] = useState(false);
+  const [bombSelected, setBombSelected] = useState(false);
+  const [bombUsed, setBombUsed] = useState(false);
+
+  const emotes = ["thumbsup", "thumbdown", "happy", "angry", "ohno"];
   const handleOpponentBoardClick = (rowIndex, columnIndex, state) => {
     if (state !== "blank" || turn !== socket.id || fired) {
       return;
     }
-    socket.emit("fire", { x: columnIndex, y: rowIndex });
+    if (bombSelected) {
+      socket.emit("fire", { x: columnIndex, y: rowIndex, bomb: true });
+      setBombUsed(true);
+      setBombSelected(false);
+    } else {
+      socket.emit("fire", { x: columnIndex, y: rowIndex, bomb: false });
+    }
     const newBoard = opponentBoard.map((row) => row.slice());
     newBoard[rowIndex][columnIndex] = "selected";
     setOpponentBoard(newBoard);
@@ -58,55 +75,128 @@ function Score({
 
   return (
     <main className="text-center">
-     <div className="text-center items-center mb-6 relative isolate overflow-hidden px-20 py-40"
-        style={{
-          backgroundImage: "url('/src/assets/scroll.png')",
-          backgroundSize: "100% 100%",}}>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-orange-950 sm:text-5xl pt-5">
-          BATTLESHIP{" "}
-        </h1>
+      <div className="text-center bg-[length:100%_100%] bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] items-center mb-6 relative isolate overflow-hidden px-20 py-40">
         {turn === socket.id ? (
-          <Timer startSeconds={20} onZero={handleZero} fired={fired} />
+          <Timer startSeconds={10} onZero={handleZero} fired={fired} />
         ) : (
           <h1 className="mt-2 text-base leading-7 text-blue-950 font-bold bg-orange-700 rounded-md sm:text-2xl">
             Opponent&apos;s Turn
           </h1>
         )}
-        <div className="mt-8 text-center items-center">
-          <div className="flex-row">
-            <div className="inline-flex mr-10 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-              General {opponentInfo.nickname}
+        <div className="mt-5 text-center">
+          <div className="flex justify-between">
+            <div className="flex gap-1 items-center">
+              <div className="flex flex-col">
+                <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                  General {opponentInfo.nickname}
+                </span>
+                {opponentInfo.level ? (
+                  <div className="items-center rounded-md bg-red-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                    Lvl: {opponentInfo.level}
+                  </div>
+                ) : null}
+              </div>
+
+              <div>
+                <ProfilePicture
+                  picture={opponentInfo.profilePicture}
+                  size="big"
+                />
+              </div>
+              <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-base font-bold text-red-950 border-2 border-red-950">
+                POINT {opponentScore}
+              </span>
+              <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-base font-bold text-red-950 border-2 border-red-950">
+                No. of Hits: {numHitOnPlayerBoard}
+              </span>
             </div>
-            <span className="inline-flex items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-              POINT {opponentScore}
-            </span>
-            <span className="inline-flex ml-10 mr-20 items-center rounded-md bg-red-200 px-2 py-1 text-1x1 font-bold text-red-950 border-2 border-red-950">
-              No. of Hits: {numHitOnPlayerBoard}
-            </span>
-            <span className="inline-flex ml-20 mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-              General {user.nickname}
-            </span>
-            <span className="inline-flex mr-10 items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-              POINT {playerScore}
-            </span>
-            <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-1x1 font-bold text-green-950 border-2 border-green-950">
-              No. of Hits: {numHitOnOpponentBoard}
-            </span>
+            <div className="flex gap-1 items-center mr-14">
+              <div className="flex flex-col">
+                <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-xl font-bold text-green-950 border-2 border-green-950">
+                  General {user.nickname}
+                </span>
+                {user.level ? (
+                  <div className="items-center rounded-md bg-green-200 px-2 py-1 text-lg font-bold text-red-950 border-2 border-red-950">
+                    Lvl: {user.level}
+                  </div>
+                ) : null}
+              </div>
+
+              <div>
+                <ProfilePicture picture={user.profilePicture} size="big" />
+              </div>
+              <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-base font-bold text-green-950 border-2 border-green-950">
+                POINT {playerScore}
+              </span>
+              <span className="inline-flex items-center rounded-md bg-green-200 px-2 py-1 text-base font-bold text-green-950 border-2 border-green-950">
+                No. of Hits: {numHitOnOpponentBoard}
+              </span>
+            </div>
           </div>
         </div>
         <div className="mt-2 mb-12">
           <div className="flex flex-row">
-            <h1 className="mr-2">
+            <div className="mr-2">
               <Board
                 board={opponentBoard}
                 onClick={handleOpponentBoardClick}
-                size="big"
+                size="small"
               />
-            </h1>
-            <h1 className="mt-20 text-orange-950 sm:text-8xl font-bold">vs</h1>
-            <h1 className="ml-2">
-              <Board board={playerBoard} onClick={() => {}} size="big" />
-            </h1>
+            </div>
+            <div className="flex flex-col justify-between">
+              <div className="flex flex-col items-center">
+                <h1 className="font-bold">{`${opponentInfo.nickname}'s Emote`}</h1>
+                {opponentEmote ? (
+                  <Emote emote={opponentEmote} />
+                ) : (
+                  <div className="w-12 h-12">None</div>
+                )}
+              </div>
+              <h1 className="text-orange-950 sm:text-8xl font-bold">vs</h1>
+              <div className="flex flex-col items-center">
+                <h1 className="font-bold">{`${user.nickname}'s Emote`}</h1>
+                {emote ? (
+                  <Emote emote={emote} />
+                ) : (
+                  <div className="w-12 h-12">None</div>
+                )}
+              </div>
+            </div>
+
+            <div className="ml-2">
+              <Board board={playerBoard} onClick={() => {}} size="small" />
+            </div>
+            <div className="flex flex-col">
+              <button
+                className={`self-start ml-3 mb-3 ${
+                  bombSelected
+                    ? "bg-green-400 rounded border-2 border-green-700"
+                    : "bg-blue-400 rounded border-2 border-blue-700"
+                } ${
+                  bombUsed ? "bg-red-400 rounded border-2 border-red-700" : ""
+                }`}
+                onClick={() => {
+                  if (bombUsed) {
+                    return;
+                  }
+                  setBombSelected(!bombSelected);
+                }}
+              >
+                <img src={bombPic} className="w-12 h-12" />
+              </button>
+              {emotes.map((emote, index) => (
+                <button
+                  key={index}
+                  className="ml-3"
+                  onClick={() => {
+                    setEmote(emote);
+                    socket.emit("sendEmote", emote);
+                  }}
+                >
+                  <Emote emote={emote} />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

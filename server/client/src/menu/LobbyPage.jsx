@@ -7,6 +7,7 @@ import InviteRefused from "../components/InviteRefused";
 import IncomingInvite from "../components/IncomingInvite";
 import { socket } from "../socket";
 import { PropTypes } from "prop-types";
+import ProfilePicture from "../components/ProfilePicture";
 
 function LobbyPage({
   clientList,
@@ -23,6 +24,7 @@ function LobbyPage({
   inviting,
   setInviting,
   setOpponentInfo,
+  role,
 }) {
   const [inviteeInfo, setInviteeInfo] = useState(null);
 
@@ -43,12 +45,20 @@ function LobbyPage({
     setOpponentInfo(inviteeInfo);
   };
 
-  function handleInvite(opponentSocketId, opponentNickname, opponentUsername) {
+  function handleInvite(
+    opponentSocketId,
+    opponentNickname,
+    opponentUsername,
+    opponentLevel,
+    opponentProfilePicture
+  ) {
     setInviting(true);
     setInviteeInfo({
       socketId: opponentSocketId,
       nickname: opponentNickname,
       username: opponentUsername,
+      level: opponentLevel,
+      profilePicture: opponentProfilePicture,
     });
     socket.emit("invite", opponentSocketId);
   }
@@ -56,13 +66,17 @@ function LobbyPage({
   function acceptInvitation(
     opponentSocketId,
     opponentNickname,
-    opponentUsername
+    opponentUsername,
+    opponentLevel,
+    opponentProfilePicture
   ) {
     socket.emit("acceptInvite", opponentSocketId);
     setOpponentInfo({
       socketId: opponentSocketId,
       nickname: opponentNickname,
       username: opponentUsername,
+      level: opponentLevel,
+      profilePicture: opponentProfilePicture,
     });
     setGameStage("game:gamerule");
     setIncomingInvite(null);
@@ -87,7 +101,9 @@ function LobbyPage({
             acceptInvitation(
               incomingInvite.socketId,
               incomingInvite.nickname,
-              incomingInvite.username
+              incomingInvite.username,
+              incomingInvite.level,
+              incomingInvite.profilePicture
             );
           }}
           refuseInvitation={() => {
@@ -156,25 +172,27 @@ function LobbyPage({
         if (clientExcludingMe.length === 0) {
           display = (
             <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl animate-pulse ">
-              No other online player who are free...
+              No other online players who are free...
             </h1>
           );
         } else {
           const listToDisplay = clientExcludingMe.map((client) => {
             return (
               <li
-                className="flex justify-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3"
-                style={{
-                  backgroundImage: "url('/src/assets/scroll.png')",
-                  backgroundSize: "100% 100%",
-                }}
+                className="flex justify-center items-center text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-3xl text-center bg-opacity-50 px-10 py-3 bg-[url('/src/assets/scroll.png')] dark:bg-[url('/src/assets/darkscroll.png')] bg-[length:100%_100%]"
                 key={client.username}
               >
                 <h2 className="my-3 mr-5 text-blue-950">General</h2>
                 <h1 className="my-3 mr-5 ">{client.nickname}</h1>
                 <h2 className="my-3 mr-5">({client.username})</h2>
+                {client.profilePicture ? (
+                  <ProfilePicture
+                    picture={client.profilePicture}
+                    size="small"
+                  />
+                ) : null}
                 {client.level ? (
-                  <h2 className="my-3">Lv:{client.level}</h2>
+                  <h2 className="ml-1 my-3">Lv:{client.level}</h2>
                 ) : null}
                 <button
                   className="mx-6 bg-gradient-to-r from-orange-600 to-orange-700 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-1xl border-2 border-orange-950"
@@ -182,7 +200,9 @@ function LobbyPage({
                     handleInvite(
                       client.socketId,
                       client.nickname,
-                      client.username
+                      client.username,
+                      client.level,
+                      client.profilePicture
                     );
                   }}
                 >
@@ -198,21 +218,9 @@ function LobbyPage({
   }
 
   return (
-    <main
-      className="grid h-screen w-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
-      style={{
-        backgroundImage: "url('/src/assets/bluebkg.jpg')",
-        backgroundSize: "100% 100%",
-      }}
-    >
+    <main className="grid h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
       <div className="text-center">
-        <div
-          className="text-center bg-cover bg-opacity-50 px-10 py-10 items-center "
-          style={{
-            backgroundImage: "url('/src/assets/wood.png')",
-            backgroundSize: "100% 100%",
-          }}
-        >
+        <div className="text-center bg-opacity-50 px-10 py-10 items-center bg-[url('/src/assets/wood.png')] bg-[length:100%_100%]">
           {display}
         </div>
         <div>
@@ -224,6 +232,32 @@ function LobbyPage({
           >
             Refresh
           </button>
+          <button
+            className="mx-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-2xl border-2 border-orange-950"
+            onClick={() => {
+              setGameStage("menu:arena");
+            }}
+          >
+            Go to Game List Page
+          </button>
+          <button
+            className="mx-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-2xl border-2 border-orange-950"
+            onClick={() => {
+              setGameStage("leaderboard");
+            }}
+          >
+            Go to Leaderboard Page
+          </button>
+          {role === "registered user" ? (
+            <button
+              className="mx-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded mt-2 mb-2 p-1 px-6 py-2 text-sm font-bold text-orange-950 shadow-sm sm:text-2xl border-2 border-orange-950"
+              onClick={() => {
+                setGameStage("history");
+              }}
+            >
+              Go to Battle History Page
+            </button>
+          ) : null}
         </div>
       </div>
     </main>

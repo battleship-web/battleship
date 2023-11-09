@@ -1,14 +1,26 @@
-import { findUserByUsername, createUser } from "./dao/userDao.js";
+import {
+  findUserByUsername,
+  createUser,
+  setUserProfilePicture,
+  setUserNickname,
+  incrementNumOfRoundsPlayed,
+  incrementNumOfRoundsWon,
+  getAllUsersArr,
+  pushGameRecord,
+  getGameRecordsArr,
+} from "./dao/userDao.js";
 import bcrypt from "bcrypt";
 import redisClient from "./config/redisClient.js";
 import { nanoid } from "nanoid";
+import { convertBoardStrTo2DArray } from "./utils/board.js";
+import { updateExp } from "./utils/exp.js";
 
 export default function (io) {
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
     socket.on("register", async (info) => {
       try {
-        const { username, password, nickname } = info;
+        const { username, password, nickname, profilePicture } = info;
         if (await findUserByUsername(username)) {
           socket.emit("registerResponse", {
             success: false,
@@ -16,7 +28,7 @@ export default function (io) {
           });
           return;
         }
-        await createUser(username, password, nickname);
+        await createUser(username, password, nickname, profilePicture);
         socket.emit("registerResponse", {
           success: true,
         });
@@ -63,6 +75,22 @@ export default function (io) {
         }
         const match = await bcrypt.compare(password, user.passwordHash);
         if (match) {
+          if (user.role === "admin") {
+            await redisClient.hSet(
+              `socketId:${socket.id}`,
+              "username",
+              user.username
+            );
+            await redisClient.hSet(`socketId:${socket.id}`, "role", user.role);
+            socket.emit("loginResponse", {
+              success: true,
+              message: {
+                username: user.username,
+                role: user.role,
+              },
+            });
+            return;
+          }
           const promise1 = redisClient.hSet(
             `socketId:${socket.id}`,
             "username",
@@ -88,14 +116,20 @@ export default function (io) {
             "exp",
             user.exp
           );
-          await Promise.all([promise1, promise2, promise3, promise4, promise5]);
-          if (user.profilePicture) {
-            await redisClient.hSet(
-              `socketId:${socket.id}`,
-              "profilePicture",
-              user.profilePicture
-            );
-          }
+          const promise6 = redisClient.hSet(
+            `socketId:${socket.id}`,
+            "profilePicture",
+            user.profilePicture
+          );
+          await Promise.all([
+            promise1,
+            promise2,
+            promise3,
+            promise4,
+            promise5,
+            promise6,
+          ]);
+
           socket.emit("loginResponse", {
             success: true,
             message: {
@@ -129,12 +163,48 @@ export default function (io) {
         const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
         if (gameId) {
           const gameInfo = await redisClient.hGetAll(`game:${gameId}`);
-          const otherPlayerSocketId =
-            gameInfo.player1SocketId === socket.id
-              ? gameInfo.player2SocketId
-              : gameInfo.player1SocketId;
+          const isPlayer1 = socket.id === gameInfo.player1SocketId;
+          const otherPlayerSocketId = isPlayer1
+            ? gameInfo.player2SocketId
+            : gameInfo.player1SocketId;
+
+          await updateExp(
+            io,
+            gameId,
+            gameInfo.player1SocketId,
+            gameInfo.player2SocketId,
+            gameInfo.player1Score,
+            gameInfo.player2Score
+          );
 
           socket.to(otherPlayerSocketId).emit("opponentQuit");
+          if (io.sockets.adapter.rooms.get(`watch:${gameId}`)) {
+            io.to(`watch:${gameId}`).emit("sptGameEnd");
+            io.socketsLeave(`watch:${gameId}`);
+          }
+          const fieldForPlayer = isPlayer1
+            ? "player1NumberOfShips"
+            : "player2NumberOfShips";
+          const fieldForOther = isPlayer1
+            ? "player2NumberOfShips"
+            : "player1NumberOfShips";
+
+          // delete old ship placement info
+          const playerNumberOfShips = parseInt(
+            await redisClient.hGet(`game:${gameId}`, fieldForPlayer)
+          );
+
+          for (let i = 0; i < playerNumberOfShips; i++) {
+            await redisClient.del(`ship${i}:${socket.id}`);
+          }
+
+          const OtherNumberOfShips = parseInt(
+            await redisClient.hGet(`game:${gameId}`, fieldForOther)
+          );
+
+          for (let i = 0; i < OtherNumberOfShips; i++) {
+            await redisClient.del(`ship${i}:${otherPlayerSocketId}`);
+          }
 
           const promise1 = redisClient.del(`game:${gameId}`);
           const promise2 = redisClient.sRem("gameList", gameId);
@@ -153,7 +223,15 @@ export default function (io) {
     });
     socket.on("setNickname", async (nickname) => {
       try {
+        const role = await redisClient.hGet(`socketId:${socket.id}`, "role");
+        const username = await redisClient.hGet(
+          `socketId:${socket.id}`,
+          "username"
+        );
         await redisClient.hSet(`socketId:${socket.id}`, "nickname", nickname);
+        if (role === "registered user") {
+          await setUserNickname(username, nickname);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -193,7 +271,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("allClientListRequest", async () => {
       try {
         const connectedSockets = Array.from(io.sockets.sockets.keys());
@@ -226,7 +303,6 @@ export default function (io) {
         console.log(error);
       }
     });
-
     socket.on("invite", async (inviteeSocketId) => {
       if (!io.sockets.sockets.has(inviteeSocketId)) {
         socket.emit("inviteeLeft", inviteeSocketId);
@@ -302,6 +378,8 @@ export default function (io) {
     });
     socket.on("placement", async (ships) => {
       try {
+        const boardWidth = 8;
+
         // get gameid
         const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
         const isPlayer1 =
@@ -310,26 +388,67 @@ export default function (io) {
 
         // make board
         const board = []; // or columns
-        for (let x = 0; x < 8; x++) {
+        for (let x = 0; x < boardWidth; x++) {
           let column = [];
-          for (let y = 0; y < 8; y++) {
+          for (let y = 0; y < boardWidth; y++) {
             column.push("B");
           }
           board.push(column);
         }
 
+        if (isPlayer1) {
+          await redisClient.hSet(
+            `game:${gameId}`,
+            "player1NumberOfShips",
+            ships.length
+          );
+        } else {
+          await redisClient.hSet(
+            `game:${gameId}`,
+            "player2NumberOfShips",
+            ships.length
+          );
+        }
+
         // processing: take ship pos and place into board
-        for (const ship of ships) {
+        for (const [index, ship] of ships.entries()) {
+          // storing original ship position
+          const storePromise1 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "x",
+            ship.x
+          );
+          const storePromise2 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "y",
+            ship.y
+          );
+          const storePromise3 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "size",
+            ship.size
+          );
+          const storePromise4 = redisClient.hSet(
+            `ship${index}:${socket.id}`,
+            "rotated",
+            ship.rotated ? "true" : "false"
+          );
+
+          await Promise.all([
+            storePromise1,
+            storePromise2,
+            storePromise3,
+            storePromise4,
+          ]);
+
           if (ship.rotated) {
             // vertical
-            for (let i = 0; i < 4; i++) {
-              // 4 square long ships
+            for (let i = 0; i < ship.size; i++) {
               board[ship.x][ship.y + i] = "S";
             }
           } else {
             // horizontal
-            for (let i = 0; i < 4; i++) {
-              // 4 square long ships
+            for (let i = 0; i < ship.size; i++) {
               board[ship.x + i][ship.y] = "S";
             }
           }
@@ -395,9 +514,54 @@ export default function (io) {
           }
 
           // updating whose turn in redis game entry
-          // await redisClient.hSet(`game:${gameId}`, "turn", turn);
-
+          await redisClient.hSet(`game:${gameId}`, "turn", turn);
           message.turn = turn;
+
+          // send info to spectators
+          if (io.sockets.adapter.rooms.get(`watch:${gameId}`)) {
+            const otherPlayerSocketId = isPlayer1
+              ? player2SocketId
+              : player1SocketId;
+
+            const fieldForShipNumber = isPlayer1
+              ? "player2NumberOfShips"
+              : "player1NumberOfShips";
+
+            const otherPlayerNumberOfShips = parseInt(
+              await redisClient.hGet(`game:${gameId}`, fieldForShipNumber)
+            );
+
+            const getPromises = Array(otherPlayerNumberOfShips)
+              .fill()
+              .map((_, index) => {
+                return redisClient.hGetAll(
+                  `ship${index}:${otherPlayerSocketId}`
+                );
+              });
+
+            const otherPlayerOriginalBoard = await Promise.all(getPromises);
+
+            // parse string into appropriate types
+            otherPlayerOriginalBoard.forEach((ship, index) => {
+              otherPlayerOriginalBoard[index].x = parseInt(ship.x);
+              otherPlayerOriginalBoard[index].y = parseInt(ship.y);
+              otherPlayerOriginalBoard[index].size = parseInt(ship.size);
+              otherPlayerOriginalBoard[index].rotated = ship.rotated === "true";
+            });
+
+            const sptMessage = {
+              p1OriginalBoard: isPlayer1 ? ships : otherPlayerOriginalBoard,
+              p2OriginalBoard: isPlayer1 ? otherPlayerOriginalBoard : ships,
+              p1BoardFireResults: null,
+              p2BoardFireResults: null,
+              turn: turn,
+              p1Score: player1Score,
+              p2Score: player2Score,
+            };
+
+            io.to(`watch:${gameId}`).emit("sptGameInfo", sptMessage);
+          }
+
           io.to(player1SocketId)
             .to(player2SocketId)
             .emit("startSignal", message);
@@ -423,30 +587,99 @@ export default function (io) {
         }
 
         // convert board string to 2d array
+        const boardWidth = 8;
         let board = [];
         let start = 0;
-        let end = 8;
-        for (let i = 0; i < 8; i++) {
+        let end = boardWidth;
+        for (let i = 0; i < boardWidth; i++) {
           board.push(boardStr.slice(start, end));
-          start += 8;
-          end += 8;
+          start += boardWidth;
+          end += boardWidth;
         }
         board = board.map((columnStr) => columnStr.split(""));
 
         // check if ship
-        let isHit = false;
+        let isHitArr = [false, false, false, false];
+        let isHitArrIndex = 0;
+        let bombWidth = 1;
 
-        if (Object.keys(position).length !== 0) {
-          // check if empty object
-          if (board[position.x][position.y] === "S") {
-            // hit
-            board[position.x][position.y] = "H";
-            isHit = true;
-          } else if (board[position.x][position.y] === "B") {
-            // miss
-            board[position.x][position.y] = "M";
+        if (position.bomb) {
+          bombWidth = 2;
+        }
+
+        for (let i = 0; i < bombWidth; i++) {
+          for (let j = 0; j < bombWidth; j++) {
+            const xPos = position.x + j;
+            const yPos = position.y + i;
+
+            if (xPos < boardWidth && yPos < boardWidth) {
+              // check if in board
+              if (board[xPos][yPos] === "S") {
+                // hit
+                board[xPos][yPos] = "H";
+                isHitArr[isHitArrIndex] = true;
+              } else if (board[xPos][yPos] === "B") {
+                // miss
+                board[xPos][yPos] = "M";
+              }
+              // for rest board remain unchanged
+            }
+            isHitArrIndex++;
           }
-          // for rest board remain unchanged
+        }
+
+        // lightning event
+        let lightning = false;
+        let lightningX = -1;
+        let lightningY = -1;
+        let lightningHit = false;
+        if (Math.random() < 0.2) {
+          // 20% chance
+          lightning = true;
+
+          // count how many available squares
+          let posOfSquaresNotHitArr = [];
+          for (let i = 0; i < boardWidth; i++) {
+            for (let j = 0; j < boardWidth; j++) {
+              if (board[i][j] === "S" || board[i][j] === "B") {
+                posOfSquaresNotHitArr.push({
+                  x: i,
+                  y: j,
+                });
+              }
+            }
+          }
+
+          // random choose
+          if (posOfSquaresNotHitArr.length > 0) {
+            let chosenPos = Math.floor(
+              Math.random() * posOfSquaresNotHitArr.length
+            ); // zero-index
+            lightningX = posOfSquaresNotHitArr[chosenPos].x;
+            lightningY = posOfSquaresNotHitArr[chosenPos].y;
+
+            // update board
+            if (
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] === "S"
+            ) {
+              // hit
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] = "L";
+              lightningHit = true;
+            } else if (
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] === "B"
+            ) {
+              // miss
+              board[posOfSquaresNotHitArr[chosenPos].x][
+                posOfSquaresNotHitArr[chosenPos].y
+              ] = "V";
+            }
+          }
         }
 
         // update redis
@@ -480,15 +713,25 @@ export default function (io) {
         let message = {
           x: position.x,
           y: position.y,
-          hit: isHit,
+          hit: isHitArr[0],
+          bomb: position.bomb,
+          lightning: lightning,
+          lightningX: lightningX,
+          lightningY: lightningY,
+          lightningHit: lightningHit,
           winner: null,
         };
+
+        // for bomb case
+        if (position.bomb) {
+          message.hit = isHitArr;
+        }
 
         // check if won
         let numOfHits = 0;
 
         for (let i = 0; i < boardStr.length; i++) {
-          if (boardStr[i] === "H") {
+          if (boardStr[i] === "H" || boardStr[i] === "L") {
             numOfHits++;
           }
         }
@@ -511,9 +754,103 @@ export default function (io) {
           }
 
           await redisClient.hSet(`game:${gameId}`, "lastWinner", socket.id);
+
+          // update mongodb
+          // stats for leaderboard
+          const player1Info = await redisClient.hGetAll(
+            `socketId:${player1SocketId}`
+          );
+          const player2Info = await redisClient.hGetAll(
+            `socketId:${player2SocketId}`
+          );
+          const player1InfoTosend = {
+            nickname: player1Info.nickname,
+            username: player1Info.username,
+            role: player1Info.role,
+            level: player1Info.level,
+            profilePicture: player1Info.profilePicture,
+          };
+          const player2InfoTosend = {
+            nickname: player2Info.nickname,
+            username: player2Info.username,
+            role: player2Info.role,
+            level: player2Info.level,
+            profilePicture: player2Info.profilePicture,
+          };
+
+          if (player1Info.role === "registered user") {
+            await incrementNumOfRoundsPlayed(player1Info.username);
+          }
+          if (player2Info.role === "registered user") {
+            await incrementNumOfRoundsPlayed(player2Info.username);
+          }
+
+          if (isPlayer1) {
+            if (player1Info.role === "registered user") {
+              await incrementNumOfRoundsWon(player1Info.username);
+            }
+          } else {
+            if (player2Info.role === "registered user")
+              await incrementNumOfRoundsWon(player2Info.username);
+          }
+
+          // for game records
+          const gameTimestamp = new Date();
+          if (isPlayer1) {
+            // push win record
+            if (player1Info.role === "registered user") {
+              await pushGameRecord(player1Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: true,
+
+                opponent: player2InfoTosend,
+              });
+            }
+
+            // push lose record
+            if (player2Info.role === "registered user") {
+              await pushGameRecord(player2Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: false,
+
+                opponent: player1InfoTosend,
+              });
+            }
+          } else {
+            // push win record
+            if (player2Info.role === "registered user") {
+              await pushGameRecord(player2Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: true,
+
+                opponent: player1InfoTosend,
+              });
+            }
+
+            // push lose record
+            if (player1Info.role === "registered user") {
+              await pushGameRecord(player1Info.username, {
+                gameId: gameId,
+                time: gameTimestamp,
+                win: false,
+
+                opponent: player2InfoTosend,
+              });
+            }
+          }
+        }
+
+        if (isPlayer1) {
+          await redisClient.hSet(`game:${gameId}`, "turn", player2SocketId);
+        } else {
+          await redisClient.hSet(`game:${gameId}`, "turn", player1SocketId);
         }
 
         io.to(player1SocketId).to(player2SocketId).emit("fireResult", message);
+        io.to(`watch:${gameId}`).emit("sptFireResult", message);
       } catch (error) {
         console.log(error);
       }
@@ -524,6 +861,19 @@ export default function (io) {
         const isPlayer1 =
           (await redisClient.hGet(`game:${gameId}`, "player1SocketId")) ===
           socket.id;
+
+        // delete ship placement info from redis
+        let fieldForShipNumber = isPlayer1
+          ? "player1NumberOfShips"
+          : "player2NumberOfShips";
+
+        const numberOfShips = parseInt(
+          await redisClient.hGet(`game:${gameId}`, fieldForShipNumber)
+        );
+
+        for (let i = 0; i < numberOfShips; i++) {
+          await redisClient.del(`ship${i}:${socket.id}`);
+        }
 
         const wantsReplayInString = wantsReplay ? "true" : "false";
         // store player wants replay status in redis
@@ -544,7 +894,7 @@ export default function (io) {
         // check if replay statuses in
         if (
           (await redisClient.hExists(`game:${gameId}`, "player1WantsReplay")) &&
-          redisClient.hExists(`game:${gameId}`, "player2WantsReplay")
+          (await redisClient.hExists(`game:${gameId}`, "player2WantsReplay"))
         ) {
           // handle when both replay statuses in
           // get replay statuses converted to boolean
@@ -574,6 +924,7 @@ export default function (io) {
 
           // end game
           if (!bothWantsReplay) {
+            await updateExp(io, gameId, player1SocketId, player2SocketId);
             // handle when both dont want replay
             // remove game info entry
             const deleteGamePromise = redisClient.del(`game:${gameId}`);
@@ -597,6 +948,10 @@ export default function (io) {
               delGamePlayer1Promise,
               delGamePlayer2Promise,
             ]);
+            if (io.sockets.adapter.rooms.get(`watch:${gameId}`)) {
+              io.to(`watch:${gameId}`).emit("sptGameEnd");
+              io.socketsLeave(`watch:${gameId}`);
+            }
           } else {
             // delete old board data from redis
             await redisClient.hDel(`game:${gameId}`, "player1Board");
@@ -657,9 +1012,54 @@ export default function (io) {
                 `game:${resetRequest.gameId}`,
                 "player2Board"
               );
+
+              // delete old ship placement info
+              const player1NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player1NumberOfShips"
+                )
+              );
+
+              for (let i = 0; i < player1NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player1SocketId}`);
+              }
+
+              const player2NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player2NumberOfShips"
+                )
+              );
+
+              for (let i = 0; i < player2NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player2SocketId}`);
+              }
             } else if (resetRequest.toReset === "cancel") {
               // handle when game end
 
+              // delete old ship placement info
+              const player1NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player1NumberOfShips"
+                )
+              );
+
+              for (let i = 0; i < player1NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player1SocketId}`);
+              }
+
+              const player2NumberOfShips = parseInt(
+                await redisClient.hGet(
+                  `game:${resetRequest.gameId}`,
+                  "player2NumberOfShips"
+                )
+              );
+
+              for (let i = 0; i < player2NumberOfShips; i++) {
+                await redisClient.del(`ship${i}:${player2SocketId}`);
+              }
               // remove game info entry
               const deleteGamePromise = redisClient.del(
                 `game:${resetRequest.gameId}`
@@ -690,6 +1090,7 @@ export default function (io) {
             }
 
             io.to(player1SocketId).to(player2SocketId).emit("reset", message);
+            io.to(`watch:${resetRequest.gameId}`).emit("sptReset", message);
           }
         }
       } catch (error) {
@@ -716,10 +1117,36 @@ export default function (io) {
           );
         }
 
+        const fieldForPlayer = isPlayer1
+          ? "player1NumberOfShips"
+          : "player2NumberOfShips";
+        const fieldForOther = isPlayer1
+          ? "player2NumberOfShips"
+          : "player1NumberOfShips";
+
+        // delete old ship placement info
+        const playerNumberOfShips = parseInt(
+          await redisClient.hGet(`game:${gameId}`, fieldForPlayer)
+        );
+
+        for (let i = 0; i < playerNumberOfShips; i++) {
+          await redisClient.del(`ship${i}:${socket.id}`);
+        }
+
+        const OtherNumberOfShips = parseInt(
+          await redisClient.hGet(`game:${gameId}`, fieldForOther)
+        );
+
+        for (let i = 0; i < OtherNumberOfShips; i++) {
+          await redisClient.del(`ship${i}:${otherPlayerSocketId}`);
+        }
+        const player1SocketId = isPlayer1 ? socket.id : otherPlayerSocketId;
+        const player2SocketId = isPlayer1 ? otherPlayerSocketId : socket.id;
+        await updateExp(io, gameId, player1SocketId, player2SocketId);
         // remove game info entry
         const deleteGamePromise = redisClient.del(`game:${gameId}`);
 
-        // remove gameId from game list
+        // remove gameId from game list ---- some error here
         const deleteGameEntryPromise = redisClient.sRem("gameList", gameId);
 
         const delPlayerGamePromise = redisClient.hDel(
@@ -740,11 +1167,12 @@ export default function (io) {
         ]);
 
         io.to(otherPlayerSocketId).emit("opponentQuit");
+        io.to(`watch:${gameId}`).emit("sptGameEnd");
+        io.socketsLeave(`watch:${gameId}`);
       } catch (error) {
         console.log(error);
       }
     });
-
     socket.on("gameListRequest", async () => {
       try {
         const redisSearchPromise = redisClient.sMembers("gameList");
@@ -773,6 +1201,7 @@ export default function (io) {
               level: player1Info[index].level,
               profilePicture: player1Info[index].profilePicture,
               score: game.player1Score,
+              socketId: game.player1SocketId,
             },
             player2: {
               username: player2Info[index].username,
@@ -780,10 +1209,219 @@ export default function (io) {
               level: player2Info[index].level,
               profilePicture: player2Info[index].profilePicture,
               score: game.player2Score,
+              socketId: game.player2SocketId,
             },
           };
         });
         socket.emit("gameList", formattedGameList);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    socket.on("watch", async (gameId) => {
+      try {
+        if (!(await redisClient.exists(`game:${gameId}`))) {
+          socket.emit("sptGameInfo", "The selected game is no longer active.");
+          return;
+        }
+        const gameInfo = await redisClient.hGetAll(`game:${gameId}`);
+        if (
+          typeof gameInfo.player1Board === "undefined" ||
+          typeof gameInfo.player2Board === "undefined"
+        ) {
+          socket.join(`watch:${gameId}`);
+          return;
+        }
+
+        const p1ShipInfoPromises = Array(
+          parseInt(gameInfo.player1NumberOfShips)
+        )
+          .fill()
+          .map((_, index) => {
+            return redisClient.hGetAll(
+              `ship${index}:${gameInfo.player1SocketId}`
+            );
+          });
+        const p1OriginalBoard = await Promise.all(p1ShipInfoPromises);
+
+        // parse string into appropriate types
+        p1OriginalBoard.forEach((ship, index) => {
+          p1OriginalBoard[index].x = parseInt(ship.x);
+          p1OriginalBoard[index].y = parseInt(ship.y);
+          p1OriginalBoard[index].size = parseInt(ship.size);
+          p1OriginalBoard[index].rotated = ship.rotated === "true";
+        });
+
+        const p2ShipInfoPromises = Array(
+          parseInt(gameInfo.player2NumberOfShips)
+        )
+          .fill()
+          .map((_, index) => {
+            return redisClient.hGetAll(
+              `ship${index}:${gameInfo.player2SocketId}`
+            );
+          });
+        const p2OriginalBoard = await Promise.all(p2ShipInfoPromises);
+
+        // parse string into appropriate types
+        p2OriginalBoard.forEach((ship, index) => {
+          p2OriginalBoard[index].x = parseInt(ship.x);
+          p2OriginalBoard[index].y = parseInt(ship.y);
+          p2OriginalBoard[index].size = parseInt(ship.size);
+          p2OriginalBoard[index].rotated = ship.rotated === "true";
+        });
+
+        const p1BoardFireResults = convertBoardStrTo2DArray(
+          gameInfo.player1Board
+        );
+
+        const p2BoardFireResults = convertBoardStrTo2DArray(
+          gameInfo.player2Board
+        );
+
+        const message = {
+          p1OriginalBoard: p1OriginalBoard,
+          p2OriginalBoard: p2OriginalBoard,
+          p1BoardFireResults: p1BoardFireResults,
+          p2BoardFireResults: p2BoardFireResults,
+          turn: gameInfo.turn,
+          p1Score: gameInfo.player1Score,
+          p2Score: gameInfo.player2Score,
+        };
+
+        socket.join(`watch:${gameId}`);
+        socket.emit("sptGameInfo", message);
+      } catch (error) {
+        console.log(error);
+        socket.emit("sptGameInfo", "Internal server error occurred.");
+      }
+    });
+
+    socket.on("sptLeaveRoom", (gameId) => {
+      try {
+        socket.leave(`watch:${gameId}`);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    socket.on("setProfilePicture", async (profilePicture) => {
+      try {
+        const role = await redisClient.hGet(`socketId:${socket.id}`, "role");
+        await redisClient.hSet(
+          `socketId:${socket.id}`,
+          "profilePicture",
+          profilePicture
+        );
+        if (role === "registered user") {
+          await setUserProfilePicture(
+            await redisClient.hGet(`socketId:${socket.id}`, "username"),
+            profilePicture
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    socket.on("requestLevelInfo", async () => {
+      try {
+        const username = await redisClient.hGet(
+          `socketId:${socket.id}`,
+          "username"
+        );
+        const user = await findUserByUsername(username);
+        if (!user) {
+          return;
+        }
+        await redisClient.hSet(`socketId:${socket.id}`, "level", user.level);
+        await redisClient.hSet(`socketId:${socket.id}`, "exp", user.exp);
+        socket.emit("levelInfo", { level: user.level, exp: user.exp });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    socket.on("sendEmote", async (emote) => {
+      const gameId = await redisClient.hGet(`socketId:${socket.id}`, "game");
+      const player1SocketId = await redisClient.hGet(
+        `game:${gameId}`,
+        "player1SocketId"
+      );
+      const player2SocketId = await redisClient.hGet(
+        `game:${gameId}`,
+        "player2SocketId"
+      );
+      const isPlayer1 = player1SocketId === socket.id;
+      const otherPlayerSocketId = isPlayer1 ? player2SocketId : player1SocketId;
+      io.to(otherPlayerSocketId).emit("emote", emote);
+      io.to(`watch:${gameId}`).emit("sptEmote", {
+        emote: emote,
+        socketId: socket.id,
+      });
+    });
+    socket.on("requestLeaderboard", async (sorting) => {
+      try {
+        let allUsersArr = await getAllUsersArr();
+        if (sorting === "byWins") {
+          allUsersArr.sort((a, b) => {
+            if (a.numOfRoundsWon > b.numOfRoundsWon) {
+              return -1;
+            } else if (a.numOfRoundsWon < b.numOfRoundsWon) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        } else if (sorting === "byWinRatio") {
+          allUsersArr.sort((a, b) => {
+            let aWinRatio = 0;
+            let bWinRatio = 0;
+            if (a.numOfRoundsPlayed !== 0) {
+              aWinRatio = a.numOfRoundsWon / a.numOfRoundsPlayed;
+            }
+            if (b.numOfRoundsPlayed !== 0) {
+              bWinRatio = b.numOfRoundsWon / b.numOfRoundsPlayed;
+            }
+
+            if (aWinRatio > bWinRatio) {
+              return -1;
+            } else if (aWinRatio < bWinRatio) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        } else if (sorting === "byLevel") {
+          allUsersArr.sort((a, b) => {
+            if (a.level > b.level) {
+              return -1;
+            } else if (a.level < b.level) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+        }
+
+        // send message
+        io.to(socket.id).emit("leaderboard", allUsersArr.slice(0, 10));
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    socket.on("requestRecord", async () => {
+      try {
+        const role = await redisClient.hGet(`socketId:${socket.id}`, "role");
+        if (role === "guest") {
+          return;
+        }
+        io.to(socket.id).emit(
+          "record",
+          await getGameRecordsArr(
+            await redisClient.hGet(`socketId:${socket.id}`, "username")
+          )
+        );
       } catch (error) {
         console.log(error);
       }

@@ -3,7 +3,6 @@ import { socket } from "./socket";
 import AdminPage from "./admin/AdminPage";
 import TitlePage from "./menu/TitlePage";
 import LoginPage from "./menu/LoginPage";
-import InputNicknamePage from "./menu/InputNicknamePage";
 import WelcomePage from "./menu/WelcomePage";
 import LobbyPage from "./menu/LobbyPage";
 import PrepPage from "./game/prep/PrepPage";
@@ -16,8 +15,17 @@ import Loading from "./components/Loading";
 import ReplayPage from "./game/battle/ReplayPage";
 import OpponentQuitPage from "./game/battle/OpponentQuitPage";
 import RegisterPage from "./menu/RegisterPage";
+import GameListPage from "./menu/GameListPage";
+import { setBoardFromFireResult, constructBoard } from "./utils/board";
+import WatchPage from "./game/spectator/WatchPage";
+import WinnerPage from "./game/spectator/WinnerPage";
+import GameHeader from "./components/GameHeader";
+import ChooseProfilePicture from "./menu/ChooseProfilePicture";
+import LeaderBoard from "./leaderboard/LeaderBoard";
+import BattleRecord from "./battlerecord/BattleRecord";
 
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [disconnectedByBacking, setDisconnectedByBacking] = useState(false);
   const [gameStage, setGameStage] = useState("menu:title");
   const [user, setUser] = useState(null);
@@ -26,6 +34,8 @@ function App() {
   const [allClientList, setAllClientList] = useState(null);
   const [socketError, setSocketError] = useState(null);
   const [gameList, setGameList] = useState(null);
+  const [leaderboard, setLeaderboard] = useState(null);
+  const [battleRecord, setBattleRecord] = useState(null);
 
   // lobby states
   const [inviteAccepted, setInviteAccepted] = useState(null);
@@ -44,6 +54,21 @@ function App() {
   const [playerBoardFireResults, setPlayerBoardFireResults] = useState([]);
   const [opponentBoardFireResults, setOpponentBoardFireResults] = useState([]);
   const [winner, setWinner] = useState(null);
+  const [emote, setEmote] = useState(null);
+  const [opponentEmote, setOpponentEmote] = useState(null);
+
+  // spectated game state
+  const [sptGameId, setSptGameId] = useState(null);
+  const [sptTurn, setSptTurn] = useState(null);
+  const [p1Score, setP1Score] = useState(null);
+  const [p2Score, setP2Score] = useState(null);
+  const [p1Info, setP1Info] = useState(null);
+  const [p2Info, setP2Info] = useState(null);
+  const [p1Board, setP1Board] = useState(null);
+  const [p2Board, setP2Board] = useState(null);
+  const [sptWinner, setSptWinner] = useState(null);
+  const [p1Emote, setP1Emote] = useState(null);
+  const [p2Emote, setP2Emote] = useState(null);
 
   let page = null;
 
@@ -57,6 +82,8 @@ function App() {
     setPlayerBoardFireResults([]);
     setOpponentBoardFireResults([]);
     setWinner(null);
+    setEmote(null);
+    setOpponentEmote(null);
   }
 
   function handleNewGame() {
@@ -66,6 +93,22 @@ function App() {
     setPlayerBoardFireResults([]);
     setOpponentBoardFireResults([]);
     setWinner(null);
+    setEmote(null);
+    setOpponentEmote(null);
+  }
+
+  function handleSptQuitGame() {
+    setSptGameId(null);
+    setSptTurn(null);
+    setP1Score(null);
+    setP2Score(null);
+    setP1Info(null);
+    setP2Info(null);
+    setP1Board(null);
+    setP2Board(null);
+    setSptWinner(null);
+    setP1Emote(null);
+    setP2Emote(null);
   }
 
   useEffect(() => {
@@ -84,6 +127,7 @@ function App() {
       setIncomingInvite(null);
       setDisconnectedByBacking(true);
       handleQuitGame();
+      handleSptQuitGame();
     }
 
     const onRegisterResponse = (data) => {
@@ -134,13 +178,31 @@ function App() {
       if (turn === socket.id) {
         setOpponentBoardFireResults([
           ...opponentBoardFireResults,
-          { rowIndex: result.y, columnIndex: result.x, hit: result.hit },
+          {
+            rowIndex: result.y,
+            columnIndex: result.x,
+            hit: result.hit,
+            lightning: result.lightning,
+            lightningRowIndex: result.lightningY,
+            lightningColumnIndex: result.lightningX,
+            lightningHit: result.lightningHit,
+            bomb: result.bomb,
+          },
         ]);
         setTurn(opponentInfo.socketId);
       } else {
         setPlayerBoardFireResults([
           ...playerBoardFireResults,
-          { rowIndex: result.y, columnIndex: result.x, hit: result.hit },
+          {
+            rowIndex: result.y,
+            columnIndex: result.x,
+            hit: result.hit,
+            lightning: result.lightning,
+            lightningRowIndex: result.lightningY,
+            lightningColumnIndex: result.lightningX,
+            lightningHit: result.lightningHit,
+            bomb: result.bomb,
+          },
         ]);
         setTurn(socket.id);
       }
@@ -162,7 +224,7 @@ function App() {
       setGameStage("game:opponentQuit");
     };
 
-    const handleReset = (message) => {
+    function handleReset(message) {
       if (message.toReset === "score") {
         setPlayerScore(0);
         setOpponentScore(0);
@@ -173,7 +235,97 @@ function App() {
         handleQuitGame();
         setGameStage("menu:lobby");
       }
+    }
+    function handleLevelInfo(levelInfo) {
+      const { level, exp } = levelInfo;
+      setUser({ ...user, level: level, exp: exp });
+    }
+
+    function handleSptGameInfo(gameInfo) {
+      console.log(gameInfo);
+      if (typeof gameInfo === "string") {
+        setGameStage("menu:arena");
+        handleSptQuitGame();
+        return;
+      }
+      if (gameStage === "spt:winner") {
+        setGameStage("spt:watch");
+      }
+      const constructedP1Board = constructBoard(
+        gameInfo.p1OriginalBoard,
+        gameInfo.p1BoardFireResults
+      );
+      const constructedP2Board = constructBoard(
+        gameInfo.p2OriginalBoard,
+        gameInfo.p2BoardFireResults
+      );
+
+      setP1Board(constructedP1Board);
+      setP2Board(constructedP2Board);
+      setSptTurn(gameInfo.turn);
+      setP1Score(gameInfo.p1Score);
+      setP2Score(gameInfo.p2Score);
+      setP1Emote(null);
+      setP2Emote(null);
+    }
+
+    function handleSptFireResult(result) {
+      const formattedResult = {
+        rowIndex: result.y,
+        columnIndex: result.x,
+        hit: result.hit,
+        lightning: result.lightning,
+        lightningRowIndex: result.lightningY,
+        lightningColumnIndex: result.lightningX,
+        lightningHit: result.lightningHit,
+        bomb: result.bomb,
+      };
+      if (sptTurn === p1Info.socketId) {
+        // fire on player 2's board
+        setBoardFromFireResult(p2Board, setP2Board, formattedResult);
+        setSptTurn(p2Info.socketId);
+      } else {
+        // fire on player 1's board
+        setBoardFromFireResult(p1Board, setP1Board, formattedResult);
+        setSptTurn(p1Info.socketId);
+      }
+      if (result.winner) {
+        setGameStage("spt:winner");
+        setSptWinner(result.winner);
+      }
+    }
+
+    function handleSptGameEnd() {
+      setGameStage("menu:arena");
+      handleSptQuitGame();
+    }
+
+    const handleSptReset = (message) => {
+      if (message.toReset === "score") {
+        setP1Score(0);
+        setP2Score(0);
+      } else if (message.toReset === "game") {
+        // have to set turn to null to display loading
+        setSptTurn(null);
+        setP1Board(null);
+        setP2Board(null);
+        setSptWinner(null);
+        setP1Emote(null);
+        setP2Emote(null);
+      } else if (message.toReset === "cancel") {
+        socket.emit("sptLeaveRoom", sptGameId);
+        handleSptQuitGame();
+        setGameStage("menu:arena");
+      }
     };
+
+    function handleSptEmote(message) {
+      if (message.socketId === p1Info.socketId) {
+        setP1Emote(message.emote);
+      } else {
+        setP2Emote(message.emote);
+      }
+    }
 
     const cleanup = () => {
       if (opponentInfo) {
@@ -201,6 +353,15 @@ function App() {
     socket.on("opponentQuit", handleOpponentQuit);
     socket.on("reset", handleReset);
     socket.on("gameList", setGameList);
+    socket.on("sptGameInfo", handleSptGameInfo);
+    socket.on("sptFireResult", handleSptFireResult);
+    socket.on("sptGameEnd", handleSptGameEnd);
+    socket.on("sptReset", handleSptReset);
+    socket.on("levelInfo", handleLevelInfo);
+    socket.on("emote", setOpponentEmote);
+    socket.on("sptEmote", handleSptEmote);
+    socket.on("leaderboard", setLeaderboard);
+    socket.on("record", setBattleRecord);
 
     window.addEventListener("pagehide", cleanup);
 
@@ -216,6 +377,14 @@ function App() {
     playerBoardFireResults,
     opponentInfo,
     disconnectedByBacking,
+    sptTurn,
+    p1Info,
+    p2Info,
+    p2Board,
+    p1Board,
+    gameStage,
+    sptGameId,
+    user,
   ]);
 
   switch (gameStage) {
@@ -246,7 +415,11 @@ function App() {
       break;
     case "menu:nickname":
       page = (
-        <InputNicknamePage setGameStage={setGameStage} setUser={setUser} />
+        <ChooseProfilePicture
+          setGameStage={setGameStage}
+          user={user}
+          setUser={setUser}
+        />
       );
       break;
     case "menu:welcome":
@@ -269,6 +442,18 @@ function App() {
           setInviting={setInviting}
           setIncomingInvite={setIncomingInvite}
           setOpponentInfo={setOpponentInfo}
+          role={user.role}
+        />
+      );
+      break;
+    case "menu:arena":
+      page = (
+        <GameListPage
+          gameList={gameList}
+          setSptGameId={setSptGameId}
+          setP1Info={setP1Info}
+          setP2Info={setP2Info}
+          setGameStage={setGameStage}
         />
       );
       break;
@@ -312,11 +497,18 @@ function App() {
           winner={winner}
           setWinner={setWinner}
           handleQuitGame={handleQuitGame}
+          emote={emote}
+          setEmote={setEmote}
+          opponentEmote={opponentEmote}
         />
       );
       break;
     case "game:waitForReplay":
-      page = <Loading text="Did the opponent escape?" />;
+      page = (
+        <div className=" h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] bg-cover">
+          <Loading text="Did the opponent escape?" />
+        </div>
+      );
       break;
     case "game:beforeReplay":
       page = (
@@ -347,12 +539,61 @@ function App() {
         />
       );
       break;
+    case "spt:watch":
+      page = (
+        <WatchPage
+          turn={sptTurn}
+          gameId={sptGameId}
+          p1Score={p1Score}
+          p2Score={p2Score}
+          p1Board={p1Board}
+          p2Board={p2Board}
+          p1Info={p1Info}
+          p2Info={p2Info}
+          p1Emote={p1Emote}
+          p2Emote={p2Emote}
+          handleSptQuitGame={handleSptQuitGame}
+          setGameStage={setGameStage}
+        />
+      );
+      break;
+    case "spt:winner":
+      page = (
+        <WinnerPage
+          gameId={sptGameId}
+          winner={sptWinner}
+          p1Info={p1Info}
+          p2Info={p2Info}
+          setGameStage={setGameStage}
+          handleSptQuitGame={handleSptQuitGame}
+        />
+      );
+      break;
+    case "leaderboard":
+      page = (
+        <LeaderBoard leaderboard={leaderboard} setGameStage={setGameStage} />
+      );
+      break;
+    case "history":
+      page = <BattleRecord record={battleRecord} setGameStage={setGameStage} />;
+      break;
     case "admin":
       page = <AdminPage clientList={allClientList} gameList={gameList} />;
       break;
     default:
       page = <NotFoundPage />;
   }
-  return page;
+  return (
+    <div className={`${isDarkMode ? "dark" : ""} h-screen w-[calc(100%)]`}>
+      <GameHeader
+        user={user}
+        gameStage={gameStage}
+        setGameStage={setGameStage}
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+      />
+      {page}
+    </div>
+  );
 }
 export default App;

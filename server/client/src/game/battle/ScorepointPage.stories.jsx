@@ -1,7 +1,17 @@
 import ScorepointPage from "./ScorepointPage";
 
-const user = { username: "nigth", nickname: "butt" };
-const opponentInfo = { username: "alice134", nickname: "Alice" };
+const user = {
+  username: "nigth",
+  nickname: "butt",
+  level: 7,
+  profilePicture: "dog",
+};
+const opponentInfo = {
+  username: "alice134",
+  nickname: "Alice",
+  level: 5,
+  profilePicture: "cat",
+};
 const board = [
   ["blank", "blank", "blank", "blank", "blank", "blank", "blank", "blank"],
   ["blank", "blank", "blank", "blank", "blank", "blank", "blank", "blank"],
@@ -31,6 +41,8 @@ export const Default = {
     playerBoardFireResults: [],
     opponentBoardFireResults: [],
     winner: null,
+    emote: "happy",
+    opponentEmote: "angry",
   },
 };
 

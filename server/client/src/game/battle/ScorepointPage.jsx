@@ -3,6 +3,7 @@ import Instruction from "../../components/Instruction";
 import Loading from "../../components/Loading";
 import { useEffect, useState } from "react";
 import { socket } from "../../socket";
+import { setBoardFromFireResult } from "../../utils/board";
 
 function ScorepointPage({
   instruction,
@@ -20,6 +21,9 @@ function ScorepointPage({
   winner,
   setWinner,
   handleQuitGame,
+  emote,
+  setEmote,
+  opponentEmote,
 }) {
   const [opponentBoard, setOpponentBoard] = useState(
     new Array(8).fill().map(() => new Array(8).fill("blank"))
@@ -29,22 +33,44 @@ function ScorepointPage({
 
   const numHitOnPlayerBoard = playerBoardFireResults.reduce(
     (accumulator, currentValue) => {
-      if (currentValue.hit) {
-        return accumulator + 1;
+      let hitIncrease = 0;
+      if (currentValue.bomb) {
+        for (let i = 0; i < 4; i++) {
+          if (currentValue.hit[i]) {
+            hitIncrease += 1;
+          }
+        }
       } else {
-        return accumulator;
+        if (currentValue.hit) {
+          hitIncrease += 1;
+        }
       }
+      if (currentValue.lightning && currentValue.lightningHit) {
+        hitIncrease += 1;
+      }
+      return accumulator + hitIncrease;
     },
     0
   );
 
   const numHitOnOpponentBoard = opponentBoardFireResults.reduce(
     (accumulator, currentValue) => {
-      if (currentValue.hit) {
-        return accumulator + 1;
+      let hitIncrease = 0;
+      if (currentValue.bomb) {
+        for (let i = 0; i < 4; i++) {
+          if (currentValue.hit[i]) {
+            hitIncrease += 1;
+          }
+        }
       } else {
-        return accumulator;
+        if (currentValue.hit) {
+          hitIncrease += 1;
+        }
       }
+      if (currentValue.lightning && currentValue.lightningHit) {
+        hitIncrease += 1;
+      }
+      return accumulator + hitIncrease;
     },
     0
   );
@@ -60,12 +86,9 @@ function ScorepointPage({
     if (playerBoardFireResults.length <= numFireOnPlayerBoard) {
       return;
     }
-    const newPlayerBoard = playerBoard.map((row) => row.slice());
     const latestFireResult =
       playerBoardFireResults[playerBoardFireResults.length - 1];
-    newPlayerBoard[latestFireResult.rowIndex][latestFireResult.columnIndex] =
-      latestFireResult.hit ? "hit" : "miss";
-    setPlayerBoard(newPlayerBoard);
+    setBoardFromFireResult(playerBoard, setPlayerBoard, latestFireResult);
     setNumFireOnPlayerBoard(numFireOnPlayerBoard + 1);
   }, [
     playerBoard,
@@ -78,12 +101,9 @@ function ScorepointPage({
     if (opponentBoardFireResults.length <= numFireOnOpponentBoard) {
       return;
     }
-    const newOpponentBoard = opponentBoard.map((row) => row.slice());
     const latestFireResult =
       opponentBoardFireResults[opponentBoardFireResults.length - 1];
-    newOpponentBoard[latestFireResult.rowIndex][latestFireResult.columnIndex] =
-      latestFireResult.hit ? "hit" : "miss";
-    setOpponentBoard(newOpponentBoard);
+    setBoardFromFireResult(opponentBoard, setOpponentBoard, latestFireResult);
     setNumFireOnOpponentBoard(numFireOnOpponentBoard + 1);
   }, [opponentBoard, opponentBoardFireResults, numFireOnOpponentBoard]);
 
@@ -121,16 +141,16 @@ function ScorepointPage({
           numHitOnOpponentBoard={numHitOnOpponentBoard}
           handleQuitGame={handleQuitGame}
           setGameStage={setGameStage}
+          emote={emote}
+          setEmote={setEmote}
+          opponentEmote={opponentEmote}
         />
       </h1>
     );
   }
 
   return (
-    <main className="grid w-screen min-h-screen place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover"
-        style={{
-          backgroundImage: "url('/src/assets/bluebkg.jpg')",
-          backgroundSize: "100% 100%",}}>
+    <main className="grid box-border min-h-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
       {scorePageDisplay}
     </main>
   );
