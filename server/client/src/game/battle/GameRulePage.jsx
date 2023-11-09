@@ -17,12 +17,11 @@ function GamerulePage({ setGameStage }) {
             {`⛴ 1) Game setup: ⛴`}
           </h1>
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl mx-16">
-            Each player has a fleet of 4 battlehips. Choose your battleships on
-            the righthandside, selecting their placement to be either on a row
-            or column. Place your ships on the grid, forming your fleet. During
-            battle, your opponent cannot see your ships and you cannot see
-            theirs. Choose your ships and their positions wisely to trick your
-            enemy!
+            Each player has 4 sets of ships to choose from. Select the ship
+            placement to be either on a row or column. Place your ships on the
+            grid, forming your fleet, or shuffle them! During battle, your
+            opponent cannot see your ships and you cannot see theirs. Choose
+            your ships and their positions wisely to trick your enemy!
           </h1>
 
           <h1 className="text-12xl font-mono font-bold tracking-tight text-orange-950 sm:text-1xl ">
