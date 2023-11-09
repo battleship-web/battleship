@@ -162,7 +162,7 @@ function RegisterPage({
     </div>
   );
   return (
-    <main className="grid h-min-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
+    <main className="grid h-min-[calc(100%)] w-[calc(100%)] bg-[url('/src/assets/bluebkg.jpg')] dark:bg-[url('/src/assets/darkbluebkg.png')] place-items-center px-6 py-24 sm:py-32 lg:px-8 bg-cover">
       {display}
     </main>
   );
